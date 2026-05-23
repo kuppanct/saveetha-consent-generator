@@ -882,7 +882,7 @@
 </div>
 
 <!-- Load procedures database script -->
-<script src="procedures.js?v=8"></script>
+<script src="procedures.js?v=9"></script>
 
 <script>
     // Global State
@@ -1707,9 +1707,9 @@
             const boxWidthPoints = page1Width - (boxX * 2);
             
             // Wrap text based on width - utilizing the entire right margin by using correct character widths
-            const contentFontSize = usingFallback ? 8.5 : 8.5;
-            const contentLineHeight = usingFallback ? 11.5 : 11.0;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 5.5 : (contentFontSize * 0.51)));
+            const contentFontSize = 7.6;
+            const contentLineHeight = 9.6;
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 5.0 : (contentFontSize * 0.46)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
