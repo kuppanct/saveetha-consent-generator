@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saveetha Urology Consent Generator</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- pdf-lib & signature_pad from CDNs -->
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.5/dist/signature_pad.umd.min.js"></script>
+    
+    <style>
+        :root {
+            /* Colors - Light Theme */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(255, 255, 255, 0.4);
+            --text-main: #2c3e50;
+            --text-muted: #5a738e;
+            --primary: #0056b3;
+            --primary-hover: #004085;
+            --accent: #00b4d8;
+            --accent-bg: rgba(0, 180, 216, 0.1);
+            --border: #dcdde1;
+            --input-bg: #ffffff;
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+            --btn-clear-bg: #e2e8f0;
+            --btn-clear-text: #475569;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            
+            --font-title: 'Outfit', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            
+            --transition-speed: 0.3s;
+        }
+
+        [data-theme="dark"] {
+            /* Colors - Dark Theme */
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --card-border: rgba(255, 255, 255, 0.05);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --accent: #38bdf8;
+            --accent-bg: rgba(56, 189, 248, 0.1);
+            --border: #334155;
+            --input-bg: #0f172a;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --btn-clear-bg: #334155;
+            --btn-clear-text: #cbd5e1;
+            --success: #4ade80;
+            --danger: #f87171;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            transition: background var(--transition-speed), color var(--transition-speed);
+        }
+
+        .app-wrapper {
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 4px;
+        }
+
+        .logo-section h1 {
+            font-family: var(--font-title);
+            font-weight: 800;
+            font-size: 24px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-section p {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        /* Controls / Theme Toggle */
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-toggle, .btn-icon {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            color: var(--text-main);
+            transition: background var(--transition-speed), transform 0.2s;
+        }
+
+        .theme-toggle:hover, .btn-icon:hover {
+            transform: scale(1.05);
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 4px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px;
+            border-radius: 26px;
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 86, 179, 0.25);
+        }
+
+        /* Main Container Card */
+        .app-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            margin-bottom: 24px;
+            transition: background var(--transition-speed), border var(--transition-speed);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography */
+        h2 {
+            font-family: var(--font-title);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+        }
+
+        h3 {
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        /* Form Controls */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        input, select, textarea {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
+        }
+
+        /* Custom Procedure Search */
+        .search-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .search-results {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .search-item {
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .search-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-item:hover {
+            background: var(--accent-bg);
+            color: var(--primary);
+        }
+
+        .selected-procedure-badge {
+            background: var(--accent-bg);
+            border: 1px solid rgba(0, 180, 216, 0.25);
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .badge-close {
+            cursor: pointer;
+            color: var(--danger);
+            font-weight: bold;
+            padding: 0 4px;
+        }
+
+        /* Textarea Previews */
+        textarea.consent-edit {
+            font-size: 12px;
+            line-height: 1.5;
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        /* Signature Pad */
+        .sig-pad-wrapper {
+            border: 2px dashed var(--primary);
+            border-radius: 12px;
+            background: var(--input-bg);
+            position: relative;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 160px;
+            display: block;
+            touch-action: none;
+            background: transparent;
+        }
+
+        .sig-pad-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+
+        /* Calibration Controls */
+        .calibration-row {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 14px;
+        }
+
+        .calibration-row label {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .calibration-row label span.value {
+            color: var(--primary);
+            font-family: monospace;
+        }
+
+        .calibration-row input[type="range"] {
+            margin-top: 6px;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            outline: none;
+            accent-color: var(--primary);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-family: var(--font-title);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #ffffff;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--btn-clear-bg);
+            color: var(--btn-clear-text);
+        }
+
+        .btn-secondary:hover {
+            opacity: 0.9;
+        }
+
+        .toggle-switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .toggle-switch-container span {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Switch checkbox */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--success);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Status Banner */
+        .status-banner {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-banner.success {
+            background: rgba(46, 204, 113, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(46, 204, 113, 0.25);
+        }
+
+        .status-banner.warning {
+            background: rgba(243, 156, 18, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(243, 156, 18, 0.25);
+        }
+
+        /* Help Cards */
+        .help-section {
+            margin-bottom: 20px;
+        }
+
+        .help-section h4 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--primary);
+        }
+
+        .help-section p {
+            font-size: 13px;
+            line-height: 1.5;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .code-block {
+            background: #0f172a;
+            color: #38bdf8;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 11px;
+            overflow-x: auto;
+            margin: 6px 0;
+            border: 1px solid #1e293b;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @media (max-width: 480px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            body {
+                padding: 10px;
+            }
+            .app-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    <header>
+        <div class="logo-section">
+            <h1>Saveetha Urology</h1>
+            <p>watertight consent generator</p>
+        </div>
+        <div class="controls">
+            <button class="theme-toggle" id="themeBtn" title="Toggle Theme" aria-label="Toggle Theme">
+                <!-- Sun Icon -->
+                <svg id="sunIcon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                <!-- Moon Icon -->
+                <svg id="moonIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('form')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Generator
+        </button>
+        <button class="tab-btn" onclick="switchTab('calibration')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+            Calibration
+        </button>
+        <button class="tab-btn" onclick="switchTab('help')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Help
+        </button>
+    </div>
+
+    <!-- MAIN GENERATOR TAB -->
+    <div id="formTab" class="tab-content active">
+        <div class="app-card">
+            <h2>Patient & Clinical Details</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="patientName">Patient Name</label>
+                    <input type="text" id="patientName" placeholder="e.g. John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label for="pid">Patient ID / MRN</label>
+                    <input type="text" id="pid" placeholder="e.g. 20260523" required>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" placeholder="Age" required min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Transgender">Transgender</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="date">Consent Date</label>
+                    <input type="date" id="date">
+                </div>
+                <div class="form-group">
+                    <label for="ward">Ward / Room</label>
+                    <input type="text" id="ward" placeholder="e.g., Uro Ward 3A">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="consultant">Operating Consultant</label>
+                <select id="consultant" onchange="toggleCustomConsultant()">
+                    <option value="Prof. Muthulatha N">Prof. Muthulatha N</option>
+                    <option value="Prof. Siva Sankar">Prof. Siva Sankar</option>
+                    <option value="Prof. Griffin">Prof. Griffin</option>
+                    <option value="Dr. Dev Krishna Barathi">Dr. Dev Krishna Barathi</option>
+                    <option value="Dr. Mohammed Farooq">Dr. Mohammed Farooq</option>
+                    <option value="Dr. Arvind Ramachandran">Dr. Arvind Ramachandran</option>
+                    <option value="Dr. Kuppan C T">Dr. Kuppan C T</option>
+                    <option value="CUSTOM">Custom...</option>
+                </select>
+                <input type="text" id="customConsultant" placeholder="Enter surgeon name" style="display:none; margin-top:8px;">
+            </div>
+
+            <div class="form-group">
+                <label for="procedureDiagnosis">Specific Diagnosis for this Patient</label>
+                <input type="text" id="procedureDiagnosis" placeholder="e.g., Left Renal Calculus (will be pre-filled on selecting procedure, or type custom)">
+            </div>
+        </div>
+
+        <div class="app-card">
+            <h2>Procedure Selection</h2>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="procedureSelect">Select Procedure</label>
+                    <select id="procedureSelect" onchange="onProcedureDropdownChange()">
+                        <option value="">-- Choose a Procedure --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="procedureSide">Surgical Side (Laterality)</label>
+                    <select id="procedureSide" onchange="triggerConsentCompilation()">
+                        <option value="N/A">Not Applicable (N/A)</option>
+                        <option value="Left">Left</option>
+                        <option value="Right">Right</option>
+                        <option value="Bilateral">Bilateral</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="customProcedureFields" style="display:none;">
+                <div class="form-group">
+                    <label for="customProc">Custom Procedure Planned</label>
+                    <input type="text" id="customProc" placeholder="e.g., Laparoscopic Pyeloplasty">
+                </div>
+                <div class="form-group">
+                    <label for="customRisks">Custom Specific Risks (comma separated)</label>
+                    <textarea id="customRisks" placeholder="Risk 1, Risk 2, Risk 3..." rows="2"></textarea>
+                </div>
+            </div>
+
+            <div id="editorPanel" style="display:none;">
+                <label>Real-Time Consent Text Preview & Override (Editable)</label>
+                <textarea id="consentTextPreview" class="consent-edit" oninput="overrideConsent()"></textarea>
+            </div>
+        </div>
+
+        <div class="app-card">
+            <h2>Patient / Relative Signature</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">The patient or their legal guardian must sign inside the box below with their finger or stylus.</p>
+            
+            <div class="sig-pad-wrapper">
+                <canvas id="signatureCanvas"></canvas>
+            </div>
+            <div class="sig-pad-actions">
+                <button class="btn btn-secondary" onclick="clearSignature()">Clear Signature</button>
+            </div>
+        </div>
+
+        <div class="toggle-switch-container">
+            <span>Use Tamil Form background (Text drawn in English)</span>
+            <label class="switch">
+                <input type="checkbox" id="tamilToggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <button class="btn btn-primary" id="genBtn" onclick="generatePDF()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate & Download PDF Consent
+        </button>
+    </div>
+
+    <!-- CALIBRATION TAB -->
+    <div id="calibrationTab" class="tab-content">
+        <div class="app-card">
+            <h2>Template Coordinates Calibration</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Adjust where text and signatures are printed on your form templates. Coordinates are relative percentages to work across different image resolutions. Saved to your phone's memory automatically.</p>
+
+            <div class="status-banner warning">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Changes persist locally in browser localStorage.
+            </div>
+
+            <h3>Page 1 - Patient Info alignment</h3>
+            <div class="calibration-row">
+                <label>Patient Info Y-axis (% from top) <span class="value" id="val_ptY">84%</span></label>
+                <input type="range" id="cal_ptY" min="5" max="95" value="84" step="0.5" oninput="updateCalibValue('ptY')">
+            </div>
+            
+            <div class="calibration-row">
+                <label>Name X-axis (% from left) <span class="value" id="val_nameX">22%</span></label>
+                <input type="range" id="cal_nameX" min="5" max="90" value="22" oninput="updateCalibValue('nameX')">
+            </div>
+
+            <div class="calibration-row">
+                <label>Age X-axis (% from left) <span class="value" id="val_ageX">52%</span></label>
+                <input type="range" id="cal_ageX" min="5" max="90" value="52" oninput="updateCalibValue('ageX')">
+            </div>
+
+            <div class="calibration-row">
+                <label>Gender X-axis (% from left) <span class="value" id="val_genderX">72%</span></label>
+                <input type="range" id="cal_genderX" min="5" max="95" value="72" oninput="updateCalibValue('genderX')">
+            </div>
+
+            <div class="calibration-row">
+                <label>PID X-axis (% from left) <span class="value" id="val_pidX">22%</span></label>
+                <input type="range" id="cal_pidX" min="5" max="90" value="22" oninput="updateCalibValue('pidX')">
+            </div>
+
+            <h3>Page 1 - Consent Box Text</h3>
+            <div class="calibration-row">
+                <label>Box X-axis (% from left) <span class="value" id="val_boxX">10%</span></label>
+                <input type="range" id="cal_boxX" min="5" max="45" value="10" oninput="updateCalibValue('boxX')">
+            </div>
+            <div class="calibration-row">
+                <label>Box Y-axis (% from top) <span class="value" id="val_boxY">52%</span></label>
+                <input type="range" id="cal_boxY" min="10" max="90" value="52" step="0.5" oninput="updateCalibValue('boxY')">
+            </div>
+
+            <h3>Page 2 - Signature Alignment</h3>
+            <div class="calibration-row">
+                <label>Signature X-axis (% from left) <span class="value" id="val_sigX">65%</span></label>
+                <input type="range" id="cal_sigX" min="5" max="95" value="65" oninput="updateCalibValue('sigX')">
+            </div>
+            <div class="calibration-row">
+                <label>Signature Y-axis (% from top) <span class="value" id="val_sigY">20%</span></label>
+                <input type="range" id="cal_sigY" min="5" max="95" value="20" oninput="updateCalibValue('sigY')">
+            </div>
+            <div class="calibration-row">
+                <label>Signature Scale factor <span class="value" id="val_sigScale">1.0</span></label>
+                <input type="range" id="cal_sigScale" min="5" max="25" value="10" step="1" oninput="updateCalibValue('sigScale')">
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="btn btn-secondary" onclick="resetCalibration()" style="flex:1;">Reset Defaults</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP TAB -->
+    <div id="helpTab" class="tab-content">
+        <div class="app-card">
+            <h2>Urology Consent Help & Guide</h2>
+            
+            <div class="help-section">
+                <h4>1. Out-of-the-Box Fallback System</h4>
+                <p>If you don't have <code>page1.jpg</code> or <code>page2.jpg</code> uploaded to your server/repository, the app will automatically detect it and draw a clean, professional, high-resolution document outline dynamically in the PDF. This allows you to print immediately or test the app anywhere.</p>
+            </div>
+
+            <div class="help-section">
+                <h4>2. Uploading Custom Images</h4>
+                <p>To use the actual official Saveetha Consent Forms (English or Tamil versions), simply save your forms as JPGs and name them exactly:</p>
+                <ul>
+                    <li>English version: <code>page1.jpg</code> and <code>page2.jpg</code></li>
+                    <li>Tamil version: <code>page1_tamil.jpg</code> and <code>page2_tamil.jpg</code></li>
+                </ul>
+                <p>Upload these files to the same directory on GitHub or your web server where this <code>index.html</code> is hosted.</p>
+            </div>
+
+            <div class="help-section">
+                <h4>3. Calibration & Scanning offsets</h4>
+                <p>Since scan dimensions vary (e.g. from camera captures or scanners), use the <strong>Calibration</strong> tab. Simply slide the markers to position where the text sits. The values are percentages of the image dimensions to work on both high-resolution scans and light phone snapshots. Stamped signatures will follow these boundaries perfectly.</p>
+            </div>
+
+            <div class="help-section">
+                <h4>4. Data Security (No-Cloud/HIPAA Compliant)</h4>
+                <p>This application is 100% client-side. The PDF is generated entirely in your phone's memory. No patient names, PIDs, medical details, or signatures are sent over the network or saved to any cloud database. When you close or refresh the tab, all inputs are wiped instantly.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load procedures database script -->
+<script src="procedures.js"></script>
+
+<script>
+    // Global State
+    let selectedProcedureKey = "";
+    let signaturePad = null;
+    let customConsentOverride = null;
+    
+    // Default Calibration Configs
+    const defaultCalibrationEN = {
+        ptY: 84, // Y axis from TOP for name/age/gender/etc
+        nameX: 22,
+        ageX: 52,
+        genderX: 72,
+        pidX: 22,
+        boxX: 10,
+        boxY: 52, // Y axis from TOP for large text box
+        sigX: 65, // X axis for signature
+        sigY: 20, // Y axis from TOP for signature
+        sigScale: 1.0
+    };
+
+    const defaultCalibrationTA = {
+        ptY: 18.5, // Y axis from TOP for first line
+        nameX: 15,
+        ageX: 48,
+        genderX: 78,
+        pidX: 25,
+        boxX: 10,
+        boxY: 59.5, // Y axis from TOP for complications box
+        sigX: 25, // X axis for signature (Left side of page 2)
+        sigY: 77, // Y axis from TOP for signature (Bottom of page 2)
+        sigScale: 1.0
+    };
+
+    // Load Calibration from Local Storage or defaults
+    let calib = { ...defaultCalibrationEN };
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", () => {
+        initTheme();
+        initSignaturePad();
+        initProcedureDropdown();
+        loadCalibration();
+        initDate();
+        
+        // Reload coordinates automatically when switching Tamil/English template
+        document.getElementById("tamilToggle").addEventListener("change", () => {
+            loadCalibration();
+        });
+        
+        // Handle window resizing for signature pad
+        window.addEventListener("resize", resizeCanvas);
+    });
+
+    // Theme Management
+    function initTheme() {
+        const savedTheme = localStorage.getItem("uro-theme") || "light";
+        document.documentElement.setAttribute("data-theme", savedTheme);
+        toggleThemeIcons(savedTheme);
+
+        document.getElementById("themeBtn").addEventListener("click", () => {
+            const currentTheme = document.documentElement.getAttribute("data-theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("uro-theme", newTheme);
+            toggleThemeIcons(newTheme);
+        });
+    }
+
+    function toggleThemeIcons(theme) {
+        if (theme === "dark") {
+            document.getElementById("sunIcon").style.display = "block";
+            document.getElementById("moonIcon").style.display = "none";
+        } else {
+            document.getElementById("sunIcon").style.display = "none";
+            document.getElementById("moonIcon").style.display = "block";
+        }
+    }
+
+    // Auto-initialize Date Field
+    function initDate() {
+        const dateInput = document.getElementById("date");
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        let mm = today.getMonth() + 1;
+        let dd = today.getDate();
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+        dateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
+    // Tab Management
+    function switchTab(tabId) {
+        document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
+
+        // Add active class to corresponding button
+        const clickedBtn = Array.from(document.querySelectorAll(".tab-btn")).find(btn => btn.getAttribute("onclick").includes(tabId));
+        if (clickedBtn) clickedBtn.classList.add("active");
+
+        document.getElementById(`${tabId}Tab`).classList.add("active");
+        
+        if (tabId === 'form') {
+            // Re-render signature canvas properly upon tab change
+            resizeCanvas();
+        }
+    }
+
+    // Signature Pad Management
+    function initSignaturePad() {
+        const canvas = document.getElementById('signatureCanvas');
+        signaturePad = new SignaturePad(canvas, {
+            penColor: 'rgb(0, 0, 139)' // dark blue pen for clinic authenticity
+        });
+        resizeCanvas();
+    }
+
+    function resizeCanvas() {
+        const canvas = document.getElementById('signatureCanvas');
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear(); // clears signature on resize to avoid distortion
+    }
+
+    function clearSignature() {
+        signaturePad.clear();
+    }
+
+    // Populate Grouped Urology Procedures Dropdown
+    function initProcedureDropdown() {
+        const select = document.getElementById("procedureSelect");
+        select.innerHTML = '<option value="">-- Choose a Procedure --</option>';
+
+        if (window.URO_CATEGORIES && window.URO_PROCEDURES) {
+            window.URO_CATEGORIES.forEach(cat => {
+                const group = document.createElement("optgroup");
+                group.label = cat.name;
+
+                // Sort procedures under this category by name
+                const procsInCat = [];
+                for (const [key, proc] of Object.entries(window.URO_PROCEDURES)) {
+                    if (proc.category === cat.id) {
+                        procsInCat.push({ key, name: proc.name });
+                    }
+                }
+                
+                procsInCat.forEach(p => {
+                    const opt = document.createElement("option");
+                    opt.value = p.key;
+                    opt.textContent = p.name;
+                    group.appendChild(opt);
+                });
+
+                if (group.children.length > 0) {
+                    select.appendChild(group);
+                }
+            });
+            
+            // Add custom other option
+            const otherOpt = document.createElement("option");
+            otherOpt.value = "OTHER";
+            otherOpt.textContent = "Other / Custom Procedure";
+            select.appendChild(otherOpt);
+        }
+    }
+
+    // Handles native select dropdown change
+    function onProcedureDropdownChange() {
+        const select = document.getElementById("procedureSelect");
+        selectedProcedureKey = select.value;
+
+        if (!selectedProcedureKey) {
+            document.getElementById("customProcedureFields").style.display = "none";
+            document.getElementById("editorPanel").style.display = "none";
+            customConsentOverride = null;
+            return;
+        }
+
+        // Pre-fill diagnosis if present in database (but allow user to edit)
+        const diagInput = document.getElementById("procedureDiagnosis");
+        if (selectedProcedureKey === "OTHER") {
+            if (!diagInput.value.trim()) {
+                diagInput.value = "";
+            }
+        } else if (window.URO_PROCEDURES[selectedProcedureKey]) {
+            diagInput.value = window.URO_PROCEDURES[selectedProcedureKey].diagnosis || "";
+        }
+
+        // Toggle custom fields UI
+        const customFields = document.getElementById("customProcedureFields");
+        if (selectedProcedureKey === "OTHER") {
+            customFields.style.display = "block";
+        } else {
+            customFields.style.display = "none";
+        }
+
+        // Show editor panel
+        document.getElementById("editorPanel").style.display = "block";
+        triggerConsentCompilation();
+    }
+
+    function toggleCustomConsultant() {
+        const val = document.getElementById("consultant").value;
+        document.getElementById("customConsultant").style.display = val === "CUSTOM" ? "block" : "none";
+    }
+
+    // Listen to changes in fields to trigger consent recompiling
+    document.getElementById("procedureDiagnosis").addEventListener("input", triggerConsentCompilation);
+    document.getElementById("customProc").addEventListener("input", triggerConsentCompilation);
+    document.getElementById("customRisks").addEventListener("input", triggerConsentCompilation);
+
+    function triggerConsentCompilation() {
+        if (!selectedProcedureKey) return;
+        
+        const diag = document.getElementById("procedureDiagnosis").value;
+        let proc = "";
+        let risks = "";
+
+        if (selectedProcedureKey === "OTHER") {
+            proc = document.getElementById("customProc").value;
+            risks = document.getElementById("customRisks").value;
+        }
+
+        const side = document.getElementById("procedureSide").value;
+        const compiledText = window.compileConsentText(selectedProcedureKey, diag, proc, risks, side);
+        document.getElementById("consentTextPreview").value = compiledText;
+        customConsentOverride = compiledText;
+    }
+
+    function overrideConsent() {
+        customConsentOverride = document.getElementById("consentTextPreview").value;
+    }
+
+    // Calibration Helpers
+    function loadCalibration() {
+        const isTamil = document.getElementById("tamilToggle").checked;
+        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
+
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                calib = JSON.parse(saved);
+                // merge with defaults in case of missing keys
+                calib = { ...defaults, ...calib };
+            } catch (e) {
+                calib = { ...defaults };
+            }
+        } else {
+            calib = { ...defaults };
+        }
+        
+        // Set values in UI
+        for (const [k, v] of Object.entries(calib)) {
+            const input = document.getElementById(`cal_${k}`);
+            if (input) {
+                if (k === 'sigScale') {
+                    input.value = Math.round(v * 10);
+                    document.getElementById(`val_${k}`).textContent = v.toFixed(1);
+                } else {
+                    input.value = v;
+                    document.getElementById(`val_${k}`).textContent = v + "%";
+                }
+            }
+        }
+    }
+
+    function updateCalibValue(key) {
+        const input = document.getElementById(`cal_${key}`);
+        if (!input) return;
+
+        let val = parseFloat(input.value);
+        if (key === 'sigScale') {
+            val = val / 10;
+            document.getElementById(`val_${key}`).textContent = val.toFixed(1);
+        } else {
+            document.getElementById(`val_${key}`).textContent = val + "%";
+        }
+
+        calib[key] = val;
+        
+        const isTamil = document.getElementById("tamilToggle").checked;
+        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        localStorage.setItem(storageKey, JSON.stringify(calib));
+    }
+
+    function resetCalibration() {
+        const isTamil = document.getElementById("tamilToggle").checked;
+        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
+        
+        calib = { ...defaults };
+        localStorage.removeItem(storageKey);
+        loadCalibration();
+    }
+
+    // Helper: Wrap text to fit in the box
+    function wrapText(text, maxChars) {
+        const paragraphs = text.split('\n');
+        let lines = [];
+        
+        paragraphs.forEach(p => {
+            if (!p.trim()) {
+                lines.push('');
+                return;
+            }
+            
+            const words = p.split(' ');
+            let currentLine = '';
+            
+            words.forEach(word => {
+                if ((currentLine + word).length > maxChars) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            lines.push(currentLine.trim());
+        });
+        
+        return lines;
+    }
+
+    // 4. Generate the PDF using pdf-lib
+    async function generatePDF() {
+        // Validation
+        if (!document.getElementById("patientName").value.trim()) {
+            alert("Please enter Patient Name.");
+            return;
+        }
+        if (!document.getElementById("age").value.trim()) {
+            alert("Please enter Age.");
+            return;
+        }
+        if (!document.getElementById("procedureDiagnosis").value.trim()) {
+            alert("Please enter specific Diagnosis.");
+            return;
+        }
+        if (!selectedProcedureKey) {
+            alert("Please select a Procedure from the dropdown.");
+            return;
+        }
+        if (signaturePad.isEmpty()) {
+            alert("Please ask the patient to sign the consent pad.");
+            return;
+        }
+
+        const genBtn = document.getElementById("genBtn");
+        genBtn.innerText = "Generating PDF...";
+        genBtn.disabled = true;
+
+        try {
+            const { PDFDocument, StandardFonts, rgb } = PDFLib;
+            const pdfDoc = await PDFDocument.create();
+            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+            const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+            // Fetch background templates
+            const isTamil = document.getElementById("tamilToggle").checked;
+            const fileSuffix = isTamil ? "_tamil" : "";
+            
+            let page1Bytes = null;
+            let page2Bytes = null;
+            let usingFallback = false;
+
+            try {
+                // Try fetching custom image assets page1.jpg & page2.jpg
+                page1Bytes = await fetch(`page1${fileSuffix}.jpg`).then(res => {
+                    if (!res.ok) throw new Error("Image missing");
+                    return res.arrayBuffer();
+                });
+                page2Bytes = await fetch(`page2${fileSuffix}.jpg`).then(res => {
+                    if (!res.ok) throw new Error("Image missing");
+                    return res.arrayBuffer();
+                });
+            } catch (imageErr) {
+                console.warn("Template images missing on server. Invoking professional dynamic vector fallback.");
+                usingFallback = true;
+            }
+
+            let page1Width, page1Height, page2Width, page2Height;
+            let p1Image, p2Image;
+
+            if (!usingFallback) {
+                p1Image = await pdfDoc.embedJpg(page1Bytes);
+                p2Image = await pdfDoc.embedJpg(page2Bytes);
+                page1Width = p1Image.width;
+                page1Height = p1Image.height;
+                page2Width = p2Image.width;
+                page2Height = p2Image.height;
+            } else {
+                // Standard high-resolution A4 size at 72 points per inch (595 x 842 points)
+                // A4 is 8.27 x 11.69 inches -> 595 x 842 points
+                page1Width = 595;
+                page1Height = 842;
+                page2Width = 595;
+                page2Height = 842;
+            }
+
+            // Create Page 1
+            const page1 = pdfDoc.addPage([page1Width, page1Height]);
+            
+            if (!usingFallback) {
+                page1.drawImage(p1Image, { x: 0, y: 0, width: page1Width, height: page1Height });
+            } else {
+                // DRAW DYNAMIC PAGE 1 OUTLINE (Vector Fallback)
+                drawFormOutline(page1, page1Width, page1Height, font, fontBold, 1, isTamil);
+            }
+
+            // EXTRACT INPUT DETAILS
+            const ptName = document.getElementById("patientName").value;
+            const ptAge = document.getElementById("age").value;
+            const ptGender = document.getElementById("gender").value;
+            const ptPid = document.getElementById("pid").value;
+            
+            const rawDate = document.getElementById("date").value;
+            let ptDate = "";
+            if (rawDate) {
+                const d = new Date(rawDate);
+                ptDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
+            }
+            
+            const ptWard = document.getElementById("ward").value || "N/A";
+            
+            const consultantVal = document.getElementById("consultant").value;
+            const ptConsultant = consultantVal === "CUSTOM" ? document.getElementById("customConsultant").value : consultantVal;
+
+            // DRAW PATIENT INFO OVERLAY (Using Percentage Calibration)
+            // PDF Y-axis starts from the BOTTOM, so we invert the top percentage (100 - pct)
+            const vitalFontSize = usingFallback ? 10 : Math.round(page1Width * 0.018); // Adaptive font size
+            const textArgs = { font: fontBold, size: vitalFontSize, color: rgb(0, 0, 0) };
+
+            const vitalY = Math.round(page1Height * (1 - (calib.ptY / 100)));
+            const lineSpacing = isTamil ? Math.round(page1Height * 0.055) : Math.round(page1Height * 0.035);
+
+            // Line 1: Name, Age, Gender
+            const nameX = Math.round(page1Width * (calib.nameX / 100));
+            const ageX = Math.round(page1Width * (calib.ageX / 100));
+            const genderX = Math.round(page1Width * (calib.genderX / 100));
+            
+            page1.drawText(ptName, { x: nameX, y: vitalY, ...textArgs });
+            page1.drawText(ptAge + " Y", { x: ageX, y: vitalY, ...textArgs });
+            page1.drawText(ptGender, { x: genderX, y: vitalY, ...textArgs });
+
+            // Line 2: PID, Date
+            const pidX = Math.round(page1Width * (calib.pidX / 100));
+            const dateX = ageX;
+            const secondY = vitalY - lineSpacing;
+            
+            page1.drawText(ptPid, { x: pidX, y: secondY, ...textArgs });
+            page1.drawText(ptDate, { x: dateX, y: secondY, ...textArgs });
+
+            if (isTamil) {
+                // Line 3 (Tamil Form Only): Surgeon, Ward
+                const surgeonX = pidX;
+                const wardX = ageX;
+                const thirdY = vitalY - 2 * lineSpacing;
+                page1.drawText(ptConsultant, { x: surgeonX, y: thirdY, ...textArgs });
+                page1.drawText(ptWard, { x: wardX, y: thirdY, ...textArgs });
+            } else {
+                // Line 2 Surgeon (English Form Only)
+                const consultantX = genderX;
+                page1.drawText(ptConsultant, { x: consultantX, y: secondY, ...textArgs });
+            }
+
+            // Draw inline paragraph details
+            // Saveetha form usually has "I, _____, diagnosed with _____ planned for _____"
+            let diagnosis = document.getElementById("procedureDiagnosis").value;
+            let procedurePlanned = "";
+            const side = document.getElementById("procedureSide").value;
+            const sidePrefix = (side && side !== "N/A") ? (side + " ") : "";
+
+            if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
+                procedurePlanned = sidePrefix + window.URO_PROCEDURES[selectedProcedureKey].name;
+            } else {
+                procedurePlanned = sidePrefix + document.getElementById("customProc").value;
+            }
+            
+            // Prefix the side to the diagnosis if not already done
+            if (sidePrefix && !diagnosis.startsWith(sidePrefix)) {
+                diagnosis = sidePrefix + diagnosis;
+            }
+
+            const inlineFontSize = usingFallback ? 10 : Math.round(page1Width * 0.016);
+            const inlineTextArgs = { font: fontBold, size: inlineFontSize, color: rgb(0,0,0) };
+            
+            // Map relative placement for paragraph fields
+            if (!usingFallback) {
+                // If using the official image, place them on the specific blanks
+                if (isTamil) {
+                    const inlineY1 = Math.round(page1Height * 0.56);
+                    const inlineY2 = Math.round(page1Height * 0.52);
+                    page1.drawText(diagnosis, { x: Math.round(page1Width * 0.215), y: inlineY1, ...inlineTextArgs });
+                    page1.drawText(procedurePlanned, { x: Math.round(page1Width * 0.32), y: inlineY2, ...inlineTextArgs });
+                } else {
+                    const inlineY1 = Math.round(page1Height * 0.69);
+                    const inlineY2 = Math.round(page1Height * 0.655);
+                    page1.drawText(diagnosis, { x: Math.round(page1Width * 0.20), y: inlineY1, ...inlineTextArgs });
+                    page1.drawText(procedurePlanned, { x: Math.round(page1Width * 0.20), y: inlineY2, ...inlineTextArgs });
+                }
+            } else {
+                // If fallback, we draw them cleanly in pre-designed slots
+                page1.drawText(diagnosis, { x: 160, y: 645, ...inlineTextArgs });
+                page1.drawText(procedurePlanned, { x: 160, y: 615, ...inlineTextArgs });
+            }
+
+            // DRAW THE COMPLICATIONS BOX TEXT
+            const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
+            const boxX = Math.round(page1Width * (calib.boxX / 100));
+            let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
+            const boxWidthPoints = page1Width - (boxX * 2);
+            
+            // Wrap text based on width
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 6 : (page1Width * 0.009)));
+            const wrappedLines = wrapText(consentText, charsPerLine);
+
+            const contentFontSize = usingFallback ? 9 : Math.round(page1Width * 0.015);
+            const contentLineHeight = usingFallback ? 13 : Math.round(page1Height * 0.019);
+
+            wrappedLines.forEach(line => {
+                if (line === '') {
+                    currentY -= contentLineHeight;
+                    return;
+                }
+                
+                // Bold headers to make it look professional
+                let textFont = font;
+                if (line.startsWith("DIAGNOSIS:") || 
+                    line.startsWith("PROCEDURE PLANNED:") || 
+                    line.startsWith("BENEFITS EXPECTED:") || 
+                    line.startsWith("ALTERNATIVES DISCUSSED & REFUSED:") || 
+                    line.startsWith("SPECIFIC RISKS & COMPLICATIONS") || 
+                    line.startsWith("EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:") ||
+                    line.startsWith("CRITICAL DECLARATION REGARDING")) {
+                    textFont = fontBold;
+                }
+
+                // If text overflows, we wrap onto Page 2
+                if (currentY < (usingFallback ? 50 : Math.round(page1Height * 0.06))) {
+                    // Create overflow page 1.5 if needed, but per Saveetha template we move to Page 2
+                    // For safety, we will let it wrap to page 2 details box.
+                }
+
+                page1.drawText(line, {
+                    x: boxX,
+                    y: currentY,
+                    size: contentFontSize,
+                    font: textFont,
+                    color: rgb(0,0,0)
+                });
+                currentY -= contentLineHeight;
+            });
+
+            // Create Page 2
+            const page2 = pdfDoc.addPage([page2Width, page2Height]);
+            
+            if (!usingFallback) {
+                page2.drawImage(p2Image, { x: 0, y: 0, width: page2Width, height: page2Height });
+            } else {
+                // DRAW DYNAMIC PAGE 2 OUTLINE (Vector Fallback)
+                drawFormOutline(page2, page2Width, page2Height, font, fontBold, 2, isTamil);
+            }
+
+            // EMBED THE SIGNATURE
+            const sigDataUrl = signaturePad.toDataURL("image/png");
+            const sigImageBytes = await fetch(sigDataUrl).then(res => res.arrayBuffer());
+            const sigImage = await pdfDoc.embedPng(sigImageBytes);
+
+            // Place Signature on Page 2 using Calibration coordinates
+            const canvas = document.getElementById('signatureCanvas');
+            const sigX = Math.round(page2Width * (calib.sigX / 100));
+            const sigY = Math.round(page2Height * (1 - (calib.sigY / 100)));
+            const sigW = Math.round(page2Width * 0.25 * calib.sigScale);
+            const sigH = Math.round(sigW * (canvas.height / canvas.width));
+
+            // Offset the signature slightly so its center aligns with (sigX, sigY)
+            page2.drawImage(sigImage, {
+                x: sigX - Math.round(sigW / 2),
+                y: sigY - Math.round(sigH / 2),
+                width: sigW,
+                height: sigH
+            });
+
+            // If using fallback, draw names and date on Page 2 signature block
+            if (usingFallback) {
+                const sigYVal = isTamil ? Math.round(page2Height * (1 - 0.77)) : Math.round(page2Height * (1 - 0.20));
+                page2.drawText(ptName, { x: 70, y: sigYVal + 24, font: fontBold, size: 10, color: rgb(0,0,0) });
+                page2.drawText(ptDate, { x: 330, y: sigYVal + 24, font: font, size: 10, color: rgb(0,0,0) });
+            }
+
+            // Save and download PDF
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${ptName.replace(/\s+/g, '_')}_Urology_Consent.pdf`;
+            link.click();
+
+        } catch (error) {
+            console.error(error);
+            alert("Error generating PDF: " + error.message);
+        } finally {
+            genBtn.innerText = "Generate & Download PDF Consent";
+            genBtn.disabled = false;
+        }
+    }
+
+    // Dynamic Form Outline Fallback Generator
+    function drawFormOutline(page, width, height, font, fontBold, pageNum, isTamil = false) {
+        const { rgb } = PDFLib;
+        const colorPrimary = rgb(0.0, 0.33, 0.7);
+        const colorDark = rgb(0.1, 0.1, 0.1);
+        const colorGray = rgb(0.5, 0.5, 0.5);
+
+        // Border Outline
+        page.drawRectangle({
+            x: 20,
+            y: 20,
+            width: width - 40,
+            height: height - 40,
+            borderColor: colorPrimary,
+            borderWidth: 1.5
+        });
+
+        if (pageNum === 1) {
+            // PAGE 1 HEADER
+            page.drawText("SAVEETHA MEDICAL COLLEGE & HOSPITALS", {
+                x: Math.round(width * 0.15), y: height - 60, font: fontBold, size: 16, color: colorPrimary
+            });
+            page.drawText("SIMATS UNIVERSITY, CHENNAI", {
+                x: Math.round(width * 0.3), y: height - 76, font: font, size: 9, color: colorGray
+            });
+            page.drawText("DEPARTMENT OF UROLOGY", {
+                x: Math.round(width * 0.32), y: height - 94, font: fontBold, size: 11, color: colorDark
+            });
+            page.drawText(isTamil ? "INFORMED CONSENT FOR SURGERY (TAMIL FORM OUTLINE)" : "INFORMED CONSENT FOR SURGERY & PROCEDURES", {
+                x: Math.round(width * 0.18), y: height - 115, font: fontBold, size: 12, color: colorPrimary
+            });
+
+            if (!isTamil) {
+                // ENGLISH FALLBACK LAYOUT (Details at bottom)
+                // 1. Text paragraph (Middle)
+                page.drawText("I, the undersigned, have been diagnosed with", { x: 40, y: height - 170, font: font, size: 9.5, color: colorDark });
+                page.drawLine({ start: { x: 235, y: height - 172 }, end: { x: width - 40, y: height - 172 }, color: colorGray, thickness: 0.5 });
+                page.drawText("and am planned to undergo the surgical procedure of", { x: 40, y: height - 200, font: font, size: 9.5, color: colorDark });
+                page.drawLine({ start: { x: 275, y: height - 202 }, end: { x: width - 40, y: height - 202 }, color: colorGray, thickness: 0.5 });
+                page.drawText("The detailed risks, benefits, and alternatives are structured below:", { x: 40, y: height - 230, font: font, size: 9.5, color: colorDark });
+
+                // 2. Complications box (Middle/Lower)
+                page.drawRectangle({
+                    x: 40,
+                    y: 180,
+                    width: width - 80,
+                    height: height - 430, // From Y=180 to Y=592
+                    borderColor: colorPrimary,
+                    borderWidth: 1
+                });
+
+                // 3. Patient Details (Bottom, matching ptY = 84%)
+                const vitalY = Math.round(height * (1 - 0.84)); // Y = 135
+                const secondY = vitalY - 30; // Y = 105
+
+                page.drawText("Patient Name:", { x: 40, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 100, y: vitalY - 2 }, end: { x: 280, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Age:", { x: 290, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 315, y: vitalY - 2 }, end: { x: 410, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Gender:", { x: 420, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 455, y: vitalY - 2 }, end: { x: 540, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+
+                page.drawText("Patient ID (PID):", { x: 40, y: secondY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 110, y: secondY - 2 }, end: { x: 280, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Date:", { x: 290, y: secondY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 315, y: secondY - 2 }, end: { x: 410, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Surgeon:", { x: 420, y: secondY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 460, y: secondY - 2 }, end: { x: 540, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+            } else {
+                // TAMIL FALLBACK LAYOUT (Details at top, Box at bottom)
+                // 1. Patient Details (Top, matching ptY = 18.5%)
+                const vitalY = Math.round(height * (1 - 0.185)); // Y = 686
+                const lineSpacing = Math.round(height * 0.055); // 40px
+                const secondY = vitalY - lineSpacing; // Y = 646
+                const thirdY = vitalY - 2 * lineSpacing; // Y = 606
+
+                page.drawText("Patient Name:", { x: 40, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 100, y: vitalY - 2 }, end: { x: 230, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Age:", { x: 240, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 265, y: vitalY - 2 }, end: { x: 390, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Gender:", { x: 400, y: vitalY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 435, y: vitalY - 2 }, end: { x: 540, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+
+                page.drawText("Patient ID (PID):", { x: 40, y: secondY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 110, y: secondY - 2 }, end: { x: 230, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Date:", { x: 240, y: secondY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 265, y: secondY - 2 }, end: { x: 390, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+
+                page.drawText("Surgeon:", { x: 40, y: thirdY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 110, y: thirdY - 2 }, end: { x: 230, y: thirdY - 2 }, color: colorGray, thickness: 0.5 });
+                page.drawText("Ward:", { x: 240, y: thirdY, font: font, size: 8.5, color: colorGray });
+                page.drawLine({ start: { x: 265, y: thirdY - 2 }, end: { x: 390, y: thirdY - 2 }, color: colorGray, thickness: 0.5 });
+
+                // 2. Text paragraph (Middle)
+                page.drawText("I, the undersigned, have been diagnosed with", { x: 40, y: thirdY - 45, font: font, size: 9.5, color: colorDark });
+                page.drawLine({ start: { x: 235, y: thirdY - 47 }, end: { x: width - 40, y: thirdY - 47 }, color: colorGray, thickness: 0.5 });
+                page.drawText("and am planned to undergo the surgical procedure of", { x: 40, y: thirdY - 75, font: font, size: 9.5, color: colorDark });
+                page.drawLine({ start: { x: 275, y: thirdY - 77 }, end: { x: width - 40, y: thirdY - 77 }, color: colorGray, thickness: 0.5 });
+
+                // 3. Complications box (Bottom, matching boxY = 59.5%)
+                const boxTopY = Math.round(height * (1 - 0.595)); // Y = 293
+                page.drawRectangle({
+                    x: 40,
+                    y: 40,
+                    width: width - 80,
+                    height: boxTopY - 40, // Height from Y=40 to Y=293 (253 points)
+                    borderColor: colorPrimary,
+                    borderWidth: 1
+                });
+            }
+        }
+
+        if (pageNum === 2) {
+            // PAGE 2 HEADER
+            page.drawText("DEPARTMENT OF UROLOGY", {
+                x: Math.round(width * 0.35), y: height - 60, font: fontBold, size: 12, color: colorPrimary
+            });
+            page.drawText("PATIENT DECLARATION & SIGNATURE BLOCK", {
+                x: Math.round(width * 0.25), y: height - 80, font: fontBold, size: 10, color: colorDark
+            });
+
+            // Declaration boilerplate text
+            const declarationText = 
+                "I hereby declare that the operating surgeon and clinical staff have fully explained the nature of my diagnosis, " +
+                "the proposed surgery, the intended benefits, and the alternative options available. I have read (or had read " +
+                "to me in my native language) all the specific risks, including the possibilities of urosepsis, organ injury, " +
+                "the critical need for timely stent removal/exchange, and the potential for intraoperative contingencies including " +
+                "conversion to open surgery. I sign this consent voluntarily, taking full personal responsibility for my medical follow-ups.";
+            
+            const wrappedDecl = wrapText(declarationText, isTamil ? 70 : 85);
+            let declY = height - 120;
+            wrappedDecl.forEach(line => {
+                page.drawText(line, { x: 40, y: declY, font: font, size: 9, color: colorDark });
+                declY -= 13;
+            });
+
+            // Signature block placement based on English vs Tamil Y coordinate
+            const sigY = isTamil ? Math.round(height * (1 - 0.77)) : Math.round(height * (1 - 0.20)); // Tamil: Y=166, English: Y=673
+            
+            // Draw lines and labels on the dynamic template
+            page.drawText("Patient / Legal Guardian Signature:", { x: 40, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
+            page.drawLine({ start: { x: 40, y: sigY + 40 }, end: { x: 240, y: sigY + 40 }, color: colorPrimary, thickness: 1 });
+            page.drawText("Name:", { x: 40, y: sigY + 24, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 70, y: sigY + 22 }, end: { x: 240, y: sigY + 22 }, color: colorGray, thickness: 0.5 });
+
+            page.drawText("Witness / Postgraduate Clinician:", { x: 300, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
+            page.drawLine({ start: { x: 300, y: sigY + 40 }, end: { x: 500, y: sigY + 40 }, color: colorDark, thickness: 1 });
+            page.drawText("Date:", { x: 300, y: sigY + 24, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 330, y: sigY + 22 }, end: { x: 500, y: sigY + 22 }, color: colorGray, thickness: 0.5 });
+        }
+    }
+</script>
+</body>
+</html>
