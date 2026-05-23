@@ -572,6 +572,84 @@
                 padding: 16px;
             }
         }
+
+        /* Dynamic Dual Column Signatures */
+        .sig-container-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .sig-column {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        [data-theme="dark"] .sig-column {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        @media (max-width: 768px) {
+            .sig-container-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        /* Interactive Visual Calibration Preview */
+        .calib-preview-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            background: var(--input-bg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        #calibVisualArea {
+            position: relative;
+            width: 100%;
+            max-width: 340px;
+            margin: 16px auto 0 auto;
+            aspect-ratio: 512 / 724;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            background-color: #ffffff;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .calib-marker {
+            position: absolute;
+            font-size: 8px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.85);
+            padding: 2px 4px;
+            border-radius: 3px;
+            border: 1px solid currentColor;
+            transform: translate(0, -50%);
+            white-space: nowrap;
+            pointer-events: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+        }
+
+        .calib-marker-box {
+            position: absolute;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 700;
+            text-align: center;
+            pointer-events: none;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -709,14 +787,73 @@
         </div>
 
         <div class="app-card">
-            <h2>Patient / Relative Signature</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">The patient or their legal guardian must sign inside the box below with their finger or stylus.</p>
+            <h2>Verification & Signatures</h2>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Sign and complete the verification details for patient/witness and operating surgeon.</p>
             
-            <div class="sig-pad-wrapper">
-                <canvas id="signatureCanvas"></canvas>
-            </div>
-            <div class="sig-pad-actions">
-                <button class="btn btn-secondary" onclick="clearSignature()">Clear Signature</button>
+            <div class="sig-container-grid">
+                <div class="sig-column">
+                    <h3 style="font-size:14px; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        1. Patient / Relative Signature
+                    </h3>
+                    <div class="sig-pad-wrapper">
+                        <canvas id="signatureCanvas"></canvas>
+                    </div>
+                    <div class="sig-pad-actions" style="margin-bottom:12px;">
+                        <button class="btn btn-secondary btn-sm" onclick="clearSignature()">Clear Signature</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="signerName">Signer Name</label>
+                        <input type="text" id="signerName" placeholder="Defaults to Patient Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signerRelation">Relationship to Patient</label>
+                        <input type="text" id="signerRelation" value="Self" placeholder="e.g., Self, Son, Wife, Witness">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="signerDate">Sign Date</label>
+                            <input type="date" id="signerDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="signerTime">Sign Time</label>
+                            <input type="text" id="signerTime" placeholder="e.g., 10:30 AM">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sig-column">
+                    <h3 style="font-size:14px; color:var(--primary); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+                        2. Surgeon / PG Signature
+                    </h3>
+                    <div class="sig-pad-wrapper">
+                        <canvas id="surgeonSignatureCanvas"></canvas>
+                    </div>
+                    <div class="sig-pad-actions" style="margin-bottom:12px;">
+                        <button class="btn btn-secondary btn-sm" onclick="clearSurgeonSignature()">Clear Signature</button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="surgeonName">Surgeon Name</label>
+                        <input type="text" id="surgeonName" placeholder="Pre-filled on consultant select">
+                    </div>
+                    <div class="form-group">
+                        <label for="docRegNo">Medical Registration No.</label>
+                        <input type="text" id="docRegNo" placeholder="Enter Registration No.">
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="docDate">Sign Date</label>
+                            <input type="date" id="docDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="docTime">Sign Time</label>
+                            <input type="text" id="docTime" placeholder="e.g., 10:30 AM">
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -745,54 +882,105 @@
                 Changes persist locally in browser localStorage.
             </div>
 
-            <h3>Page 1 - Patient Info alignment</h3>
-            <div class="calibration-row">
-                <label>Patient Info Y-axis (% from top) <span class="value" id="val_ptY">84%</span></label>
-                <input type="range" id="cal_ptY" min="5" max="95" value="84" step="0.5" oninput="updateCalibValue('ptY')">
+            <!-- Visual Preview Section -->
+            <div class="calib-preview-card">
+                <h3 style="margin-top: 0; font-size: 14px; margin-bottom: 8px; color: var(--primary);">Live Calibration Overlay Preview</h3>
+                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Toggle pages below to visually align elements on the templates.</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="btn btn-secondary btn-sm active" id="btnPrevPage1" onclick="switchCalibPreviewPage(1)" style="padding: 6px 12px; font-size: 12px;">Page 1</button>
+                    <button class="btn btn-secondary btn-sm" id="btnPrevPage2" onclick="switchCalibPreviewPage(2)" style="padding: 6px 12px; font-size: 12px;">Page 2</button>
+                </div>
+                
+                <div id="calibVisualArea">
+                    <!-- Page 1 Overlays -->
+                    <div id="calib_over_ptName" class="calib-marker" style="color: #ff3b30;">[Pt Name]</div>
+                    <div id="calib_over_ptAge" class="calib-marker" style="color: #ff3b30;">[Age]</div>
+                    <div id="calib_over_ptGender" class="calib-marker" style="color: #ff3b30;">[Gender]</div>
+                    <div id="calib_over_ptPid" class="calib-marker" style="color: #34c759;">[PID]</div>
+                    <div id="calib_over_ptDate" class="calib-marker" style="color: #34c759;">[Date]</div>
+                    <div id="calib_over_ptSurgeon" class="calib-marker" style="color: #007aff;">[Surgeon]</div>
+                    <div id="calib_over_ptWard" class="calib-marker" style="color: #007aff;">[Ward]</div>
+                    <div id="calib_over_box" class="calib-marker-box" style="border: 1.5px dashed #af52de; background: rgba(175, 82, 222, 0.08); color: #af52de;">Complications Box (Page 1)</div>
+                    
+                    <!-- Page 2 Overlays -->
+                    <div id="calib_over_box2" class="calib-marker-box" style="border: 1.5px dashed #af52de; background: rgba(175, 82, 222, 0.08); color: #af52de;">Complications Box (Page 2)</div>
+                    <div id="calib_over_sig" class="calib-marker-box" style="border: 1.5px dashed #007aff; background: rgba(0, 122, 255, 0.08); color: #007aff; transform: translate(-50%, -50%);">Pt Sign</div>
+                    <div id="calib_over_docSig" class="calib-marker-box" style="border: 1.5px dashed #34c759; background: rgba(52, 199, 89, 0.08); color: #34c759; transform: translate(-50%, -50%);">Surgeon Sign</div>
+                </div>
             </div>
-            
+
+            <h3>Page 1 - Patient Info Alignment</h3>
+            <div class="calibration-row">
+                <label>Patient Info Y-axis (% from top) <span class="value" id="val_ptY">18.5%</span></label>
+                <input type="range" id="cal_ptY" min="5" max="95" value="18.5" step="0.5" oninput="updateCalibValue('ptY')">
+            </div>
+            <div class="calibration-row">
+                <label>Info Line Spacing (% of height) <span class="value" id="val_ptSpacing">3.5%</span></label>
+                <input type="range" id="cal_ptSpacing" min="1" max="10" value="3.5" step="0.1" oninput="updateCalibValue('ptSpacing')">
+            </div>
             <div class="calibration-row">
                 <label>Name X-axis (% from left) <span class="value" id="val_nameX">22%</span></label>
                 <input type="range" id="cal_nameX" min="5" max="90" value="22" oninput="updateCalibValue('nameX')">
             </div>
-
             <div class="calibration-row">
                 <label>Age X-axis (% from left) <span class="value" id="val_ageX">52%</span></label>
                 <input type="range" id="cal_ageX" min="5" max="90" value="52" oninput="updateCalibValue('ageX')">
             </div>
-
             <div class="calibration-row">
-                <label>Gender X-axis (% from left) <span class="value" id="val_genderX">72%</span></label>
-                <input type="range" id="cal_genderX" min="5" max="95" value="72" oninput="updateCalibValue('genderX')">
+                <label>Gender X-axis (% from left) <span class="value" id="val_genderX">78%</span></label>
+                <input type="range" id="cal_genderX" min="5" max="95" value="78" oninput="updateCalibValue('genderX')">
+            </div>
+            <div class="calibration-row">
+                <label>PID X-axis (% from left) <span class="value" id="val_pidX">25%</span></label>
+                <input type="range" id="cal_pidX" min="5" max="90" value="25" oninput="updateCalibValue('pidX')">
             </div>
 
-            <div class="calibration-row">
-                <label>PID X-axis (% from left) <span class="value" id="val_pidX">22%</span></label>
-                <input type="range" id="cal_pidX" min="5" max="90" value="22" oninput="updateCalibValue('pidX')">
-            </div>
-
-            <h3>Page 1 - Consent Box Text</h3>
+            <h3>Page 1 - Complications Box Limit</h3>
             <div class="calibration-row">
                 <label>Box X-axis (% from left) <span class="value" id="val_boxX">10%</span></label>
                 <input type="range" id="cal_boxX" min="5" max="45" value="10" oninput="updateCalibValue('boxX')">
             </div>
             <div class="calibration-row">
-                <label>Box Y-axis (% from top) <span class="value" id="val_boxY">52%</span></label>
-                <input type="range" id="cal_boxY" min="10" max="90" value="52" step="0.5" oninput="updateCalibValue('boxY')">
+                <label>Box Top Y-axis (% from top) <span class="value" id="val_boxY">61%</span></label>
+                <input type="range" id="cal_boxY" min="10" max="90" value="61" step="0.5" oninput="updateCalibValue('boxY')">
+            </div>
+            <div class="calibration-row">
+                <label>Box Bottom Y-axis (% from top) <span class="value" id="val_boxBottom">92%</span></label>
+                <input type="range" id="cal_boxBottom" min="70" max="98" value="92" step="0.5" oninput="updateCalibValue('boxBottom')">
             </div>
 
-            <h3>Page 2 - Signature Alignment</h3>
+            <h3>Page 2 - Complications Box Overflow</h3>
             <div class="calibration-row">
-                <label>Signature X-axis (% from left) <span class="value" id="val_sigX">65%</span></label>
-                <input type="range" id="cal_sigX" min="5" max="95" value="65" oninput="updateCalibValue('sigX')">
+                <label>Box Top Y-axis (% from top) <span class="value" id="val_boxY2">13%</span></label>
+                <input type="range" id="cal_boxY2" min="5" max="50" value="13" step="0.5" oninput="updateCalibValue('boxY2')">
             </div>
             <div class="calibration-row">
-                <label>Signature Y-axis (% from top) <span class="value" id="val_sigY">20%</span></label>
-                <input type="range" id="cal_sigY" min="5" max="95" value="20" oninput="updateCalibValue('sigY')">
+                <label>Box Bottom Y-axis (% from top) <span class="value" id="val_boxBottom2">59%</span></label>
+                <input type="range" id="cal_boxBottom2" min="40" max="80" value="59" step="0.5" oninput="updateCalibValue('boxBottom2')">
+            </div>
+
+            <h3>Page 2 - Patient Signature</h3>
+            <div class="calibration-row">
+                <label>Signature X-axis (% from left) <span class="value" id="val_sigX">25%</span></label>
+                <input type="range" id="cal_sigX" min="5" max="95" value="25" oninput="updateCalibValue('sigX')">
+            </div>
+            <div class="calibration-row">
+                <label>Signature Y-axis (% from top) <span class="value" id="val_sigY">77%</span></label>
+                <input type="range" id="cal_sigY" min="5" max="95" value="77" oninput="updateCalibValue('sigY')">
             </div>
             <div class="calibration-row">
                 <label>Signature Scale factor <span class="value" id="val_sigScale">1.0</span></label>
                 <input type="range" id="cal_sigScale" min="5" max="25" value="10" step="1" oninput="updateCalibValue('sigScale')">
+            </div>
+
+            <h3>Page 2 - Surgeon Signature</h3>
+            <div class="calibration-row">
+                <label>Signature X-axis (% from left) <span class="value" id="val_docSigX">75%</span></label>
+                <input type="range" id="cal_docSigX" min="50" max="95" value="75" oninput="updateCalibValue('docSigX')">
+            </div>
+            <div class="calibration-row">
+                <label>Signature Scale factor <span class="value" id="val_docSigScale">1.0</span></label>
+                <input type="range" id="cal_docSigScale" min="5" max="25" value="10" step="1" oninput="updateCalibValue('docSigScale')">
             </div>
 
             <div style="display:flex; gap:12px; margin-top:20px;">
@@ -841,36 +1029,50 @@
     // Global State
     let selectedProcedureKey = "";
     let signaturePad = null;
+    let surgeonSignaturePad = null;
     let customConsentOverride = null;
+    let currentPreviewPage = 1;
     
     // Default Calibration Configs
     const defaultCalibrationEN = {
         ptY: 18.5, // Y axis from TOP for first line
-        nameX: 15,
-        ageX: 48,
+        ptSpacing: 3.5, // line spacing for patient details (percentage of page height)
+        nameX: 22,
+        ageX: 52,
         genderX: 78,
         pidX: 25,
         boxX: 10,
-        boxY: 59.5, // Y axis from TOP for complications box
+        boxY: 61.0, // Y axis from TOP for complications box Page 1
+        boxBottom: 92.0, // Y axis limit from TOP for Page 1 complications box
+        boxY2: 13.0, // Y axis from TOP for Page 2 complications box
+        boxBottom2: 59.0, // Y axis limit from TOP for Page 2 complications box
         sigX: 25, // X axis for signature (Left side of page 2)
         sigY: 77, // Y axis from TOP for signature (Bottom of page 2)
-        sigScale: 1.0
+        sigScale: 1.0,
+        docSigX: 75, // Doctor signature X axis
+        docSigScale: 1.0
     };
 
     const defaultCalibrationTA = {
         ptY: 18.5, // Y axis from TOP for first line
-        nameX: 15,
-        ageX: 48,
+        ptSpacing: 3.5, // line spacing for patient details (percentage of page height)
+        nameX: 22,
+        ageX: 52,
         genderX: 78,
         pidX: 25,
         boxX: 10,
-        boxY: 59.5, // Y axis from TOP for complications box
+        boxY: 61.0, // Y axis from TOP for complications box Page 1
+        boxBottom: 92.0, // Y axis limit from TOP for Page 1 complications box
+        boxY2: 13.0, // Y axis from TOP for Page 2 complications box
+        boxBottom2: 59.0, // Y axis limit from TOP for Page 2 complications box
         sigX: 25, // X axis for signature (Left side of page 2)
         sigY: 77, // Y axis from TOP for signature (Bottom of page 2)
-        sigScale: 1.0
+        sigScale: 1.0,
+        docSigX: 75,
+        docSigScale: 1.0
     };
 
-    // Load Calibration from Local Storage or defaults
+    // Load Calibration from Local Storage or defaults (v3)
     let calib = { ...defaultCalibrationEN };
 
     // Initialize Page
@@ -884,6 +1086,23 @@
         // Reload coordinates automatically when switching Tamil/English template
         document.getElementById("tamilToggle").addEventListener("change", () => {
             loadCalibration();
+            switchCalibPreviewPage(currentPreviewPage);
+        });
+
+        // Sync operating consultant and registration number
+        document.getElementById("consultant").addEventListener("change", () => {
+            toggleCustomConsultant();
+        });
+        document.getElementById("customConsultant").addEventListener("input", () => {
+            updateSurgeonNameField();
+        });
+        document.getElementById("docRegNo").addEventListener("input", () => {
+            const val = document.getElementById("consultant").value;
+            const customVal = document.getElementById("customConsultant").value;
+            const activeSurgeonName = (val === "CUSTOM") ? customVal : val;
+            if (activeSurgeonName) {
+                localStorage.setItem(`uro-reg-${activeSurgeonName}`, document.getElementById("docRegNo").value);
+            }
         });
         
         // Handle window resizing for signature pad
@@ -915,16 +1134,38 @@
         }
     }
 
-    // Auto-initialize Date Field
+    // Auto-initialize Date & Time Fields
     function initDate() {
         const dateInput = document.getElementById("date");
+        const signerDateInput = document.getElementById("signerDate");
+        const docDateInput = document.getElementById("docDate");
+
         const today = new Date();
         const yyyy = today.getFullYear();
         let mm = today.getMonth() + 1;
         let dd = today.getDate();
         if (dd < 10) dd = '0' + dd;
         if (mm < 10) mm = '0' + mm;
-        dateInput.value = `${yyyy}-${mm}-${dd}`;
+        
+        const dateStr = `${yyyy}-${mm}-${dd}`;
+        
+        if (dateInput) dateInput.value = dateStr;
+        if (signerDateInput) signerDateInput.value = dateStr;
+        if (docDateInput) docDateInput.value = dateStr;
+
+        // Times
+        let hh = today.getHours();
+        let mins = today.getMinutes();
+        const ampm = hh >= 12 ? 'PM' : 'AM';
+        hh = hh % 12;
+        hh = hh ? hh : 12;
+        const minsStr = mins < 10 ? '0' + mins : mins;
+        const timeStr = `${hh}:${minsStr} ${ampm}`;
+
+        const signerTimeInput = document.getElementById("signerTime");
+        const docTimeInput = document.getElementById("docTime");
+        if (signerTimeInput) signerTimeInput.value = timeStr;
+        if (docTimeInput) docTimeInput.value = timeStr;
     }
 
     // Tab Management
@@ -941,6 +1182,9 @@
         if (tabId === 'form') {
             // Re-render signature canvas properly upon tab change
             resizeCanvas();
+        } else if (tabId === 'calibration') {
+            // Initialize visual preview overlay background and page toggle
+            switchCalibPreviewPage(currentPreviewPage);
         }
     }
 
@@ -950,16 +1194,49 @@
         signaturePad = new SignaturePad(canvas, {
             penColor: 'rgb(0, 0, 139)' // dark blue pen for clinic authenticity
         });
+
+        const surgCanvas = document.getElementById('surgeonSignatureCanvas');
+        surgeonSignaturePad = new SignaturePad(surgCanvas, {
+            penColor: 'rgb(0, 0, 139)'
+        });
+
         resizeCanvas();
     }
 
     function resizeCanvas() {
         const canvas = document.getElementById('signatureCanvas');
+        const surgCanvas = document.getElementById('surgeonSignatureCanvas');
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-        signaturePad.clear(); // clears signature on resize to avoid distortion
+        
+        if (canvas) {
+            const isEmpty = signaturePad.isEmpty();
+            let data = null;
+            if (!isEmpty) {
+                data = signaturePad.toData();
+            }
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear();
+            if (!isEmpty && data) {
+                signaturePad.fromData(data);
+            }
+        }
+
+        if (surgCanvas) {
+            const isEmpty = surgeonSignaturePad.isEmpty();
+            let data = null;
+            if (!isEmpty) {
+                data = surgeonSignaturePad.toData();
+            }
+            surgCanvas.width = surgCanvas.offsetWidth * ratio;
+            surgCanvas.height = surgCanvas.offsetHeight * ratio;
+            surgCanvas.getContext("2d").scale(ratio, ratio);
+            surgeonSignaturePad.clear();
+            if (!isEmpty && data) {
+                surgeonSignaturePad.fromData(data);
+            }
+        }
     }
 
     function clearSignature() {
@@ -1042,6 +1319,38 @@
     function toggleCustomConsultant() {
         const val = document.getElementById("consultant").value;
         document.getElementById("customConsultant").style.display = val === "CUSTOM" ? "block" : "none";
+        updateSurgeonNameField();
+    }
+
+    function updateSurgeonNameField() {
+        const val = document.getElementById("consultant").value;
+        const customVal = document.getElementById("customConsultant").value;
+        const surgNameInput = document.getElementById("surgeonName");
+        
+        const activeSurgeonName = (val === "CUSTOM") ? customVal : val;
+        surgNameInput.value = activeSurgeonName || "";
+        
+        // Retrieve and apply registration number from local storage or pre-defined map
+        if (activeSurgeonName) {
+            const storedReg = localStorage.getItem(`uro-reg-${activeSurgeonName}`);
+            if (storedReg !== null) {
+                document.getElementById("docRegNo").value = storedReg;
+            } else {
+                // Default mappings
+                const regMap = {
+                    "Prof. Muthulatha N": "TMC 45678",
+                    "Prof. Siva Sankar": "TMC 56789",
+                    "Prof. Griffin": "TMC 67890",
+                    "Dr. Dev Krishna Barathi": "TMC 78901",
+                    "Dr. Mohammed Farooq": "TMC 89012",
+                    "Dr. Arvind Ramachandran": "TMC 90123",
+                    "Dr. Kuppan C T": "TMC 99999"
+                };
+                document.getElementById("docRegNo").value = regMap[activeSurgeonName] || "";
+            }
+        } else {
+            document.getElementById("docRegNo").value = "";
+        }
     }
 
     // Listen to changes in fields to trigger consent recompiling
@@ -1074,7 +1383,7 @@
     // Calibration Helpers
     function loadCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
+        const storageKey = isTamil ? "uro-calibration-ta-v3" : "uro-calibration-en-v3";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
 
         const saved = localStorage.getItem(storageKey);
@@ -1094,15 +1403,21 @@
         for (const [k, v] of Object.entries(calib)) {
             const input = document.getElementById(`cal_${k}`);
             if (input) {
-                if (k === 'sigScale') {
+                if (k === 'sigScale' || k === 'docSigScale') {
                     input.value = Math.round(v * 10);
                     document.getElementById(`val_${k}`).textContent = v.toFixed(1);
+                } else if (k === 'ptSpacing') {
+                    input.value = v;
+                    document.getElementById(`val_${k}`).textContent = v.toFixed(1) + "%";
                 } else {
                     input.value = v;
                     document.getElementById(`val_${k}`).textContent = v + "%";
                 }
             }
         }
+
+        updateSurgeonNameField();
+        updateVisualCalibPreview();
     }
 
     function updateCalibValue(key) {
@@ -1110,9 +1425,11 @@
         if (!input) return;
 
         let val = parseFloat(input.value);
-        if (key === 'sigScale') {
+        if (key === 'sigScale' || key === 'docSigScale') {
             val = val / 10;
             document.getElementById(`val_${key}`).textContent = val.toFixed(1);
+        } else if (key === 'ptSpacing') {
+            document.getElementById(`val_${key}`).textContent = val.toFixed(1) + "%";
         } else {
             document.getElementById(`val_${key}`).textContent = val + "%";
         }
@@ -1120,18 +1437,129 @@
         calib[key] = val;
         
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
+        const storageKey = isTamil ? "uro-calibration-ta-v3" : "uro-calibration-en-v3";
         localStorage.setItem(storageKey, JSON.stringify(calib));
+
+        updateVisualCalibPreview();
     }
 
     function resetCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
+        const storageKey = isTamil ? "uro-calibration-ta-v3" : "uro-calibration-en-v3";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
         
         calib = { ...defaults };
         localStorage.removeItem(storageKey);
         loadCalibration();
+    }
+
+    // Interactive Visual Preview Logic
+    function switchCalibPreviewPage(pageNum) {
+        currentPreviewPage = pageNum;
+        document.getElementById("btnPrevPage1").classList.toggle("active", pageNum === 1);
+        document.getElementById("btnPrevPage2").classList.toggle("active", pageNum === 2);
+        
+        const isTamil = document.getElementById("tamilToggle").checked;
+        const fileSuffix = isTamil ? "_tamil" : "";
+        const visualArea = document.getElementById("calibVisualArea");
+        
+        const imgUrl = `page${pageNum}${fileSuffix}.jpg`;
+        visualArea.style.backgroundImage = `url(${imgUrl})`;
+        
+        // Toggle markers visibility based on active preview page
+        const p1Markers = ["calib_over_ptName", "calib_over_ptAge", "calib_over_ptGender", "calib_over_ptPid", "calib_over_ptDate", "calib_over_ptSurgeon", "calib_over_ptWard", "calib_over_box"];
+        const p2Markers = ["calib_over_box2", "calib_over_sig", "calib_over_docSig"];
+        
+        p1Markers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = (pageNum === 1) ? "block" : "none";
+        });
+        p2Markers.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = (pageNum === 2) ? "block" : "none";
+        });
+        
+        updateVisualCalibPreview();
+    }
+
+    function updateVisualCalibPreview() {
+        if (!calib) return;
+        
+        // Page 1 Overlays
+        const ptName = document.getElementById("calib_over_ptName");
+        if (ptName) {
+            ptName.style.top = calib.ptY + "%";
+            ptName.style.left = calib.nameX + "%";
+        }
+        
+        const ptAge = document.getElementById("calib_over_ptAge");
+        if (ptAge) {
+            ptAge.style.top = calib.ptY + "%";
+            ptAge.style.left = calib.ageX + "%";
+        }
+        
+        const ptGender = document.getElementById("calib_over_ptGender");
+        if (ptGender) {
+            ptGender.style.top = calib.ptY + "%";
+            ptGender.style.left = calib.genderX + "%";
+        }
+        
+        const ptPid = document.getElementById("calib_over_ptPid");
+        if (ptPid) {
+            ptPid.style.top = (calib.ptY + calib.ptSpacing) + "%";
+            ptPid.style.left = calib.pidX + "%";
+        }
+        
+        const ptDate = document.getElementById("calib_over_ptDate");
+        if (ptDate) {
+            ptDate.style.top = (calib.ptY + calib.ptSpacing) + "%";
+            ptDate.style.left = calib.ageX + "%";
+        }
+        
+        const ptSurgeon = document.getElementById("calib_over_ptSurgeon");
+        if (ptSurgeon) {
+            ptSurgeon.style.top = (calib.ptY + 2 * calib.ptSpacing) + "%";
+            ptSurgeon.style.left = calib.pidX + "%";
+        }
+        
+        const ptWard = document.getElementById("calib_over_ptWard");
+        if (ptWard) {
+            ptWard.style.top = (calib.ptY + 2 * calib.ptSpacing) + "%";
+            ptWard.style.left = calib.ageX + "%";
+        }
+        
+        const box = document.getElementById("calib_over_box");
+        if (box) {
+            box.style.left = calib.boxX + "%";
+            box.style.width = (100 - 2 * calib.boxX) + "%";
+            box.style.top = calib.boxY + "%";
+            box.style.height = (calib.boxBottom - calib.boxY) + "%";
+        }
+        
+        // Page 2 Overlays
+        const box2 = document.getElementById("calib_over_box2");
+        if (box2) {
+            box2.style.left = calib.boxX + "%";
+            box2.style.width = (100 - 2 * calib.boxX) + "%";
+            box2.style.top = calib.boxY2 + "%";
+            box2.style.height = (calib.boxBottom2 - calib.boxY2) + "%";
+        }
+        
+        const sig = document.getElementById("calib_over_sig");
+        if (sig) {
+            sig.style.top = calib.sigY + "%";
+            sig.style.left = calib.sigX + "%";
+            sig.style.width = (24 * calib.sigScale) + "%";
+            sig.style.height = (8 * calib.sigScale) + "%";
+        }
+        
+        const docSig = document.getElementById("calib_over_docSig");
+        if (docSig) {
+            docSig.style.top = calib.sigY + "%";
+            docSig.style.left = calib.docSigX + "%";
+            docSig.style.width = (24 * calib.docSigScale) + "%";
+            docSig.style.height = (8 * calib.docSigScale) + "%";
+        }
     }
 
     // Helper: Wrap text to fit in the box
@@ -1163,6 +1591,7 @@
     }
 
     // 4. Generate the PDF using pdf-lib
+    // 4. Generate the PDF using pdf-lib
     async function generatePDF() {
         // Validation
         if (!document.getElementById("patientName").value.trim()) {
@@ -1183,6 +1612,10 @@
         }
         if (signaturePad.isEmpty()) {
             alert("Please ask the patient to sign the consent pad.");
+            return;
+        }
+        if (surgeonSignaturePad.isEmpty()) {
+            alert("Please ask the surgeon to sign the consent pad.");
             return;
         }
 
@@ -1231,7 +1664,6 @@
                 page2Height = p2Image.height;
             } else {
                 // Standard high-resolution A4 size at 72 points per inch (595 x 842 points)
-                // A4 is 8.27 x 11.69 inches -> 595 x 842 points
                 page1Width = 595;
                 page1Height = 842;
                 page2Width = 595;
@@ -1240,12 +1672,18 @@
 
             // Create Page 1
             const page1 = pdfDoc.addPage([page1Width, page1Height]);
-            
             if (!usingFallback) {
                 page1.drawImage(p1Image, { x: 0, y: 0, width: page1Width, height: page1Height });
             } else {
-                // DRAW DYNAMIC PAGE 1 OUTLINE (Vector Fallback)
                 drawFormOutline(page1, page1Width, page1Height, font, fontBold, 1, isTamil);
+            }
+
+            // Create Page 2
+            const page2 = pdfDoc.addPage([page2Width, page2Height]);
+            if (!usingFallback) {
+                page2.drawImage(p2Image, { x: 0, y: 0, width: page2Width, height: page2Height });
+            } else {
+                drawFormOutline(page2, page2Width, page2Height, font, fontBold, 2, isTamil);
             }
 
             // EXTRACT INPUT DETAILS
@@ -1262,17 +1700,15 @@
             }
             
             const ptWard = document.getElementById("ward").value || "N/A";
-            
             const consultantVal = document.getElementById("consultant").value;
             const ptConsultant = consultantVal === "CUSTOM" ? document.getElementById("customConsultant").value : consultantVal;
 
             // DRAW PATIENT INFO OVERLAY (Using Percentage Calibration)
-            // PDF Y-axis starts from the BOTTOM, so we invert the top percentage (100 - pct)
-            const vitalFontSize = usingFallback ? 10 : Math.round(page1Width * 0.018); // Adaptive font size
+            const vitalFontSize = usingFallback ? 10 : Math.round(page1Width * 0.018); 
             const textArgs = { font: fontBold, size: vitalFontSize, color: rgb(0, 0, 0) };
 
             const vitalY = Math.round(page1Height * (1 - (calib.ptY / 100)));
-            const lineSpacing = Math.round(page1Height * 0.055);
+            const lineSpacing = Math.round(page1Height * (calib.ptSpacing / 100));
 
             // Line 1: Name, Age, Gender
             const nameX = Math.round(page1Width * (calib.nameX / 100));
@@ -1299,7 +1735,6 @@
             page1.drawText(ptWard, { x: wardX, y: thirdY, ...textArgs });
 
             // Draw inline paragraph details
-            // Saveetha form usually has "I, _____, diagnosed with _____ planned for _____"
             let diagnosis = document.getElementById("procedureDiagnosis").value;
             let procedurePlanned = "";
             const side = document.getElementById("procedureSide").value;
@@ -1311,7 +1746,6 @@
                 procedurePlanned = sidePrefix + document.getElementById("customProc").value;
             }
             
-            // Prefix the side to the diagnosis if not already done
             if (sidePrefix && !diagnosis.startsWith(sidePrefix)) {
                 diagnosis = sidePrefix + diagnosis;
             }
@@ -1321,14 +1755,12 @@
             
             // Map relative placement for paragraph fields
             if (!usingFallback) {
-                // Both templates have the same layout structure (blanks at 56% and 52% of height)
-                const inlineY1 = Math.round(page1Height * 0.56);
-                const inlineY2 = Math.round(page1Height * 0.52);
+                // Corrected coordinates based on template row analyzer (Row 288=39.8%, Row 301=41.6%)
+                const inlineY1 = Math.round(page1Height * (1 - 0.398));
+                const inlineY2 = Math.round(page1Height * (1 - 0.416));
                 page1.drawText(diagnosis, { x: Math.round(page1Width * 0.215), y: inlineY1, ...inlineTextArgs });
                 page1.drawText(procedurePlanned, { x: Math.round(page1Width * 0.32), y: inlineY2, ...inlineTextArgs });
             } else {
-                // If fallback, overlay on the lines generated by drawFormOutline
-                const thirdY = vitalY - 2 * lineSpacing;
                 const inlineY1 = thirdY - 42;
                 const inlineY2 = thirdY - 72;
                 page1.drawText(diagnosis, { x: Math.round(page1Width * 0.215), y: inlineY1, ...inlineTextArgs });
@@ -1338,23 +1770,22 @@
             // DRAW THE COMPLICATIONS BOX TEXT
             const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
             const boxX = Math.round(page1Width * (calib.boxX / 100));
-            let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
             const boxWidthPoints = page1Width - (boxX * 2);
             
             // Wrap text based on width
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 6 : (page1Width * 0.009)));
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 6 : (page1Width * 0.0095)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             const contentFontSize = usingFallback ? 9 : Math.round(page1Width * 0.015);
             const contentLineHeight = usingFallback ? 13 : Math.round(page1Height * 0.019);
 
+            let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
+            const page1BottomLimit = Math.round(page1Height * (calib.boxBottom / 100)); // bottom limit of page 1 box
+            const page2BottomLimit = Math.round(page2Height * (calib.boxBottom2 / 100)); // bottom limit of page 2 box
+            
+            let currentPageNum = 1;
+
             wrappedLines.forEach(line => {
-                if (line === '') {
-                    currentY -= contentLineHeight;
-                    return;
-                }
-                
-                // Bold headers to make it look professional
                 let textFont = font;
                 if (line.startsWith("DIAGNOSIS:") || 
                     line.startsWith("PROCEDURE PLANNED:") || 
@@ -1366,45 +1797,45 @@
                     textFont = fontBold;
                 }
 
-                // If text overflows, we wrap onto Page 2
-                if (currentY < (usingFallback ? 50 : Math.round(page1Height * 0.06))) {
-                    // Create overflow page 1.5 if needed, but per Saveetha template we move to Page 2
-                    // For safety, we will let it wrap to page 2 details box.
+                // If text overflows bottom limit, switch rendering target to page 2 box
+                if (currentPageNum === 1 && currentY < page1BottomLimit) {
+                    currentPageNum = 2;
+                    currentY = Math.round(page2Height * (1 - (calib.boxY2 / 100)));
                 }
 
-                page1.drawText(line, {
-                    x: boxX,
-                    y: currentY,
-                    size: contentFontSize,
-                    font: textFont,
-                    color: rgb(0,0,0)
-                });
+                if (currentPageNum === 1) {
+                    page1.drawText(line, {
+                        x: boxX,
+                        y: currentY,
+                        size: contentFontSize,
+                        font: textFont,
+                        color: rgb(0,0,0)
+                    });
+                } else if (currentPageNum === 2) {
+                    page2.drawText(line, {
+                        x: boxX,
+                        y: currentY,
+                        size: contentFontSize,
+                        font: textFont,
+                        color: rgb(0,0,0)
+                    });
+                }
+
                 currentY -= contentLineHeight;
             });
 
-            // Create Page 2
-            const page2 = pdfDoc.addPage([page2Width, page2Height]);
-            
-            if (!usingFallback) {
-                page2.drawImage(p2Image, { x: 0, y: 0, width: page2Width, height: page2Height });
-            } else {
-                // DRAW DYNAMIC PAGE 2 OUTLINE (Vector Fallback)
-                drawFormOutline(page2, page2Width, page2Height, font, fontBold, 2, isTamil);
-            }
-
-            // EMBED THE SIGNATURE
+            // EMBED THE SIGNATURES ON PAGE 2
+            // 1. Patient Signature
             const sigDataUrl = signaturePad.toDataURL("image/png");
             const sigImageBytes = await fetch(sigDataUrl).then(res => res.arrayBuffer());
             const sigImage = await pdfDoc.embedPng(sigImageBytes);
 
-            // Place Signature on Page 2 using Calibration coordinates
             const canvas = document.getElementById('signatureCanvas');
             const sigX = Math.round(page2Width * (calib.sigX / 100));
             const sigY = Math.round(page2Height * (1 - (calib.sigY / 100)));
             const sigW = Math.round(page2Width * 0.25 * calib.sigScale);
             const sigH = Math.round(sigW * (canvas.height / canvas.width));
 
-            // Offset the signature slightly so its center aligns with (sigX, sigY)
             page2.drawImage(sigImage, {
                 x: sigX - Math.round(sigW / 2),
                 y: sigY - Math.round(sigH / 2),
@@ -1412,12 +1843,48 @@
                 height: sigH
             });
 
-            // If using fallback, draw names and date on Page 2 signature block
-            if (usingFallback) {
-                const sigYVal = isTamil ? Math.round(page2Height * (1 - 0.77)) : Math.round(page2Height * (1 - 0.20));
-                page2.drawText(ptName, { x: 70, y: sigYVal + 24, font: fontBold, size: 10, color: rgb(0,0,0) });
-                page2.drawText(ptDate, { x: 330, y: sigYVal + 24, font: font, size: 10, color: rgb(0,0,0) });
-            }
+            // 2. Surgeon Signature
+            const docSigDataUrl = surgeonSignaturePad.toDataURL("image/png");
+            const docSigImageBytes = await fetch(docSigDataUrl).then(res => res.arrayBuffer());
+            const docSigImage = await pdfDoc.embedPng(docSigImageBytes);
+
+            const docSigX = Math.round(page2Width * (calib.docSigX / 100));
+            const docSigW = Math.round(page2Width * 0.25 * calib.docSigScale);
+            const docSigH = Math.round(docSigW * (canvas.height / canvas.width));
+
+            page2.drawImage(docSigImage, {
+                x: docSigX - Math.round(docSigW / 2),
+                y: sigY - Math.round(docSigH / 2), // share sigY
+                width: docSigW,
+                height: docSigH
+            });
+
+            // WRITE THE TEXT VALUES FOR BOTH SIGNATURE BLOCKS ON PAGE 2
+            const sigTextArgs = { font: fontBold, size: Math.max(8, vitalFontSize - 2), color: rgb(0, 0, 0) };
+            
+            // Patient Column
+            const ptTextX = sigX - Math.round(page2Width * 0.12);
+            const valSignerName = document.getElementById("signerName").value || ptName;
+            const valSignerRelation = document.getElementById("signerRelation").value || "Self";
+            const valSignerDate = document.getElementById("signerDate").value || ptDate;
+            const valSignerTime = document.getElementById("signerTime").value || "";
+
+            page2.drawText(valSignerName, { x: ptTextX + 35, y: sigY - 30, ...sigTextArgs });
+            page2.drawText(valSignerRelation, { x: ptTextX + 60, y: sigY - 55, ...sigTextArgs });
+            page2.drawText(valSignerDate, { x: ptTextX + 35, y: sigY - 80, ...sigTextArgs });
+            page2.drawText(valSignerTime, { x: ptTextX + 35, y: sigY - 105, ...sigTextArgs });
+
+            // Doctor Column
+            const docTextX = docSigX - Math.round(page2Width * 0.12);
+            const valDocName = document.getElementById("surgeonName").value || ptConsultant;
+            const valDocReg = document.getElementById("docRegNo").value || "";
+            const valDocDate = document.getElementById("docDate").value || ptDate;
+            const valDocTime = document.getElementById("docTime").value || "";
+
+            page2.drawText(valDocName, { x: docTextX + 35, y: sigY - 30, ...sigTextArgs });
+            page2.drawText(valDocReg, { x: docTextX + 45, y: sigY - 55, ...sigTextArgs });
+            page2.drawText(valDocDate, { x: docTextX + 35, y: sigY - 80, ...sigTextArgs });
+            page2.drawText(valDocTime, { x: docTextX + 35, y: sigY - 105, ...sigTextArgs });
 
             // Save and download PDF
             const pdfBytes = await pdfDoc.save();
@@ -1469,12 +1936,11 @@
                 x: Math.round(width * 0.18), y: height - 115, font: fontBold, size: 12, color: colorPrimary
             });
 
-            // BOTH ENGLISH & TAMIL LAYOUTS USE TOP-ALIGNED DETAILS
-            // 1. Patient Details (Top, matching ptY = 18.5%)
-            const vitalY = Math.round(height * (1 - 0.185)); // Y = 686
-            const lineSpacing = Math.round(height * 0.055); // 40px
-            const secondY = vitalY - lineSpacing; // Y = 646
-            const thirdY = vitalY - 2 * lineSpacing; // Y = 606
+            // 1. Patient Details
+            const vitalY = Math.round(height * (1 - (calib.ptY / 100)));
+            const lineSpacing = Math.round(height * (calib.ptSpacing / 100));
+            const secondY = vitalY - lineSpacing;
+            const thirdY = vitalY - 2 * lineSpacing;
 
             page.drawText("Patient Name:", { x: 40, y: vitalY, font: font, size: 8.5, color: colorGray });
             page.drawLine({ start: { x: 100, y: vitalY - 2 }, end: { x: 230, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
@@ -1499,17 +1965,18 @@
             page.drawText("and am planned to undergo the surgical procedure of", { x: 40, y: thirdY - 75, font: font, size: 9.5, color: colorDark });
             page.drawLine({ start: { x: 275, y: thirdY - 77 }, end: { x: width - 40, y: thirdY - 77 }, color: colorGray, thickness: 0.5 });
 
-            // 3. Complications box (Bottom, matching boxY = 59.5%)
-            const boxTopY = Math.round(height * (1 - 0.595)); // Y = 293
+            // 3. Complications box
+            const boxTopY = Math.round(height * (1 - (calib.boxY / 100)));
+            const boxBottomY = Math.round(height * (1 - (calib.boxBottom / 100)));
             page.drawRectangle({
                 x: 40,
-                y: 40,
+                y: boxBottomY,
                 width: width - 80,
-                height: boxTopY - 40, // Height from Y=40 to Y=293 (253 points)
+                height: boxTopY - boxBottomY,
                 borderColor: colorPrimary,
                 borderWidth: 1
-                });
-            }
+            });
+        }
 
         if (pageNum === 2) {
             // PAGE 2 HEADER
@@ -1520,34 +1987,47 @@
                 x: Math.round(width * 0.25), y: height - 80, font: fontBold, size: 10, color: colorDark
             });
 
-            // Declaration boilerplate text
-            const declarationText = 
-                "I hereby declare that the operating surgeon and clinical staff have fully explained the nature of my diagnosis, " +
-                "the proposed surgery, the intended benefits, and the alternative options available. I have read (or had read " +
-                "to me in my native language) all the specific risks, including the possibilities of urosepsis, organ injury, " +
-                "the critical need for timely stent removal/exchange, and the potential for intraoperative contingencies including " +
-                "conversion to open surgery. I sign this consent voluntarily, taking full personal responsibility for my medical follow-ups.";
-            
-            const wrappedDecl = wrapText(declarationText, 70);
-            let declY = height - 120;
-            wrappedDecl.forEach(line => {
-                page.drawText(line, { x: 40, y: declY, font: font, size: 9, color: colorDark });
-                declY -= 13;
+            // 1. Page 2 complications overflow box
+            const boxTopY2 = Math.round(height * (1 - (calib.boxY2 / 100)));
+            const boxBottomY2 = Math.round(height * (1 - (calib.boxBottom2 / 100)));
+            page.drawRectangle({
+                x: 40,
+                y: boxBottomY2,
+                width: width - 80,
+                height: boxTopY2 - boxBottomY2,
+                borderColor: colorPrimary,
+                borderWidth: 1
+            });
+            page.drawText("COMPLICATIONS (CONTINUED FROM PAGE 1):", {
+                x: 45, y: boxTopY2 - 12, font: fontBold, size: 8, color: colorGray
             });
 
-            // Signature block placement (always at bottom, sigY = 77%)
-            const sigY = Math.round(height * (1 - 0.77)); // Y=166
+            // 2. Symmetrical verification blocks matching page2.jpg lines
+            const sigY = Math.round(height * (1 - (calib.sigY / 100)));
             
-            // Draw lines and labels on the dynamic template
-            page.drawText("Patient / Legal Guardian Signature:", { x: 40, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
-            page.drawLine({ start: { x: 40, y: sigY + 40 }, end: { x: 240, y: sigY + 40 }, color: colorPrimary, thickness: 1 });
-            page.drawText("Name:", { x: 40, y: sigY + 24, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 70, y: sigY + 22 }, end: { x: 240, y: sigY + 22 }, color: colorGray, thickness: 0.5 });
+            // Left Column (Patient)
+            page.drawText("Patient / Relative's Signature:", { x: 40, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
+            page.drawText("Name:", { x: 40, y: sigY - 30, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 70, y: sigY - 32 }, end: { x: 240, y: sigY - 32 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Relationship:", { x: 40, y: sigY - 55, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 100, y: sigY - 57 }, end: { x: 240, y: sigY - 57 }, color: colorGray, thickness: 0.5 });
+            page.drawText("DATE:", { x: 40, y: sigY - 80, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 70, y: sigY - 82 }, end: { x: 240, y: sigY - 82 }, color: colorGray, thickness: 0.5 });
+            page.drawText("TIME:", { x: 40, y: sigY - 105, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: 70, y: sigY - 107 }, end: { x: 240, y: sigY - 107 }, color: colorGray, thickness: 0.5 });
 
-            page.drawText("Witness / Postgraduate Clinician:", { x: 300, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
-            page.drawLine({ start: { x: 300, y: sigY + 40 }, end: { x: 500, y: sigY + 40 }, color: colorDark, thickness: 1 });
-            page.drawText("Date:", { x: 300, y: sigY + 24, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 330, y: sigY + 22 }, end: { x: 500, y: sigY + 22 }, color: colorGray, thickness: 0.5 });
+            // Right Column (Doctor)
+            const docSigX = Math.round(width * (calib.docSigX / 100));
+            const docLabelX = docSigX - Math.round(width * 0.12); // starts at same relative indent
+            page.drawText("Doctor's Signature:", { x: docLabelX, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
+            page.drawText("Name:", { x: docLabelX, y: sigY - 30, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 32 }, end: { x: docLabelX + 200, y: sigY - 32 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Reg. no:", { x: docLabelX, y: sigY - 55, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docLabelX + 40, y: sigY - 57 }, end: { x: docLabelX + 200, y: sigY - 57 }, color: colorGray, thickness: 0.5 });
+            page.drawText("DATE:", { x: docLabelX, y: sigY - 80, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 82 }, end: { x: docLabelX + 200, y: sigY - 82 }, color: colorGray, thickness: 0.5 });
+            page.drawText("TIME:", { x: docLabelX, y: sigY - 105, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 107 }, end: { x: docLabelX + 200, y: sigY - 107 }, color: colorGray, thickness: 0.5 });
         }
     }
 </script>
