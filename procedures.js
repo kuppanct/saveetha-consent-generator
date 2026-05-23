@@ -89,6 +89,7 @@ const URO_PROCEDURES = {
     },
     "TRUS_BIOPSY": {
         name: "Transrectal Ultrasound (TRUS) Guided Prostate Biopsy",
+        gender: "Male",
         category: "cat1",
         diagnosis: "Elevated PSA / Suspected Prostate Cancer",
         benefits: "Accurate tissue diagnosis of prostate pathology under real-time ultrasound guidance.",
@@ -104,6 +105,7 @@ const URO_PROCEDURES = {
     },
     "TRANSPERINEAL_BIOPSY": {
         name: "Transperineal Template Prostate Biopsy",
+        gender: "Male",
         category: "cat1",
         diagnosis: "Elevated PSA / Suspected Prostate Cancer / Negative previous TRUS biopsy",
         benefits: "Systematic sampling of the prostate gland through the perineum, minimizing rectal infection risk.",
@@ -132,6 +134,7 @@ const URO_PROCEDURES = {
     },
     "PARAPHIMOSIS_REDUCTION": {
         name: "Reduction of Paraphimosis",
+        gender: "Male",
         category: "cat1",
         diagnosis: "Paraphimosis (trapped retracted foreskin)",
         benefits: "Relief of penile strangulation, restoration of venous return, and prevention of glans necrosis.",
@@ -205,6 +208,7 @@ const URO_PROCEDURES = {
     },
     "TURP": {
         name: "Transurethral Resection of the Prostate (TURP)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Benign Prostatic Hyperplasia (BPH) with bladder outflow obstruction",
         benefits: "Endoscopic removal of obstructing prostate tissue to restore normal urinary flow.",
@@ -222,6 +226,7 @@ const URO_PROCEDURES = {
     },
     "CIRCUMCISION": {
         name: "Conventional / Stapler Circumcision",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Phimosis / Paraphimosis / Recurrent Balanoposthitis",
         benefits: "Surgical removal of the foreskin to eliminate tightness, infection, and poor hygiene.",
@@ -295,6 +300,7 @@ const URO_PROCEDURES = {
     },
     "TUIP": {
         name: "Transurethral Incision of the Prostate (TUIP)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Small prostate with bladder outflow obstruction",
         benefits: "Incision of the prostate and bladder neck without resecting tissue, preserving ejaculation in many.",
@@ -309,6 +315,7 @@ const URO_PROCEDURES = {
     },
     "MALE_IMPLANTS": {
         name: "Minimally Invasive Implants (Rezum / UroLift)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Benign Prostatic Hyperplasia (BPH)",
         benefits: "Preservation of sexual function and rapid relief of LUTS using steam therapy (Rezum) or mechanical clips (UroLift).",
@@ -322,6 +329,7 @@ const URO_PROCEDURES = {
     },
     "MALE_FB_REMOVAL": {
         name: "Removal of Foreign Body from Bladder / Urethra",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Intravesical / Intraurethral Foreign Body",
         benefits: "Endoscopic extraction of foreign objects to prevent bladder infection, stones, or perforation.",
@@ -885,6 +893,7 @@ const URO_PROCEDURES = {
     },
     "VVF": {
         name: "Vesicovaginal Fistula (VVF) Repair",
+        gender: "Female",
         category: "cat4",
         diagnosis: "Vesicovaginal Fistula (abnormal tract between bladder and vagina)",
         benefits: "Surgical closure of the fistula to cure continuous urine leakage through the vagina.",
@@ -902,6 +911,7 @@ const URO_PROCEDURES = {
     },
     "URETEROVAGINAL_FISTULA": {
         name: "Ureterovaginal Fistula Repair",
+        gender: "Female",
         category: "cat4",
         diagnosis: "Ureterovaginal Fistula (leakage from ureter into vagina)",
         benefits: "Repairing the ureteral leak (usually via ureteral reimplantation) to stop vaginal urine leak and protect the kidney.",
@@ -918,6 +928,7 @@ const URO_PROCEDURES = {
     },
     "SLING": {
         name: "Mid-Urethral Sling (TVT / TOT)",
+        gender: "Female",
         category: "cat4",
         diagnosis: "Female Stress Urinary Incontinence (SUI)",
         benefits: "Placing a synthetic mesh sling under the urethra to support it and cure leakage during coughing, sneezing, or exercise.",
@@ -977,6 +988,7 @@ const URO_PROCEDURES = {
     },
     "DORSAL_SLIT": {
         name: "Dorsal Slit of Prepuce",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Severe Phimosis with balanitis / Paraphimosis",
         benefits: "Incising the dorsal foreskin to relieve constriction and allow exposure of the glans penis.",
@@ -989,6 +1001,7 @@ const URO_PROCEDURES = {
     },
     "VASECTOMY": {
         name: "Bilateral No-Scalpel Vasectomy (NSV)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Desire for permanent surgical contraception",
         benefits: "Highly effective, permanent sterilization via a minimally invasive puncture technique.",
@@ -1003,6 +1016,7 @@ const URO_PROCEDURES = {
     },
     "VASOVASOSTOMY": {
         name: "Microsurgical Vasovasostomy (Vasectomy Reversal)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Post-vasectomy infertility / Desire to restore fertility",
         benefits: "Reconnecting the severed ends of the vas deferens using microsurgery to restore sperm in semen.",
@@ -1016,6 +1030,7 @@ const URO_PROCEDURES = {
     },
     "VASOEPIDIDYMOSTOMY": {
         name: "Microsurgical Vasoepididymostomy",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Epididymal obstruction / Failed vasovasostomy",
         benefits: "Anastomosing the vas deferens directly to an epididymal tubule to bypass blockages.",
@@ -1029,6 +1044,7 @@ const URO_PROCEDURES = {
     },
     "MICROSURGICAL_VARICOCELECTOMY": {
         name: "Microsurgical Varicocelectomy",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Clinical Varicocele with male subfertility or chronic testicular pain",
         benefits: "Ligating dilated testicular veins under microscope to improve semen parameters and relieve pain.",
@@ -1044,6 +1060,7 @@ const URO_PROCEDURES = {
     },
     "LAP_VARICOCELECTOMY": {
         name: "Laparoscopic / Open Varicocelectomy",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Varicocele with subfertility or scrotal pain",
         benefits: "Ligating internal spermatic veins via abdominal laparoscopic or open approach.",
@@ -1060,6 +1077,7 @@ const URO_PROCEDURES = {
     },
     "TESE": {
         name: "Testicular Sperm Extraction (TESE / Micro-TESE)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Azoospermia (Non-obstructive or Obstructive)",
         benefits: "Retrieving sperm directly from testicular tissue for use in ICSI/IVF.",
@@ -1072,6 +1090,7 @@ const URO_PROCEDURES = {
     },
     "MESA": {
         name: "Microsurgical Epididymal Sperm Aspiration (MESA)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Obstructive Azoospermia",
         benefits: "Microsurgical retrieval of large quantities of high-quality sperm from the epididymis.",
@@ -1084,6 +1103,7 @@ const URO_PROCEDURES = {
     },
     "PESA": {
         name: "Percutaneous Epididymal Sperm Aspiration (PESA)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Obstructive Azoospermia",
         benefits: "Needle aspiration of sperm from the epididymis under local anesthesia.",
@@ -1095,6 +1115,7 @@ const URO_PROCEDURES = {
     },
     "TESTICULAR_BIOPSY": {
         name: "Testicular Biopsy",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Azoospermia / Suspected intratubular germ cell neoplasia",
         benefits: "Diagnostic histology of testicular tissue to evaluate spermatogenesis.",
@@ -1107,6 +1128,7 @@ const URO_PROCEDURES = {
     },
     "SEMIRIGID_PROSTHESIS": {
         name: "Malleable (Semi-Rigid) Penile Prosthesis Implantation",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Severe, refractory Erectile Dysfunction (ED)",
         benefits: "Surgical implantation of bendable rods in the corpora cavernosa to allow reliable mechanical erections.",
@@ -1123,6 +1145,7 @@ const URO_PROCEDURES = {
     },
     "INFLATABLE_PROSTHESIS": {
         name: "Three-Piece Inflatable Penile Prosthesis (IPP) Implantation",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Refractory Erectile Dysfunction",
         benefits: "Implantation of fluid-filled cylinders, pump, and reservoir to provide highly natural-appearing erections.",
@@ -1139,6 +1162,7 @@ const URO_PROCEDURES = {
     },
     "PEYRONIES_CORRECTION": {
         name: "Surgical Correction of Peyronie's Disease (Plication / Grafting)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Peyronie's Disease (penile curvature causing painful or impossible intercourse)",
         benefits: "Surgical straightening of the penis by plicating the convex side or grafting the concave side.",
@@ -1153,6 +1177,7 @@ const URO_PROCEDURES = {
     },
     "HYDROCELE_EXCISION": {
         name: "Excision of Hydrocele (Lord's / Jaboulay's Repair)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Hydrocele (fluid accumulation around the testis)",
         benefits: "Excision or plication of the tunica vaginalis sac to permanently cure scrotal swelling.",
@@ -1167,6 +1192,7 @@ const URO_PROCEDURES = {
     },
     "SPERMATOCELECTOMY": {
         name: "Spermatocelectomy / Epididymectomy",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Spermatocele / Epididymal cyst / Chronic epididymitis",
         benefits: "Removal of the epididymal cyst or the entire epididymis to relieve swelling or chronic infection.",
@@ -1179,6 +1205,7 @@ const URO_PROCEDURES = {
     },
     "ORCHIDOPEXY": {
         name: "Orchidopexy (for Undescended Testis / Testicular Torsion)",
+        gender: "Male",
         category: "cat5",
         diagnosis: "Cryptorchidism (undescended testis) / Testicular Torsion",
         benefits: "Surgical mobilization and anchoring of the testis in the scrotum to preserve fertility and prevent torsion.",
@@ -1192,6 +1219,7 @@ const URO_PROCEDURES = {
     },
     "RADICAL_PROSTATECTOMY": {
         name: "Radical Prostatectomy (Open / Laparoscopic / Robotic-Assisted)",
+        gender: "Male",
         category: "cat6",
         diagnosis: "Localized Prostate Cancer",
         benefits: "Surgical removal of the prostate, seminal vesicles, and surrounding tissue to cure prostate cancer.",
@@ -1352,6 +1380,7 @@ const URO_PROCEDURES = {
     },
     "PENECTOMY": {
         name: "Partial Penectomy / Total Penectomy with Perineal Urethrostomy",
+        gender: "Male",
         category: "cat6",
         diagnosis: "Penile Cancer",
         benefits: "Surgical removal of the diseased portion of the penis to clear penile cancer.",
