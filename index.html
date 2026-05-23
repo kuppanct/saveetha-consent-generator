@@ -1074,7 +1074,7 @@
     // Calibration Helpers
     function loadCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
 
         const saved = localStorage.getItem(storageKey);
@@ -1120,13 +1120,13 @@
         calib[key] = val;
         
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
         localStorage.setItem(storageKey, JSON.stringify(calib));
     }
 
     function resetCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta" : "uro-calibration-en";
+        const storageKey = isTamil ? "uro-calibration-ta-v2" : "uro-calibration-en-v2";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
         
         calib = { ...defaults };
