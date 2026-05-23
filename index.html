@@ -882,7 +882,7 @@
 </div>
 
 <!-- Load procedures database script -->
-<script src="procedures.js?v=9"></script>
+<script src="procedures.js?v=10"></script>
 
 <script>
     // Global State
@@ -1704,12 +1704,13 @@
             // DRAW THE COMPLICATIONS BOX TEXT
             const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
             const boxX = Math.round(page1Width * (calib.boxX / 100));
-            const boxWidthPoints = page1Width - (boxX * 2);
+            // Utilize more space on the right side of the page (4% right margin instead of centering)
+            const boxWidthPoints = page1Width - boxX - Math.round(page1Width * 0.04);
             
             // Wrap text based on width - utilizing the entire right margin by using correct character widths
-            const contentFontSize = 7.6;
-            const contentLineHeight = 9.6;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 5.0 : (contentFontSize * 0.46)));
+            const contentFontSize = 7.1;
+            const contentLineHeight = 9.0;
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.8 : (contentFontSize * 0.45)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
@@ -1727,6 +1728,7 @@
                     line.startsWith("SPECIFIC RISKS & COMPLICATIONS") || 
                     line.startsWith("GENERAL MAJOR SURGICAL RISKS:") || 
                     line.startsWith("EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:") ||
+                    line.startsWith("SPECIAL HIGH-RISK CONSENT ADDENDUM:") ||
                     line.startsWith("CRITICAL DECLARATION REGARDING")) {
                     textFont = fontBold;
                 }
