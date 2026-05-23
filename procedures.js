@@ -1488,7 +1488,11 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
 
     if (procKey !== "OTHER" && procedure) {
         diagnosis = customDiag || procedure.diagnosis;
-        procedurePlanned = customProc || procedure.name;
+        if (procKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" || procKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED") {
+            procedurePlanned = customProc || "Cystoscopy and Proceed";
+        } else {
+            procedurePlanned = customProc || procedure.name;
+        }
         benefits = procedure.benefits;
         alternatives = procedure.alternatives;
         specificRisks = [...procedure.risks];
@@ -1527,20 +1531,21 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     text += `ALTERNATIVES DISCUSSED & REFUSED:\n${alternatives}\n\n`;
     
     text += `SPECIFIC RISKS & COMPLICATIONS (Read and Explained):\n`;
-    text += `I understand that all surgeries carry risks. Specific to this procedure, I have been informed of the following:\n`;
+    text += `I understand that all surgeries carry risks. Specific to this procedure, I have been informed of the following risks (which I accept): `;
     
-    specificRisks.forEach((risk, index) => {
-        text += `${index + 1}. ${risk}\n`;
-    });
-
-    let riskIndex = specificRisks.length;
+    const formattedRisks = specificRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ");
+    text += formattedRisks + ".\n\n";
 
     if (isMajor) {
-        text += `${riskIndex + 1}. Bleeding & Hemorrhage: Risk of bleeding during or after surgery, which may require blood transfusion, clot evacuation, or surgical re-exploration.\n`;
-        text += `${riskIndex + 2}. Severe Infection & Sepsis: Risk of wound infection, deep pelvic infection, urinary tract infection, or systemic urosepsis which can progress to life-threatening septic shock.\n`;
-        text += `${riskIndex + 3}. Thromboembolism: Risk of deep vein thrombosis (DVT) in the legs or pulmonary embolism (blood clot in the lungs), which can be fatal.\n`;
-        text += `${riskIndex + 4}. Anesthesia Risks: Risks associated with general, spinal, or epidural anesthesia including allergic reaction, respiratory failure, cardiac arrest, or death.\n`;
-        text += `${riskIndex + 5}. Adjacent Organ Injury: Risk of accidental damage to surrounding structures (bowel, bladder, ureter, nerves, major blood vessels) requiring immediate repair during the surgery.\n`;
+        text += `GENERAL MAJOR SURGICAL RISKS: `;
+        const majorRisks = [
+            "Bleeding & Hemorrhage: Risk of bleeding during or after surgery, which may require blood transfusion, clot evacuation, or surgical re-exploration",
+            "Severe Infection & Sepsis: Risk of wound infection, deep pelvic infection, urinary tract infection, or systemic urosepsis which can progress to life-threatening septic shock",
+            "Thromboembolism: Risk of deep vein thrombosis (DVT) in the legs or pulmonary embolism (blood clot in the lungs), which can be fatal",
+            "Anesthesia Risks: Risks associated with general, spinal, or epidural anesthesia including allergic reaction, respiratory failure, cardiac arrest, or death",
+            "Adjacent Organ Injury: Risk of accidental damage to surrounding structures (bowel, bladder, ureter, nerves, major blood vessels) requiring immediate repair during the surgery"
+        ];
+        text += majorRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ") + ".\n\n";
     }
 
     text += `\nEXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:\n`;

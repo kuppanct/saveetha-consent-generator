@@ -657,8 +657,8 @@
 <div class="app-wrapper">
     <header>
         <div class="logo-section">
-            <h1>Saveetha Urology</h1>
-            <p>watertight consent generator</p>
+            <h1>Saveetha Urology Consent Generator</h1>
+            <p>Watertight Medicolegal Overlay System</p>
         </div>
         <div class="controls">
             <button class="theme-toggle" id="themeBtn" title="Toggle Theme" aria-label="Toggle Theme">
@@ -678,10 +678,6 @@
         <button class="tab-btn" onclick="switchTab('calibration')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
             Calibration
-        </button>
-        <button class="tab-btn" onclick="switchTab('help')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Help
         </button>
     </div>
 
@@ -912,6 +908,8 @@
                     <div id="calib_over_box2" class="calib-marker-box" style="border: 1.5px dashed #af52de; background: rgba(175, 82, 222, 0.08); color: #af52de;">Complications Box (Page 2)</div>
                     <div id="calib_over_sig" class="calib-marker-box" style="border: 1.5px dashed #007aff; background: rgba(0, 122, 255, 0.08); color: #007aff; transform: translate(-50%, -50%);">Pt Sign</div>
                     <div id="calib_over_docSig" class="calib-marker-box" style="border: 1.5px dashed #34c759; background: rgba(52, 199, 89, 0.08); color: #34c759; transform: translate(-50%, -50%);">Surgeon Sign</div>
+                    <div id="calib_over_ptSigDetails" class="calib-marker-box" style="border: 1.5px dashed #007aff; background: rgba(0, 122, 255, 0.04); color: #007aff; font-size: 7px; transform: translate(0, 0); display: flex; align-items: center; justify-content: center; text-align: center;">Pt Details</div>
+                    <div id="calib_over_docSigDetails" class="calib-marker-box" style="border: 1.5px dashed #34c759; background: rgba(52, 199, 89, 0.04); color: #34c759; font-size: 7px; transform: translate(0, 0); display: flex; align-items: center; justify-content: center; text-align: center;">Surgeon Details</div>
                 </div>
             </div>
 
@@ -943,12 +941,20 @@
 
             <h3>Page 1 - Paragraph Blanks</h3>
             <div class="calibration-row">
-                <label>Diagnosis Y-axis (% from top) <span class="value" id="val_diagY">39.8%</span></label>
-                <input type="range" id="cal_diagY" min="30" max="55" value="39.8" step="0.1" oninput="updateCalibValue('diagY')">
+                <label>Diagnosis X-axis (% from left) <span class="value" id="val_diagX">21.5%</span></label>
+                <input type="range" id="cal_diagX" min="5" max="90" value="21.5" step="0.5" oninput="updateCalibValue('diagX')">
             </div>
             <div class="calibration-row">
-                <label>Procedure Y-axis (% from top) <span class="value" id="val_procY">41.6%</span></label>
-                <input type="range" id="cal_procY" min="30" max="55" value="41.6" step="0.1" oninput="updateCalibValue('procY')">
+                <label>Diagnosis Y-axis (% from top) <span class="value" id="val_diagY">30%</span></label>
+                <input type="range" id="cal_diagY" min="10" max="95" value="30" step="0.1" oninput="updateCalibValue('diagY')">
+            </div>
+            <div class="calibration-row">
+                <label>Procedure X-axis (% from left) <span class="value" id="val_procX">32%</span></label>
+                <input type="range" id="cal_procX" min="5" max="90" value="32" step="0.5" oninput="updateCalibValue('procX')">
+            </div>
+            <div class="calibration-row">
+                <label>Procedure Y-axis (% from top) <span class="value" id="val_procY">32.7%</span></label>
+                <input type="range" id="cal_procY" min="10" max="95" value="32.7" step="0.1" oninput="updateCalibValue('procY')">
             </div>
 
             <h3>Page 1 - Complications Box Limit</h3>
@@ -999,40 +1005,26 @@
                 <input type="range" id="cal_docSigScale" min="5" max="25" value="12" step="1" oninput="updateCalibValue('docSigScale')">
             </div>
 
+            <h3>Page 2 - Signature Verification Text</h3>
+            <div class="calibration-row">
+                <label>Details Y-axis (% from top) <span class="value" id="val_sigDetailsY">76%</span></label>
+                <input type="range" id="cal_sigDetailsY" min="50" max="95" value="76" step="0.5" oninput="updateCalibValue('sigDetailsY')">
+            </div>
+            <div class="calibration-row">
+                <label>Details Spacing (% of height) <span class="value" id="val_sigDetailsSpacing">2.2%</span></label>
+                <input type="range" id="cal_sigDetailsSpacing" min="0.5" max="6" value="2.2" step="0.1" oninput="updateCalibValue('sigDetailsSpacing')">
+            </div>
+            <div class="calibration-row">
+                <label>Patient Details X-axis (% from left) <span class="value" id="val_ptSigDetailsX">9%</span></label>
+                <input type="range" id="cal_ptSigDetailsX" min="2" max="45" value="9" oninput="updateCalibValue('ptSigDetailsX')">
+            </div>
+            <div class="calibration-row">
+                <label>Surgeon Details X-axis (% from left) <span class="value" id="val_docSigDetailsX">63%</span></label>
+                <input type="range" id="cal_docSigDetailsX" min="40" max="90" value="63" oninput="updateCalibValue('docSigDetailsX')">
+            </div>
+
             <div style="display:flex; gap:12px; margin-top:20px;">
                 <button class="btn btn-secondary" onclick="resetCalibration()" style="flex:1;">Reset Defaults</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- HELP TAB -->
-    <div id="helpTab" class="tab-content">
-        <div class="app-card">
-            <h2>Urology Consent Help & Guide</h2>
-            
-            <div class="help-section">
-                <h4>1. Out-of-the-Box Fallback System</h4>
-                <p>If you don't have <code>page1.jpg</code> or <code>page2.jpg</code> uploaded to your server/repository, the app will automatically detect it and draw a clean, professional, high-resolution document outline dynamically in the PDF. This allows you to print immediately or test the app anywhere.</p>
-            </div>
-
-            <div class="help-section">
-                <h4>2. Uploading Custom Images</h4>
-                <p>To use the actual official Saveetha Consent Forms (English or Tamil versions), simply save your forms as JPGs and name them exactly:</p>
-                <ul>
-                    <li>English version: <code>page1.jpg</code> and <code>page2.jpg</code></li>
-                    <li>Tamil version: <code>page1_tamil.jpg</code> and <code>page2_tamil.jpg</code></li>
-                </ul>
-                <p>Upload these files to the same directory on GitHub or your web server where this <code>index.html</code> is hosted.</p>
-            </div>
-
-            <div class="help-section">
-                <h4>3. Calibration & Scanning offsets</h4>
-                <p>Since scan dimensions vary (e.g. from camera captures or scanners), use the <strong>Calibration</strong> tab. Simply slide the markers to position where the text sits. The values are percentages of the image dimensions to work on both high-resolution scans and light phone snapshots. Stamped signatures will follow these boundaries perfectly.</p>
-            </div>
-
-            <div class="help-section">
-                <h4>4. Data Security (No-Cloud/HIPAA Compliant)</h4>
-                <p>This application is 100% client-side. The PDF is generated entirely in your phone's memory. No patient names, PIDs, medical details, or signatures are sent over the network or saved to any cloud database. When you close or refresh the tab, all inputs are wiped instantly.</p>
             </div>
         </div>
     </div>
@@ -1057,18 +1049,24 @@
         ageX: 61,
         genderX: 76,
         pidX: 20,
-        diagY: 39.8,
-        procY: 41.6,
-        boxX: 9,
-        boxY: 48.0, // Y axis from TOP for complications box Page 1
-        boxBottom: 85.5, // Y axis limit from TOP for Page 1 complications box
+        diagX: 21.5,
+        diagY: 30.0,
+        procX: 32.0,
+        procY: 32.7,
+        boxX: 5,
+        boxY: 46.0, // Y axis from TOP for complications box Page 1
+        boxBottom: 87.0, // Y axis limit from TOP for Page 1 complications box
         boxY2: 13.0, // Y axis from TOP for Page 2 complications box
         boxBottom2: 62.5, // Y axis limit from TOP for Page 2 complications box
-        sigX: 23, // X axis for signature (Left side of page 2)
-        sigY: 69, // Y axis from TOP for signature (Bottom of page 2)
+        sigX: 21, // X axis for signature (Left side of page 2)
+        sigY: 71, // Y axis from TOP for signature (Bottom of page 2)
         sigScale: 1.2,
         docSigX: 75, // Doctor signature X axis
-        docSigScale: 1.2
+        docSigScale: 1.2,
+        sigDetailsY: 76.0,
+        sigDetailsSpacing: 2.2,
+        ptSigDetailsX: 9.0,
+        docSigDetailsX: 63.0
     };
 
     const defaultCalibrationTA = {
@@ -1078,18 +1076,24 @@
         ageX: 61,
         genderX: 76,
         pidX: 20,
-        diagY: 39.8,
-        procY: 41.6,
-        boxX: 9,
-        boxY: 48.0, // Y axis from TOP for complications box Page 1
-        boxBottom: 85.5, // Y axis limit from TOP for Page 1 complications box
+        diagX: 21.5,
+        diagY: 30.0,
+        procX: 32.0,
+        procY: 32.7,
+        boxX: 5,
+        boxY: 46.0, // Y axis from TOP for complications box Page 1
+        boxBottom: 87.0, // Y axis limit from TOP for Page 1 complications box
         boxY2: 13.0, // Y axis from TOP for Page 2 complications box
         boxBottom2: 62.5, // Y axis limit from TOP for Page 2 complications box
-        sigX: 23, // X axis for signature (Left side of page 2)
-        sigY: 69, // Y axis from TOP for signature (Bottom of page 2)
+        sigX: 21, // X axis for signature (Left side of page 2)
+        sigY: 71, // Y axis from TOP for signature (Bottom of page 2)
         sigScale: 1.2,
         docSigX: 75,
-        docSigScale: 1.2
+        docSigScale: 1.2,
+        sigDetailsY: 76.0,
+        sigDetailsSpacing: 2.2,
+        ptSigDetailsX: 9.0,
+        docSigDetailsX: 63.0
     };
 
     // Load Calibration from Local Storage or defaults (v3)
@@ -1407,7 +1411,7 @@
     // Calibration Helpers
     function loadCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v4" : "uro-calibration-en-v4";
+        const storageKey = isTamil ? "uro-calibration-ta-v5" : "uro-calibration-en-v5";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
 
         const saved = localStorage.getItem(storageKey);
@@ -1461,7 +1465,7 @@
         calib[key] = val;
         
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v4" : "uro-calibration-en-v4";
+        const storageKey = isTamil ? "uro-calibration-ta-v5" : "uro-calibration-en-v5";
         localStorage.setItem(storageKey, JSON.stringify(calib));
 
         updateVisualCalibPreview();
@@ -1469,7 +1473,7 @@
 
     function resetCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v4" : "uro-calibration-en-v4";
+        const storageKey = isTamil ? "uro-calibration-ta-v5" : "uro-calibration-en-v5";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
         
         calib = { ...defaults };
@@ -1492,7 +1496,7 @@
         
         // Toggle markers visibility based on active preview page
         const p1Markers = ["calib_over_ptName", "calib_over_ptAge", "calib_over_ptGender", "calib_over_ptPid", "calib_over_ptDate", "calib_over_ptSurgeon", "calib_over_ptWard", "calib_over_diag", "calib_over_proc", "calib_over_box"];
-        const p2Markers = ["calib_over_box2", "calib_over_sig", "calib_over_docSig"];
+        const p2Markers = ["calib_over_box2", "calib_over_sig", "calib_over_docSig", "calib_over_ptSigDetails", "calib_over_docSigDetails"];
         
         p1Markers.forEach(id => {
             const el = document.getElementById(id);
@@ -1555,13 +1559,13 @@
         const calibOverDiag = document.getElementById("calib_over_diag");
         if (calibOverDiag) {
             calibOverDiag.style.top = calib.diagY + "%";
-            calibOverDiag.style.left = "21.5%";
+            calibOverDiag.style.left = calib.diagX + "%";
         }
         
         const calibOverProc = document.getElementById("calib_over_proc");
         if (calibOverProc) {
             calibOverProc.style.top = calib.procY + "%";
-            calibOverProc.style.left = "32%";
+            calibOverProc.style.left = calib.procX + "%";
         }
         
         const box = document.getElementById("calib_over_box");
@@ -1595,6 +1599,22 @@
             docSig.style.left = calib.docSigX + "%";
             docSig.style.width = (24 * calib.docSigScale) + "%";
             docSig.style.height = (8 * calib.docSigScale) + "%";
+        }
+
+        const ptSigDet = document.getElementById("calib_over_ptSigDetails");
+        if (ptSigDet) {
+            ptSigDet.style.top = calib.sigDetailsY + "%";
+            ptSigDet.style.left = calib.ptSigDetailsX + "%";
+            ptSigDet.style.width = "30%";
+            ptSigDet.style.height = (4 * calib.sigDetailsSpacing) + "%";
+        }
+
+        const docSigDet = document.getElementById("calib_over_docSigDetails");
+        if (docSigDet) {
+            docSigDet.style.top = calib.sigDetailsY + "%";
+            docSigDet.style.left = calib.docSigDetailsX + "%";
+            docSigDet.style.width = "30%";
+            docSigDet.style.height = (4 * calib.sigDetailsSpacing) + "%";
         }
     }
 
@@ -1777,7 +1797,11 @@
             const sidePrefix = (side && side !== "N/A") ? (side + " ") : "";
 
             if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
-                procedurePlanned = sidePrefix + window.URO_PROCEDURES[selectedProcedureKey].name;
+                if (selectedProcedureKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" || selectedProcedureKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED") {
+                    procedurePlanned = sidePrefix + "Cystoscopy and Proceed";
+                } else {
+                    procedurePlanned = sidePrefix + window.URO_PROCEDURES[selectedProcedureKey].name;
+                }
             } else {
                 procedurePlanned = sidePrefix + document.getElementById("customProc").value;
             }
@@ -1792,8 +1816,10 @@
             // Map relative placement for paragraph fields
             const inlineY1 = Math.round(page1Height * (1 - (calib.diagY / 100)));
             const inlineY2 = Math.round(page1Height * (1 - (calib.procY / 100)));
-            page1.drawText(diagnosis, { x: Math.round(page1Width * 0.215), y: inlineY1, ...inlineTextArgs });
-            page1.drawText(procedurePlanned, { x: Math.round(page1Width * 0.32), y: inlineY2, ...inlineTextArgs });
+            const inlineX1 = Math.round(page1Width * (calib.diagX / 100));
+            const inlineX2 = Math.round(page1Width * (calib.procX / 100));
+            page1.drawText(diagnosis, { x: inlineX1, y: inlineY1, ...inlineTextArgs });
+            page1.drawText(procedurePlanned, { x: inlineX2, y: inlineY2, ...inlineTextArgs });
 
             // DRAW THE COMPLICATIONS BOX TEXT
             const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
@@ -1820,6 +1846,7 @@
                     line.startsWith("BENEFITS EXPECTED:") || 
                     line.startsWith("ALTERNATIVES DISCUSSED & REFUSED:") || 
                     line.startsWith("SPECIFIC RISKS & COMPLICATIONS") || 
+                    line.startsWith("GENERAL MAJOR SURGICAL RISKS:") || 
                     line.startsWith("EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:") ||
                     line.startsWith("CRITICAL DECLARATION REGARDING")) {
                     textFont = fontBold;
@@ -1890,29 +1917,33 @@
             // WRITE THE TEXT VALUES FOR BOTH SIGNATURE BLOCKS ON PAGE 2
             const sigTextArgs = { font: fontBold, size: Math.max(8, vitalFontSize - 2), color: rgb(0, 0, 0) };
             
-            // Patient Column
-            const ptTextX = sigX - Math.round(page2Width * 0.12);
+            // Draw text values using the new calibration properties
+            const detailsY = Math.round(page2Height * (1 - (calib.sigDetailsY / 100)));
+            const detailsSpacing = Math.round(page2Height * (calib.sigDetailsSpacing / 100));
+            const ptTextX = Math.round(page2Width * (calib.ptSigDetailsX / 100));
+            const docTextX = Math.round(page2Width * (calib.docSigDetailsX / 100));
+
+            // Patient Column Details
             const valSignerName = document.getElementById("signerName").value || ptName;
             const valSignerRelation = document.getElementById("signerRelation").value || "Self";
             const valSignerDate = document.getElementById("signerDate").value || ptDate;
             const valSignerTime = document.getElementById("signerTime").value || "";
 
-            page2.drawText(valSignerName, { x: ptTextX + 35, y: sigY - 30, ...sigTextArgs });
-            page2.drawText(valSignerRelation, { x: ptTextX + 60, y: sigY - 55, ...sigTextArgs });
-            page2.drawText(valSignerDate, { x: ptTextX + 35, y: sigY - 80, ...sigTextArgs });
-            page2.drawText(valSignerTime, { x: ptTextX + 35, y: sigY - 105, ...sigTextArgs });
+            page2.drawText(valSignerName, { x: ptTextX + 35, y: detailsY, ...sigTextArgs });
+            page2.drawText(valSignerRelation, { x: ptTextX + 60, y: detailsY - detailsSpacing, ...sigTextArgs });
+            page2.drawText(valSignerDate, { x: ptTextX + 35, y: detailsY - 2 * detailsSpacing, ...sigTextArgs });
+            page2.drawText(valSignerTime, { x: ptTextX + 35, y: detailsY - 3 * detailsSpacing, ...sigTextArgs });
 
-            // Doctor Column
-            const docTextX = docSigX - Math.round(page2Width * 0.12);
+            // Doctor Column Details
             const valDocName = document.getElementById("surgeonName").value || ptConsultant;
             const valDocReg = document.getElementById("docRegNo").value || "";
             const valDocDate = document.getElementById("docDate").value || ptDate;
             const valDocTime = document.getElementById("docTime").value || "";
 
-            page2.drawText(valDocName, { x: docTextX + 35, y: sigY - 30, ...sigTextArgs });
-            page2.drawText(valDocReg, { x: docTextX + 45, y: sigY - 55, ...sigTextArgs });
-            page2.drawText(valDocDate, { x: docTextX + 35, y: sigY - 80, ...sigTextArgs });
-            page2.drawText(valDocTime, { x: docTextX + 35, y: sigY - 105, ...sigTextArgs });
+            page2.drawText(valDocName, { x: docTextX + 35, y: detailsY, ...sigTextArgs });
+            page2.drawText(valDocReg, { x: docTextX + 45, y: detailsY - detailsSpacing, ...sigTextArgs });
+            page2.drawText(valDocDate, { x: docTextX + 35, y: detailsY - 2 * detailsSpacing, ...sigTextArgs });
+            page2.drawText(valDocTime, { x: docTextX + 35, y: detailsY - 3 * detailsSpacing, ...sigTextArgs });
 
             // Save and download PDF
             const pdfBytes = await pdfDoc.save();
@@ -2034,30 +2065,32 @@
 
             // 2. Symmetrical verification blocks matching page2.jpg lines
             const sigY = Math.round(height * (1 - (calib.sigY / 100)));
-            
+            const detailsY = Math.round(height * (1 - (calib.sigDetailsY / 100)));
+            const detailsSpacing = Math.round(height * (calib.sigDetailsSpacing / 100));
+            const ptTextX = Math.round(width * (calib.ptSigDetailsX / 100));
+            const docTextX = Math.round(width * (calib.docSigDetailsX / 100));
+
             // Left Column (Patient)
-            page.drawText("Patient / Relative's Signature:", { x: 40, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
-            page.drawText("Name:", { x: 40, y: sigY - 30, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 70, y: sigY - 32 }, end: { x: 240, y: sigY - 32 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Relationship:", { x: 40, y: sigY - 55, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 100, y: sigY - 57 }, end: { x: 240, y: sigY - 57 }, color: colorGray, thickness: 0.5 });
-            page.drawText("DATE:", { x: 40, y: sigY - 80, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 70, y: sigY - 82 }, end: { x: 240, y: sigY - 82 }, color: colorGray, thickness: 0.5 });
-            page.drawText("TIME:", { x: 40, y: sigY - 105, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: 70, y: sigY - 107 }, end: { x: 240, y: sigY - 107 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Patient / Relative's Signature:", { x: ptTextX, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
+            page.drawText("Name:", { x: ptTextX, y: detailsY, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 2 }, end: { x: ptTextX + 180, y: detailsY - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Relationship:", { x: ptTextX, y: detailsY - detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: ptTextX + 55, y: detailsY - detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("DATE:", { x: ptTextX, y: detailsY - 2 * detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 2 * detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - 2 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("TIME:", { x: ptTextX, y: detailsY - 3 * detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 3 * detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - 3 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
 
             // Right Column (Doctor)
-            const docSigX = Math.round(width * (calib.docSigX / 100));
-            const docLabelX = docSigX - Math.round(width * 0.12); // starts at same relative indent
-            page.drawText("Doctor's Signature:", { x: docLabelX, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
-            page.drawText("Name:", { x: docLabelX, y: sigY - 30, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 32 }, end: { x: docLabelX + 200, y: sigY - 32 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Reg. no:", { x: docLabelX, y: sigY - 55, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docLabelX + 40, y: sigY - 57 }, end: { x: docLabelX + 200, y: sigY - 57 }, color: colorGray, thickness: 0.5 });
-            page.drawText("DATE:", { x: docLabelX, y: sigY - 80, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 82 }, end: { x: docLabelX + 200, y: sigY - 82 }, color: colorGray, thickness: 0.5 });
-            page.drawText("TIME:", { x: docLabelX, y: sigY - 105, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docLabelX + 30, y: sigY - 107 }, end: { x: docLabelX + 200, y: sigY - 107 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Doctor's Signature:", { x: docTextX, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
+            page.drawText("Name:", { x: docTextX, y: detailsY, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 2 }, end: { x: docTextX + 180, y: detailsY - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("Reg. no:", { x: docTextX, y: detailsY - detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docTextX + 40, y: detailsY - detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("DATE:", { x: docTextX, y: detailsY - 2 * detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 2 * detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - 2 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            page.drawText("TIME:", { x: docTextX, y: detailsY - 3 * detailsSpacing, font: font, size: 8, color: colorGray });
+            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 3 * detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - 3 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
         }
     }
 </script>
