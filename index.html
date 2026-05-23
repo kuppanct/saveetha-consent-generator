@@ -1792,7 +1792,7 @@
             // 0.50 is the balanced ratio: 0.42 caused overflow, 0.58 was too conservative
             const contentFontSize = 6.8;
             const contentLineHeight = 8.5;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.2 : (contentFontSize * 0.50)));
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.2 : (contentFontSize * 0.47)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
