@@ -1855,7 +1855,6 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     
     const formattedRisks = specificRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ");
     text += formattedRisks + ".\n";
-
     if (isMajor) {
         text += `GENERAL MAJOR SURGICAL RISKS: `;
         const majorRisks = [
@@ -1867,8 +1866,7 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
         ];
         text += majorRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ") + ".\n";
     }
-
-    text += `\nEXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:\n`;
+    text += `EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:\n`;
     text += `I authorize the surgical team to alter the procedure ONLY IF a life-threatening emergency arises, or if stopping the surgery to obtain fresh consent would cause me medical harm. Specifically, I consent to:\n`;
     if (hasStent) {
         text += `- Abandoning the primary endoscopic procedure and deploying a DJ stent for "passive dilation" if the ureter is too tight to safely admit the instrument, acknowledging a staged procedure will be needed later.\n`;
@@ -1883,28 +1881,24 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     if (isMajor && (isUroOncOrReconstructive || procKey === "OTHER")) {
         text += `- Perform any necessary bowel resection, stoma creation, or vessel grafting if required as an emergency measure.\n`;
     }
-
     if (hasStent) {
-        text += `\nCRITICAL DECLARATION REGARDING DOUBLE-J (DJ) STENT:\n`;
+        text += `CRITICAL DECLARATION REGARDING DOUBLE-J (DJ) STENT:\n`;
         text += `1. I have been explicitly informed that a Double-J (DJ) Ureteral Stent will be placed inside my body. I understand that this stent is a TEMPORARY foreign body and DOES NOT DISSOLVE.\n`;
         text += `2. I have been informed that the stent MUST be removed or exchanged within the timeframe specified by my surgeon (typically 4 to 12 weeks, and absolutely NOT exceeding 6 months for standard stents).\n`;
         text += `3. I understand that FAILURE TO RETURN for stent removal will lead to severe, irreversible medical complications, including but not limited to: severe stent encrustation (stone formation over the tube), complete loss of kidney function (renal failure necessitating lifelong dialysis or kidney removal), life-threatening urosepsis (severe blood infection), and the necessity of highly complex open or endoscopic surgeries to extract the calcified stent.\n`;
         text += `4. I have been warned of the common, expected stent symptoms (such as mild blood in the urine, bladder spasms, pain in the back/flank during urination, and urinary frequency/urgency) and when to seek emergency care (high fever, severe chills, inability to pass urine, or passing large blood clots).\n`;
         text += `5. By signing, I accept absolute personal responsibility for scheduling and attending my follow-up appointment for stent removal or exchange. I explicitly acknowledge that the hospital and the surgical team are not responsible for tracking my stent, and I release them from any and all clinical and medicolegal liability, including organ loss, permanent disability, or mortality, arising from my failure to report for timely stent removal.\n`;
     }
-
     if (hasCatheter) {
-        text += `\nCRITICAL DECLARATION REGARDING URETHRAL CATHETER / SUPRAPUBIC CYSTOSTOMY:\n`;
+        text += `CRITICAL DECLARATION REGARDING URETHRAL CATHETER / SUPRAPUBIC CYSTOSTOMY:\n`;
         text += `I understand that a urethral catheter or suprapubic tube will be placed to drain my bladder. I have been informed that it requires strict hygiene, timely monitoring, and removal/exchange per the doctor's instructions. Failure to do so may lead to severe bladder spasm, urethral erosion, strictures, or chronic kidney damage.\n`;
     }
-
     if (hasNephrostomy) {
-        text += `\nCRITICAL DECLARATION REGARDING NEPHROSTOMY TUBE:\n`;
+        text += `CRITICAL DECLARATION REGARDING NEPHROSTOMY TUBE:\n`;
         text += `I understand that an external nephrostomy tube will be draining my kidney directly. I agree to maintain tube hygiene, avoid pulling or displacement, and report immediately for block, leak, or fever. I accept responsibility for scheduled removal or exchange of the tube.\n`;
     }
-
     if (isHighRisk) {
-        text += `\nSPECIAL HIGH-RISK CONSENT ADDENDUM:\n`;
+        text += `SPECIAL HIGH-RISK CONSENT ADDENDUM:\n`;
         text += `I explicitly understand that due to the patient's advanced age, severe pre-existing medical conditions (comorbidities such as heart disease, lung disease, kidney impairment, liver dysfunction, diabetes, or blood clotting disorders), or the complex/emergency nature of this procedure, the surgical and anesthetic risks are SIGNIFICANTLY HEIGHTENED.\n`;
         text += `Specifically, I have been informed of and accept the high probability of the following outcomes:\n`;
         text += `- The necessity of post-operative admission to the Intensive Care Unit (ICU) or High Dependency Unit (HDU) for close monitoring.\n`;

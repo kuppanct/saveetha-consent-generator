@@ -761,6 +761,21 @@
                 </div>
             </div>
 
+            <div id="approachGroup" style="display:none; margin-bottom: 16px;">
+                <label>Surgical Approach</label>
+                <div style="display:flex; gap:16px; margin-top:8px; flex-wrap:wrap;">
+                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
+                        <input type="checkbox" id="approachOpen" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Open
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
+                        <input type="checkbox" id="approachLap" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Laparoscopic
+                    </label>
+                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
+                        <input type="checkbox" id="approachRobotic" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Robotic
+                    </label>
+                </div>
+            </div>
+
             <div id="customProcedureFields" style="display:none;">
                 <div class="form-group">
                     <label for="customProc">Custom Procedure Planned</label>
@@ -882,7 +897,7 @@
 </div>
 
 <!-- Load procedures database script -->
-<script src="procedures.js?v=10"></script>
+<script src="procedures.js?v=12"></script>
 
 <script>
     // Global State
@@ -1187,6 +1202,11 @@
                 }
             }
             select.value = prevSelected;
+            // Re-apply all UI state (approach checkboxes, stent toggle, editor panel)
+            // only if there is actually a selection to restore
+            if (select.value) {
+                onProcedureDropdownChange();
+            }
         }
     }
 
@@ -1198,6 +1218,7 @@
         if (!selectedProcedureKey) {
             document.getElementById("customProcedureFields").style.display = "none";
             document.getElementById("editorPanel").style.display = "none";
+            document.getElementById("approachGroup").style.display = "none";
             customConsentOverride = null;
             return;
         }
@@ -1208,6 +1229,29 @@
             stentToggle.checked = !!window.URO_PROCEDURES[selectedProcedureKey].hasStent;
         } else {
             stentToggle.checked = false;
+        }
+
+        // Configure and toggle the approach checkbox group based on the procedure's approach options
+        const approachGroup = document.getElementById("approachGroup");
+        if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
+            const procObj = window.URO_PROCEDURES[selectedProcedureKey];
+            const procName = procObj.name;
+            // Show approach selector only if procedure explicitly offers multiple approaches
+            const hasOpenOption = procName.includes("Open");
+            const hasLapOption = procName.includes("Laparoscopic") || procName.includes("Lap ");
+            const hasRoboticOption = procName.includes("Robotic");
+            const hasApproachOptions = (hasOpenOption || hasLapOption || hasRoboticOption) &&
+                (procName.includes(" / ") || procName.includes(" or "));
+            if (hasApproachOptions) {
+                approachGroup.style.display = "block";
+                document.getElementById("approachOpen").checked = hasOpenOption;
+                document.getElementById("approachLap").checked = hasLapOption;
+                document.getElementById("approachRobotic").checked = hasRoboticOption;
+            } else {
+                approachGroup.style.display = "none";
+            }
+        } else {
+            approachGroup.style.display = "none";
         }
 
         // Toggle custom fields UI
@@ -1265,6 +1309,30 @@
     document.getElementById("customProc").addEventListener("input", triggerConsentCompilation);
     document.getElementById("customRisks").addEventListener("input", triggerConsentCompilation);
 
+    function getSelectedApproachString() {
+        const approaches = [];
+        if (document.getElementById("approachOpen").checked) approaches.push("Open");
+        if (document.getElementById("approachLap").checked) approaches.push("Laparoscopic");
+        if (document.getElementById("approachRobotic").checked) approaches.push("Robotic");
+        
+        if (approaches.length === 0) return "Surgical";
+        return approaches.join(" / ");
+    }
+
+    function formatProcedureName(name, approachStr) {
+        const parenRegex = /\((Open|Laparoscopic|Robotic-Assisted|Robotic|or|Assisted|\s|\/|\-)+\)/i;
+        if (parenRegex.test(name)) {
+            return name.replace(parenRegex, `(${approachStr})`);
+        }
+        if (name.includes("Open / Laparoscopic")) {
+            return name.replace("Open / Laparoscopic", approachStr);
+        }
+        if (name.includes("Robotic-Assisted or Laparoscopic")) {
+            return name.replace("Robotic-Assisted or Laparoscopic", approachStr);
+        }
+        return name;
+    }
+
     function triggerConsentCompilation() {
         if (!selectedProcedureKey) return;
         
@@ -1275,6 +1343,20 @@
         if (selectedProcedureKey === "OTHER") {
             proc = document.getElementById("customProc").value;
             risks = document.getElementById("customRisks").value;
+        } else if (window.URO_PROCEDURES[selectedProcedureKey]) {
+            const procObj = window.URO_PROCEDURES[selectedProcedureKey];
+            let name = procObj.name;
+            // Show approach selector only if procedure name contains multi-approach separator
+            const hasOpenOption = name.includes("Open");
+            const hasLapOption = name.includes("Laparoscopic") || name.includes("Lap ");
+            const hasRoboticOption = name.includes("Robotic");
+            const hasApproach = (hasOpenOption || hasLapOption || hasRoboticOption) &&
+                (name.includes(" / ") || name.includes(" or "));
+            if (hasApproach) {
+                const approachStr = getSelectedApproachString();
+                name = formatProcedureName(name, approachStr);
+            }
+            proc = name;
         }
 
         const side = document.getElementById("procedureSide").value;
@@ -1708,9 +1790,10 @@
             const boxWidthPoints = page1Width - boxX - Math.round(page1Width * 0.04);
             
             // Wrap text based on width - utilizing the entire right margin by using correct character widths
-            const contentFontSize = 7.1;
-            const contentLineHeight = 9.0;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.8 : (contentFontSize * 0.45)));
+            const contentFontSize = 6.8;
+            const contentLineHeight = 8.5;
+            // Use 0.42 as character width ratio for Helvetica at small sizes (tighter estimate)
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.5 : (contentFontSize * 0.42)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
@@ -1720,6 +1803,9 @@
             let currentPageNum = 1;
 
             wrappedLines.forEach(line => {
+                // Skip blank lines to save space - they come from \n separators in compiled text
+                if (!line.trim()) return;
+
                 let textFont = font;
                 if (line.startsWith("DIAGNOSIS:") || 
                     line.startsWith("PROCEDURE PLANNED:") || 
