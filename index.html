@@ -657,8 +657,8 @@
 <div class="app-wrapper">
     <header>
         <div class="logo-section">
-            <h1>Saveetha Urology Consent Generator</h1>
-            <p>Watertight Medicolegal Overlay System</p>
+            <h1>Saveetha Urology</h1>
+            <p>Consent Generator</p>
         </div>
         <div class="controls">
             <button class="theme-toggle" id="themeBtn" title="Toggle Theme" aria-label="Toggle Theme">
@@ -695,7 +695,7 @@
                 </div>
                 <div class="form-group">
                     <label for="gender">Gender</label>
-                    <select id="gender">
+                    <select id="gender" onchange="initProcedureDropdown()">
                         <option value="Male">Male</option>
                         <option value="Female">Female</option>
                         <option value="Transgender">Transgender</option>
@@ -735,7 +735,7 @@
 
             <div class="form-group">
                 <label for="procedureDiagnosis">Specific Diagnosis for this Patient</label>
-                <input type="text" id="procedureDiagnosis" placeholder="e.g., Left Renal Calculus (will be pre-filled on selecting procedure, or type custom)">
+                <input type="text" id="procedureDiagnosis" placeholder="e.g., Left Renal Calculus (type custom diagnosis)">
             </div>
         </div>
 
@@ -745,6 +745,7 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="procedureSelect">Select Procedure</label>
+                    <input type="text" id="procedureSearch" placeholder="🔍 Search procedure..." style="margin-bottom: 8px;" oninput="initProcedureDropdown()">
                     <select id="procedureSelect" onchange="onProcedureDropdownChange()">
                         <option value="">-- Choose a Procedure --</option>
                     </select>
@@ -848,6 +849,22 @@
             </div>
         </div>
 
+        <div class="toggle-switch-container" style="margin-bottom: 12px;">
+            <span>Mark as HIGH-RISK Patient (Severe Comorbidities / Advanced Age)</span>
+            <label class="switch">
+                <input type="checkbox" id="highRiskToggle" onchange="triggerConsentCompilation()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-switch-container" style="margin-bottom: 12px;">
+            <span>DJ Stent Placement Possibility</span>
+            <label class="switch">
+                <input type="checkbox" id="djStentToggle" onchange="triggerConsentCompilation()">
+                <span class="slider"></span>
+            </label>
+        </div>
+
         <div class="toggle-switch-container">
             <span>Use Tamil Form background (Text drawn in English)</span>
             <label class="switch">
@@ -930,7 +947,7 @@
         docSigDetailsX: 66.0
     };
 
-    // Load Calibration from Local Storage or defaults (v6)
+    // Load Calibration from Local Storage or defaults (v7)
     let calib = { ...defaultCalibrationEN };
 
     // Initialize Page
@@ -1104,6 +1121,13 @@
     // Populate Grouped Urology Procedures Dropdown
     function initProcedureDropdown() {
         const select = document.getElementById("procedureSelect");
+        const ptGender = document.getElementById("gender") ? document.getElementById("gender").value : "Male";
+        const searchInput = document.getElementById("procedureSearch");
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
+        
+        // Remember previous selection
+        const prevSelected = select.value;
+        
         select.innerHTML = '<option value="">-- Choose a Procedure --</option>';
 
         if (window.URO_CATEGORIES && window.URO_PROCEDURES) {
@@ -1115,6 +1139,12 @@
                 const procsInCat = [];
                 for (const [key, proc] of Object.entries(window.URO_PROCEDURES)) {
                     if (proc.category === cat.id) {
+                        if (proc.gender && ptGender !== "Transgender" && proc.gender !== ptGender) {
+                            continue;
+                        }
+                        if (searchTerm && !proc.name.toLowerCase().includes(searchTerm)) {
+                            continue;
+                        }
                         procsInCat.push({ key, name: proc.name });
                     }
                 }
@@ -1132,10 +1162,31 @@
             });
             
             // Add custom other option
-            const otherOpt = document.createElement("option");
-            otherOpt.value = "OTHER";
-            otherOpt.textContent = "Other / Custom Procedure";
-            select.appendChild(otherOpt);
+            if (!searchTerm || "other".includes(searchTerm) || "custom".includes(searchTerm) || "procedure".includes(searchTerm)) {
+                const otherOpt = document.createElement("option");
+                otherOpt.value = "OTHER";
+                otherOpt.textContent = "Other / Custom Procedure";
+                select.appendChild(otherOpt);
+            }
+        }
+        
+        // Restore selection if it's still available (or preserve if filtered out so we don't clear the form)
+        if (prevSelected) {
+            const hasOption = Array.from(select.options).some(opt => opt.value === prevSelected);
+            if (!hasOption) {
+                if (prevSelected === "OTHER") {
+                    const otherOpt = document.createElement("option");
+                    otherOpt.value = "OTHER";
+                    otherOpt.textContent = "Other / Custom Procedure";
+                    select.appendChild(otherOpt);
+                } else if (window.URO_PROCEDURES[prevSelected]) {
+                    const opt = document.createElement("option");
+                    opt.value = prevSelected;
+                    opt.textContent = window.URO_PROCEDURES[prevSelected].name;
+                    select.appendChild(opt);
+                }
+            }
+            select.value = prevSelected;
         }
     }
 
@@ -1151,14 +1202,12 @@
             return;
         }
 
-        // Pre-fill diagnosis if present in database (but allow user to edit)
-        const diagInput = document.getElementById("procedureDiagnosis");
-        if (selectedProcedureKey === "OTHER") {
-            if (!diagInput.value.trim()) {
-                diagInput.value = "";
-            }
-        } else if (window.URO_PROCEDURES[selectedProcedureKey]) {
-            diagInput.value = window.URO_PROCEDURES[selectedProcedureKey].diagnosis || "";
+        // Auto-configure the DJ stent checkbox based on the selected procedure's default, but let the user manually override
+        const stentToggle = document.getElementById("djStentToggle");
+        if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
+            stentToggle.checked = !!window.URO_PROCEDURES[selectedProcedureKey].hasStent;
+        } else {
+            stentToggle.checked = false;
         }
 
         // Toggle custom fields UI
@@ -1229,7 +1278,9 @@
         }
 
         const side = document.getElementById("procedureSide").value;
-        const compiledText = window.compileConsentText(selectedProcedureKey, diag, proc, risks, side);
+        const isHighRisk = document.getElementById("highRiskToggle") ? document.getElementById("highRiskToggle").checked : false;
+        const hasStent = document.getElementById("djStentToggle") ? document.getElementById("djStentToggle").checked : false;
+        const compiledText = window.compileConsentText(selectedProcedureKey, diag, proc, risks, side, isHighRisk, hasStent);
         document.getElementById("consentTextPreview").value = compiledText;
         customConsentOverride = compiledText;
     }
@@ -1238,10 +1289,9 @@
         customConsentOverride = document.getElementById("consentTextPreview").value;
     }
 
-    // Calibration Helpers
     function loadCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v6" : "uro-calibration-en-v6";
+        const storageKey = isTamil ? "uro-calibration-ta-v7" : "uro-calibration-en-v7";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
 
         const saved = localStorage.getItem(storageKey);
@@ -1295,7 +1345,7 @@
         calib[key] = val;
         
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v6" : "uro-calibration-en-v6";
+        const storageKey = isTamil ? "uro-calibration-ta-v7" : "uro-calibration-en-v7";
         localStorage.setItem(storageKey, JSON.stringify(calib));
 
         updateVisualCalibPreview();
@@ -1303,7 +1353,7 @@
 
     function resetCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v6" : "uro-calibration-en-v6";
+        const storageKey = isTamil ? "uro-calibration-ta-v7" : "uro-calibration-en-v7";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
         
         calib = { ...defaults };
@@ -1627,8 +1677,8 @@
             const sidePrefix = (side && side !== "N/A") ? (side + " ") : "";
 
             if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
-                if (selectedProcedureKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" || selectedProcedureKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED") {
-                    procedurePlanned = sidePrefix + "Cystoscopy and Proceed";
+                if (selectedProcedureKey === "THERAPEUTIC_CYSTOSCOPY_PROCEED") {
+                    procedurePlanned = sidePrefix + "Therapeutic Cystoscopy and Proceed";
                 } else {
                     procedurePlanned = sidePrefix + window.URO_PROCEDURES[selectedProcedureKey].name;
                 }
@@ -1656,12 +1706,11 @@
             const boxX = Math.round(page1Width * (calib.boxX / 100));
             const boxWidthPoints = page1Width - (boxX * 2);
             
-            // Wrap text based on width
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 6 : (page1Width * 0.0095)));
+            // Wrap text based on width - utilizing the entire right margin by using correct character widths
+            const contentFontSize = usingFallback ? 8.5 : 8.5;
+            const contentLineHeight = usingFallback ? 11.5 : 11.0;
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 5.5 : (contentFontSize * 0.51)));
             const wrappedLines = wrapText(consentText, charsPerLine);
-
-            const contentFontSize = usingFallback ? 9 : Math.round(page1Width * 0.015);
-            const contentLineHeight = usingFallback ? 13 : Math.round(page1Height * 0.019);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
             const page1BottomLimit = Math.round(page1Height * (1 - (calib.boxBottom / 100))); // bottom limit of page 1 box

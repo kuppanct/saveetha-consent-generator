@@ -15,7 +15,6 @@ const URO_CATEGORIES = [
 ];
 
 const URO_PROCEDURES = {
-    // CATEGORY 1: Bedside, Diagnostic, & Minor Office Procedures
     "FOLEY": {
         name: "Simple Catheterisation (Foley)",
         category: "cat1",
@@ -27,7 +26,8 @@ const URO_PROCEDURES = {
             "Urethral injury, mucosal bleeding (hematuria), or creation of a false passage.",
             "Bladder spasms, localized pain, or bypassing of urine around the catheter.",
             "Long-term urethral stricture (narrowing of the urine pipe) due to mechanical irritation.",
-            "Catheter block or encrustation necessitating emergency changes."
+            "Catheter block or encrustation necessitating emergency changes.",
+            "Severe urethral disruption or tearing; creation of a false passage; balloon inflation inside the urethral lumen causing severe injury; urosepsis leading to septic shock."
         ],
         hasCatheter: true
     },
@@ -52,7 +52,8 @@ const URO_PROCEDURES = {
             "Urinary tract infection (UTI) due to catheter insertion.",
             "Transient dysuria (pain during urination) or mild hematuria (blood in urine).",
             "Urethral or bladder trauma during catheter insertion.",
-            "Autonomic dysreflexia (in spinal cord injury patients) causing high blood pressure."
+            "Autonomic dysreflexia (in spinal cord injury patients) causing high blood pressure.",
+            "Bladder rupture or bladder perforation (rare but documented); autonomic dysreflexia in spinal cord patients leading to malignant hypertension or stroke."
         ],
         hasCatheter: true
     },
@@ -66,7 +67,8 @@ const URO_PROCEDURES = {
             "Radiation exposure (minimal, within standard diagnostic limits).",
             "Urinary tract infection (UTI) or urosepsis.",
             "Allergic reaction to the contrast medium used.",
-            "Transient pain, burning on urination, or hematuria."
+            "Transient pain, burning on urination, or hematuria.",
+            "Bladder rupture or bladder perforation (rare but documented); contrast-induced anaphylaxis or acute kidney injury; autonomic dysreflexia in spinal cord patients leading to malignant hypertension or stroke."
         ],
         hasCatheter: true
     },
@@ -80,7 +82,8 @@ const URO_PROCEDURES = {
             "Chemical cystitis causing severe urinary urgency, frequency, and painful urination.",
             "Hematuria or passing of tissue debris.",
             "Systemic BCG infection (BCGosis) causing high fever, joint pain, or liver involvement (requires anti-tubercular drugs).",
-            "Urethral stricture or contracture of the bladder capacity over time."
+            "Urethral stricture or contracture of the bladder capacity over time.",
+            "BCG-osis (systemic tuberculous sepsis) causing granulomatous hepatitis, pneumonitis, or death; bladder wall necrosis requiring emergency radical cystectomy."
         ],
         hasCatheter: true
     },
@@ -94,7 +97,8 @@ const URO_PROCEDURES = {
             "Infection and severe urosepsis (even with prophylactic antibiotics) requiring hospitalization.",
             "Rectal bleeding (rectorrhagia) or hematuria lasting for several days.",
             "Hemospermia (blood in semen) for up to 4-6 weeks.",
-            "Acute urinary retention requiring temporary catheterization."
+            "Acute urinary retention requiring temporary catheterization.",
+            "Life-threatening septic shock from enteric pathogens (even with antibiotics); massive rectal hemorrhage requiring emergency rectal packing or arterial embolization; persistent erectile dysfunction."
         ],
         hasCatheter: true
     },
@@ -138,10 +142,9 @@ const URO_PROCEDURES = {
             "Failure of manual reduction requiring immediate surgical dorsal slit."
         ]
     },
-
-    // CATEGORY 2: Endourology & Outpatient Core Packages
     "MALE_CYSTOSCOPY": {
-        name: "Male Cystoscopy and Proceed (Diagnostic)",
+        name: "Cystoscopy and Proceed (Diagnostic)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Hematuria / LUTS / Bladder Mass / Suspected urethral stricture",
         benefits: "Direct endoscopic visualization of the urethra, prostate, bladder neck, and bladder cavity.",
@@ -154,7 +157,8 @@ const URO_PROCEDURES = {
         ]
     },
     "MALE_SPC": {
-        name: "Suprapubic Cystostomy (SPC) - Male",
+        name: "Suprapubic Cystostomy (SPC)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Acute / Chronic urinary retention with failed urethral catheterization",
         benefits: "Direct bladder drainage through the lower abdominal wall, bypassing the urethra.",
@@ -168,7 +172,8 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "MALE_BNI": {
-        name: "Bladder Neck Incision (BNI) - Male",
+        name: "Bladder Neck Incision (BNI)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Bladder Neck Stenosis / Primary Bladder Neck Obstruction",
         benefits: "Incising the tight bladder neck endoscopically to restore normal voiding pressures.",
@@ -183,7 +188,8 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "MALE_URETHRAL_DILATATION": {
-        name: "Urethral Dilatation - Male",
+        name: "Urethral Dilatation",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Urethral Stricture Disease",
         benefits: "Mechanical dilation of the narrowed urethral lumen to improve urine flow.",
@@ -192,7 +198,8 @@ const URO_PROCEDURES = {
             "Urethral tear, false passage formation, or severe bleeding.",
             "High recurrence rate of stricture, necessitating regular self-dilatation.",
             "Urosepsis or bacteremia during dilation.",
-            "Sphincter injury causing urinary incontinence."
+            "Sphincter injury causing urinary incontinence.",
+            "Complete urethral avulsion; severe perineal extravasation of fluid (water-logged scrotum/perineum); permanent sphincter destruction causing total incontinence."
         ],
         hasCatheter: true
     },
@@ -207,7 +214,8 @@ const URO_PROCEDURES = {
             "Severe hemorrhage requiring blood transfusion or re-exploration.",
             "Retrograde ejaculation (occurs in >75% of cases).",
             "Urethral stricture or bladder neck stenosis in the long term.",
-            "Temporary or permanent urinary incontinence (due to external sphincter injury)."
+            "Temporary or permanent urinary incontinence (due to external sphincter injury).",
+            "TUR Syndrome (dilutional hyponatremia) causing cerebral edema, seizures, coma, or death (specific to monopolar saline-free glycine irrigation); capsule perforation with extraperitoneal/intraperitoneal irrigation fluid absorption; rectourethral fistula; permanent urinary incontinence (due to total external sphincter destruction)."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -247,7 +255,8 @@ const URO_PROCEDURES = {
             "High recurrence rate (often >50% within 1-2 years).",
             "Urethral bleeding or perineal extravasation of irrigation fluid.",
             "Erectile dysfunction or chordee (penile curvature) if incision extends into corpus cavernosum.",
-            "Urosepsis or urinary tract infection."
+            "Urosepsis or urinary tract infection.",
+            "Complete urethral avulsion; severe perineal extravasation of fluid (water-logged scrotum/perineum); permanent sphincter destruction causing total incontinence."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -262,7 +271,8 @@ const URO_PROCEDURES = {
             "Bladder perforation (extraperitoneal or intraperitoneal) potentially requiring open surgical repair.",
             "Severe bleeding requiring blood transfusion or clot evacuation.",
             "Obturator nerve reflex during resection leading to thigh twitching and perforation risk.",
-            "Tumor recurrence requiring adjuvant intravesical therapy (BCG/Mitomycin)."
+            "Tumor recurrence requiring adjuvant intravesical therapy (BCG/Mitomycin).",
+            "Intraperitoneal bladder perforation with bowel injury, peritonitis, or tumor seeding; severe primary or delayed secondary hemorrhage requiring emergency cystectomy or arterial embolization; obturator nerve reflex leading to major vessel tear."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -277,7 +287,8 @@ const URO_PROCEDURES = {
             "Bladder mucosal injury, bleeding, or bladder wall perforation.",
             "Retained stone fragments requiring secondary procedures.",
             "Urinary tract infection or urosepsis.",
-            "Urethral trauma or stricture due to scope passage."
+            "Urethral trauma or stricture due to scope passage.",
+            "Bladder rupture/perforation; direct thermal or mechanical injury to ureteric orifices causing permanent ureteric stricture or reflux; severe urethral tearing."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -325,7 +336,8 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "MALE_CYSTOSCOPY_PROCEED_COMBINED": {
-        name: "Male Cystoscopy and Proceed (Combined Consent for BNI/TURP/OIU/TURBT/Cystolitholapaxy/etc.)",
+        name: "Cystoscopy and Proceed (Combined Consent for BNI/TURP/OIU/TURBT/Cystolitholapaxy/etc.)",
+        gender: "Male",
         category: "cat2",
         diagnosis: "Bladder Outflow Obstruction / Hematuria / Bladder Mass / Urethral Stricture under evaluation",
         benefits: "Direct visualization and single-session therapeutic correction of any bladder, urethral, or prostatic pathology encountered.",
@@ -345,9 +357,9 @@ const URO_PROCEDURES = {
         hasCatheter: true,
         hasStent: true
     },
-
     "FEMALE_CYSTOSCOPY": {
-        name: "Female Cystoscopy and Proceed (Diagnostic)",
+        name: "Cystoscopy and Proceed (Diagnostic)",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Hematuria / Recurrent UTI / Suspicious bladder symptoms",
         benefits: "Direct endoscopic inspection of female urethra, bladder neck, and bladder.",
@@ -359,7 +371,8 @@ const URO_PROCEDURES = {
         ]
     },
     "FEMALE_DILATATION": {
-        name: "Urethral / Bladder Neck Dilatation - Female",
+        name: "Urethral / Bladder Neck Dilatation",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Female Urethral Stenosis / Bladder Neck Obstruction",
         benefits: "Dilation of female urethra to improve flow and resolve high post-void residuals.",
@@ -373,6 +386,7 @@ const URO_PROCEDURES = {
     },
     "FEMALE_HYDRODISTENTION": {
         name: "Bladder Hydrodistention (for Interstitial Cystitis)",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Interstitial Cystitis / Bladder Pain Syndrome",
         benefits: "Therapeutic stretching of the bladder under anesthesia to relieve pain and increase capacity; diagnostic for Hunner's ulcers.",
@@ -386,7 +400,8 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "FEMALE_BIOPSY": {
-        name: "Cold Cup / Punch Bladder Biopsy - Female",
+        name: "Cold Cup / Punch Bladder Biopsy",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Suspected Bladder Pathology / Mucosal lesion",
         benefits: "Pathological diagnosis of bladder mucosal abnormalities.",
@@ -399,7 +414,8 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "FEMALE_SPC": {
-        name: "Suprapubic Cystostomy (SPC) - Female",
+        name: "Suprapubic Cystostomy (SPC)",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Acute urinary retention / Neurogenic bladder / Failed urethral access",
         benefits: "Bypassing the female urethra for clean urinary drainage via lower abdomen.",
@@ -413,6 +429,7 @@ const URO_PROCEDURES = {
     },
     "FEMALE_CARUNCLE": {
         name: "Excision of Urethral Caruncle",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Symptomatic Urethral Caruncle (bleeding/pain)",
         benefits: "Surgical removal of the painful vascular mass at the urethral opening.",
@@ -424,7 +441,8 @@ const URO_PROCEDURES = {
         ]
     },
     "FEMALE_CYSTOSCOPY_PROCEED_COMBINED": {
-        name: "Female Cystoscopy and Proceed (Combined Consent for Dilatation/Hydrodistention/Biopsy/SPC/Caruncle/TURBT)",
+        name: "Cystoscopy and Proceed (Combined Consent for Dilatation/Hydrodistention/Biopsy/SPC/Caruncle/TURBT)",
+        gender: "Female",
         category: "cat2",
         diagnosis: "Hematuria / Recurrent UTI / Bladder Mass / Voiding Dysfunction under evaluation",
         benefits: "Diagnostic mapping and single-session therapeutic intervention for encountered bladder, urethral, or ureteral pathology.",
@@ -442,8 +460,6 @@ const URO_PROCEDURES = {
         hasCatheter: true,
         hasStent: true
     },
-
-    // CATEGORY 3: Endourology Cases with Unilateral and Bilateral DJS
     "RIRS_UNILATERAL": {
         name: "Unilateral Retrograde Intrarenal Surgery (RIRS) with Unilateral DJS",
         category: "cat3",
@@ -454,7 +470,8 @@ const URO_PROCEDURES = {
             "Infection and severe urosepsis requiring ICU care.",
             "Ureteral injury (mucosal tear, perforation, or avulsion/tearing) requiring stent, open reconstruction, or nephrectomy.",
             "Ureteral stricture (delayed scarring) requiring balloon dilation or reconstruction.",
-            "Incomplete stone clearance requiring staged secondary procedures."
+            "Incomplete stone clearance requiring staged secondary procedures.",
+            "Complete ureteral avulsion (tearing away of the ureter from the kidney or bladder) requiring emergency open laparotomy, ileal ureter substitution, or autotransplantation; loss of the kidney (nephrectomy); subcapsular renal hematoma or renal rupture."
         ],
         isMajorSurgery: true,
         hasStent: true
@@ -469,7 +486,8 @@ const URO_PROCEDURES = {
             "Higher risk of bilateral ureteral edema or injury leading to transient anuria (no urine output) or acute renal failure.",
             "Increased risk of systemic inflammatory response (SIRS) and severe urosepsis.",
             "Bilateral ureteral injury, stricture, or perforation.",
-            "Prolonged operative time and increased anesthetic risk."
+            "Prolonged operative time and increased anesthetic risk.",
+            "Bilateral ureteral injury, bilateral spasms, or bilateral mucosal edema leading to acute anuria (no urine output), acute renal failure, and temporary or permanent hemodialysis; higher rate of systemic inflammatory response (SIRS) and septic shock."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -485,7 +503,8 @@ const URO_PROCEDURES = {
             "Ureteral perforation or mucosal tearing.",
             "Ureteral avulsion (complete pulling out of the ureter) requiring emergency open reconstruction (ileal ureter or autotransplantation).",
             "Stone migration upward into the kidney (requiring RIRS or stent placement).",
-            "Delayed ureteral stricture formation."
+            "Delayed ureteral stricture formation.",
+            "Complete ureteral avulsion (tearing away of the ureter from the kidney or bladder) requiring emergency open laparotomy, ileal ureter substitution, or autotransplantation; loss of the kidney (nephrectomy); subcapsular renal hematoma or renal rupture."
         ],
         isMajorSurgery: true,
         hasStent: true
@@ -499,7 +518,8 @@ const URO_PROCEDURES = {
         risks: [
             "Bilateral ureteral spasms, mucosal edema, or injury leading to acute renal failure.",
             "Severe post-operative fever, UTI, or life-threatening urosepsis.",
-            "Increased incidence of stent-related pain, urgency, and hematuria."
+            "Increased incidence of stent-related pain, urgency, and hematuria.",
+            "Bilateral ureteral injury, bilateral spasms, or bilateral mucosal edema leading to acute anuria (no urine output), acute renal failure, and temporary or permanent hemodialysis; higher rate of systemic inflammatory response (SIRS) and septic shock."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -548,7 +568,8 @@ const URO_PROCEDURES = {
             "Severe hemorrhage from renal parenchymal puncture requiring blood transfusion, emergency angioembolization (clotting of bleeding vessel), or nephrectomy.",
             "Adjacent organ injury: pleural cavity injury (causing pneumothorax or hydrothorax requiring a chest tube), colonic perforation, or injury to spleen/liver.",
             "Urosepsis or septic shock due to absorption of pressurized irrigation fluid.",
-            "Hydro-nephrosis or extravasation of fluid into the retroperitoneum."
+            "Hydro-nephrosis or extravasation of fluid into the retroperitoneum.",
+            "Catastrophic renal hemorrhage requiring emergency angioembolization, renal packing, or emergency nephrectomy (loss of kidney); colonic perforation with fecal contamination requiring bowel resection and temporary stoma; pleural cavity injury (pneumothorax/hemothorax) requiring chest tube or thoracotomy; liver or spleen laceration."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -564,7 +585,8 @@ const URO_PROCEDURES = {
             "High risk of fluid overload, hypothermia, and prolonged anesthesia.",
             "Bilateral renal bleeding or bilateral nephrostomy tube displacement.",
             "Bilateral pleural injury or severe post-operative respiratory compromise.",
-            "Increased risk of acute kidney injury (AKI) due to bilateral parenchymal trauma."
+            "Increased risk of acute kidney injury (AKI) due to bilateral parenchymal trauma.",
+            "Bilateral renal hemorrhage; bilateral pleural injury; acute bilateral kidney injury (AKI) requiring hemodialysis; severe hypothermia and fluid overload from bilateral pressurized irrigation."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -596,7 +618,8 @@ const URO_PROCEDURES = {
         risks: [
             "High risk of systemic inflammatory response (SIRS) and septic shock.",
             "Combined bilateral injuries (pleural, ureteral, renal parenchyma).",
-            "Anesthetic risks associated with complex positioning (prone/split-leg)."
+            "Anesthetic risks associated with complex positioning (prone/split-leg).",
+            "Bilateral renal hemorrhage; bilateral pleural injury; acute bilateral kidney injury (AKI) requiring hemodialysis; severe hypothermia and fluid overload from bilateral pressurized irrigation."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -690,8 +713,6 @@ const URO_PROCEDURES = {
         hasStent: true,
         isBilateral: true
     },
-
-    // CATEGORY 4: Reconstructive & Functional Urology
     "ANASTOMOTIC_URETHROPLASTY": {
         name: "Anastomotic Urethroplasty",
         category: "cat4",
@@ -702,7 +723,8 @@ const URO_PROCEDURES = {
             "Recurrence of urethral stricture (requires further dilatation or OIU).",
             "Post-operative erectile dysfunction (temporary or permanent) due to cavernosal nerve injury.",
             "Penile shortening or chordee (curvature).",
-            "Urinary incontinence (due to sphincter weakness) or semen pooling in bulbar urethra."
+            "Urinary incontinence (due to sphincter weakness) or semen pooling in bulbar urethra.",
+            "Graft necrosis, graft loss, or urethral fistula (urethrocutaneous fistula) requiring multiple complex salvage surgeries; permanent erectile dysfunction or severe chordee (penile curvature); pelvic bone osteomyelitis."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -717,7 +739,8 @@ const URO_PROCEDURES = {
             "Graft failure, necrosis, or contracture leading to stricture recurrence.",
             "Donor site complications (mouth pain, difficulty opening mouth, numbness, salivary duct injury).",
             "Fistula formation (urethrocutaneous fistula) requiring secondary repair.",
-            "Post-void dribbling or semen sequestration."
+            "Post-void dribbling or semen sequestration.",
+            "Graft necrosis, graft loss, or urethral fistula (urethrocutaneous fistula) requiring multiple complex salvage surgeries; permanent erectile dysfunction or severe chordee (penile curvature); pelvic bone osteomyelitis."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -747,11 +770,12 @@ const URO_PROCEDURES = {
             "Anastomotic leak or urinoma requiring prolonged stenting or drain placement.",
             "Recurrence of UPJ obstruction (due to scarring) requiring secondary pyeloplasty or endopyelotomy.",
             "Crossing vessel injury or bleeding requiring conversion to open surgery.",
-            "Infection, retroperitoneal abscess, or loss of kidney function."
+            "Infection, retroperitoneal abscess, or loss of kidney function.",
+            "Anastomotic breakdown with massive urine leak (urinoma) leading to retroperitoneal fibrosis or sepsis; loss of kidney function requiring nephrectomy; injury to major crossing renal vessels requiring emergency vascular reconstruction."
         ],
         isMajorSurgery: true,
-        hasStent: true,
         hasCatheter: true,
+        hasStent: true,
         isLaparoscopicOrRobotic: true
     },
     "URETEROURETEROSTOMY": {
@@ -794,8 +818,8 @@ const URO_PROCEDURES = {
             "Recurrent vesicoureteral reflux or persistent hydronephrosis."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "URETERAL_REIMPLANT_HITCH": {
         name: "Ureteral Reimplantation with Psoas Hitch / Boari Flap",
@@ -810,8 +834,8 @@ const URO_PROCEDURES = {
             "Anastomotic stricture."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "ILEAL_URETER": {
         name: "Ileal Ureter Substitution",
@@ -826,8 +850,8 @@ const URO_PROCEDURES = {
             "Chronic pyelonephritis or recurrent UTIs."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "AUGMENTATION_CYSTOPLASTY": {
         name: "Augmentation Cystoplasty (Ileocystoplasty)",
@@ -869,7 +893,8 @@ const URO_PROCEDURES = {
             "Failure of repair and recurrence of VVF (rate increases with previous failed attempts or radiation).",
             "Ureteral injury during dissection (may require reimplantation).",
             "Decreased bladder capacity, urgency, or bladder spasms.",
-            "Vaginal shortening or dyspareunia (painful intercourse)."
+            "Vaginal shortening or dyspareunia (painful intercourse).",
+            "Failure of repair and recurrence of fistula (especially in irradiated tissues or prior failed repairs); ureteral ligation or injury during dissection requiring ureteral reimplantation; permanent vaginal shortening or severe dyspareunia (painful intercourse)."
         ],
         isMajorSurgery: true,
         hasCatheter: true,
@@ -884,11 +909,12 @@ const URO_PROCEDURES = {
         risks: [
             "Anastomotic leak or stricture at the reimplant site.",
             "Persistent vaginal leakage requiring re-exploration.",
-            "Loss of kidney function due to chronic obstruction."
+            "Loss of kidney function due to chronic obstruction.",
+            "Failure of repair and recurrence of fistula (especially in irradiated tissues or prior failed repairs); ureteral ligation or injury during dissection requiring ureteral reimplantation; permanent vaginal shortening or severe dyspareunia (painful intercourse)."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "SLING": {
         name: "Mid-Urethral Sling (TVT / TOT)",
@@ -900,7 +926,8 @@ const URO_PROCEDURES = {
             "Mesh erosion into the urethra or vagina, requiring surgical excision of the mesh.",
             "De novo urinary urgency or urge incontinence (overactive bladder symptoms).",
             "Urinary retention or voiding difficulty requiring temporary or permanent self-catheterization.",
-            "Pelvic pain, thigh pain (specific to TOT), or dyspareunia."
+            "Pelvic pain, thigh pain (specific to TOT), or dyspareunia.",
+            "Erosion of synthetic mesh/cuff into the urethra, bladder, or vagina, requiring complete surgical explantation; chronic intractable pelvic pain; severe infection requiring device removal, leading to severe scarring."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -915,7 +942,8 @@ const URO_PROCEDURES = {
             "Urethral erosion by the cuff requiring device removal.",
             "Infection of the prosthetic components requiring complete removal of the device.",
             "Mechanical failure of the pump, reservoir, or cuff over time (average lifespan 7-10 years).",
-            "Urethral atrophy under the cuff leading to recurrent incontinence."
+            "Urethral atrophy under the cuff leading to recurrent incontinence.",
+            "Erosion of synthetic mesh/cuff into the urethra, bladder, or vagina, requiring complete surgical explantation; chronic intractable pelvic pain; severe infection requiring device removal, leading to severe scarring."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -947,8 +975,6 @@ const URO_PROCEDURES = {
         ],
         hasCatheter: true
     },
-
-    // CATEGORY 5: Andrology & Infertility
     "DORSAL_SLIT": {
         name: "Dorsal Slit of Prepuce",
         category: "cat5",
@@ -1011,7 +1037,8 @@ const URO_PROCEDURES = {
             "Hydrocele formation (due to lymphatic ligation) requiring subsequent surgery (reduced to <1% with microscope).",
             "Testicular artery injury leading to testicular atrophy (shrinkage and loss of function).",
             "Recurrence or persistence of varicocele.",
-            "Infection, hematoma, or persistent pain."
+            "Infection, hematoma, or persistent pain.",
+            "Accidental ligation of the testicular artery leading to testicular atrophy (shrinkage and loss of hormone/sperm production); chronic scrotal pain; conversion to open surgery."
         ],
         isMajorSurgery: true
     },
@@ -1025,7 +1052,8 @@ const URO_PROCEDURES = {
             "Higher risk of hydrocele formation (compared to microsurgery).",
             "Conversion to open surgery (for laparoscopic route).",
             "Injury to abdominal bowel or vessels (laparoscopic route).",
-            "Testicular artery injury or varicocele recurrence."
+            "Testicular artery injury or varicocele recurrence.",
+            "Accidental ligation of the testicular artery leading to testicular atrophy (shrinkage and loss of hormone/sperm production); chronic scrotal pain; conversion to open surgery."
         ],
         isMajorSurgery: true,
         isLaparoscopicOrRobotic: true
@@ -1087,7 +1115,8 @@ const URO_PROCEDURES = {
             "Prosthetic infection requiring complete removal of the device (a devastating complication).",
             "Erosion of the rods through the urethra, glans, or skin.",
             "Mechanical failure, sizing issues, or chronic penile pain.",
-            "Destruction of remaining natural erectile tissue, making future non-prosthetic erections impossible."
+            "Destruction of remaining natural erectile tissue, making future non-prosthetic erections impossible.",
+            "Prosthetic infection requiring immediate device explantation (salvage failure); erosion of the cylinders through the glans penis, scrotum, or urethra; destruction of residual erectile tissue making non-prosthetic erections permanently impossible."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -1102,7 +1131,8 @@ const URO_PROCEDURES = {
             "Infection requiring immediate salvage surgery or device explantation.",
             "Mechanical failure of the pump, cylinders, or tubing requiring surgical revision.",
             "Urethral or bladder injury during reservoir placement.",
-            "Auto-inflation, cylinder migration, or penile shortening."
+            "Auto-inflation, cylinder migration, or penile shortening.",
+            "Prosthetic infection requiring immediate device explantation (salvage failure); erosion of the cylinders through the glans penis, scrotum, or urethra; destruction of residual erectile tissue making non-prosthetic erections permanently impossible."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -1131,7 +1161,8 @@ const URO_PROCEDURES = {
             "Large scrotal hematoma (scrotum can swell to size of a grapefruit).",
             "Wound infection or scrotal abscess.",
             "Recurrence of hydrocele (rare).",
-            "Testicular injury or atrophy."
+            "Testicular injury or atrophy.",
+            "Massive scrotal hematoma (filling the scrotum to the size of a grapefruit) requiring surgical drainage; chronic testicular pain; testicular ischemia leading to atrophy."
         ]
     },
     "SPERMATOCELECTOMY": {
@@ -1159,8 +1190,6 @@ const URO_PROCEDURES = {
             "Scrotal hematoma or infection."
         ]
     },
-
-    // CATEGORY 6: Uro-Oncology
     "RADICAL_PROSTATECTOMY": {
         name: "Radical Prostatectomy (Open / Laparoscopic / Robotic-Assisted)",
         category: "cat6",
@@ -1171,7 +1200,8 @@ const URO_PROCEDURES = {
             "Urinary incontinence: temporary leakage is common; permanent incontinence requiring pads or AUS occurs in 5-10%.",
             "Erectile dysfunction: high incidence (50-90%) even with nerve-sparing techniques.",
             "Anastamotic stricture (bladder neck contracture).",
-            "Rectal injury during dissection leading to fecal fistula or requiring temporary colostomy."
+            "Rectal injury during dissection leading to fecal fistula or requiring temporary colostomy.",
+            "Permanent urinary incontinence (5-10%) requiring lifelong pads or artificial urinary sphincter (AUS); permanent erectile dysfunction (50-90%); rectal injury during dissection leading to fecal fistula or requiring temporary colostomy."
         ],
         isMajorSurgery: true,
         hasCatheter: true,
@@ -1201,7 +1231,8 @@ const URO_PROCEDURES = {
             "Severe hemorrhage from renal hilar vessels requiring major transfusion or re-exploration.",
             "Adjacent organ injury: spleen, liver, pancreas, bowel, or major vessels (IVC/aorta).",
             "Loss of overall renal function leading to renal failure, especially if the remaining kidney is diseased.",
-            "Incisional hernia or flank bulge."
+            "Incisional hernia or flank bulge.",
+            "Catastrophic bleeding from renal hilum or major vessels (IVC/aorta) requiring emergency splenectomy, liver resection, or vascular grafting; delayed secondary hemorrhage (pseudoaneurysm) requiring emergency angioembolization; urine leak from collecting system requiring prolonged stenting or re-operation; acute renal failure in single-kidney patients."
         ],
         isMajorSurgery: true,
         isLaparoscopicOrRobotic: true
@@ -1216,7 +1247,8 @@ const URO_PROCEDURES = {
             "Post-operative urine leak from the renal collecting system (requires DJ stenting or nephrostomy).",
             "Delayed secondary hemorrhage (pseudoaneurysm) requiring emergency angioembolization.",
             "Warm ischemia time damage leading to temporary or permanent loss of function in the operated kidney.",
-            "Positive surgical margins requiring close monitoring or radical nephrectomy."
+            "Positive surgical margins requiring close monitoring or radical nephrectomy.",
+            "Catastrophic bleeding from renal hilum or major vessels (IVC/aorta) requiring emergency splenectomy, liver resection, or vascular grafting; delayed secondary hemorrhage (pseudoaneurysm) requiring emergency angioembolization; urine leak from collecting system requiring prolonged stenting or re-operation; acute renal failure in single-kidney patients."
         ],
         isMajorSurgery: true,
         hasStent: true,
@@ -1249,7 +1281,8 @@ const URO_PROCEDURES = {
             "Severe blood loss requiring multiple transfusions.",
             "Urinary diversion complications (ileal conduit leak, stomal stenosis, neobladder incontinence).",
             "Bowel dysfunction, ileus, small bowel obstruction, or anastomotic leak.",
-            "Severe pelvic infection or wound dehiscence."
+            "Severe pelvic infection or wound dehiscence.",
+            "Urinary/bowel anastomotic leak leading to fecal or chemical peritonitis, requiring emergency re-laparotomy and stoma creation; small bowel obstruction or ileus; pelvic abscess and wound dehiscence; permanent neobladder incontinence or physical hypercontinence requiring lifelong self-catheterization; high rate of deep vein thrombosis (DVT) and fatal pulmonary embolism; on-table mortality."
         ],
         isMajorSurgery: true,
         hasCatheter: true,
@@ -1265,11 +1298,12 @@ const URO_PROCEDURES = {
             "Ureteroileal anastomotic leak (urine leak in abdomen) or stricture (kidney obstruction).",
             "Stoma complications: retraction, necrosis, parastomal hernia, or skin irritation.",
             "Bowel anastomosis leak or obstruction.",
-            "Metabolic abnormalities and chronic UTIs."
+            "Metabolic abnormalities and chronic UTIs.",
+            "Urinary/bowel anastomotic leak leading to fecal or chemical peritonitis, requiring emergency re-laparotomy and stoma creation; small bowel obstruction or ileus; pelvic abscess and wound dehiscence; permanent neobladder incontinence or physical hypercontinence requiring lifelong self-catheterization; high rate of deep vein thrombosis (DVT) and fatal pulmonary embolism; on-table mortality."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "NEOBLADDER": {
         name: "Orthotopic Neobladder Creation (Studer / Hautmann)",
@@ -1281,7 +1315,8 @@ const URO_PROCEDURES = {
             "Neobladder incontinence (especially nocturnal incontinence in up to 30-50%).",
             "Hyper-continence (inability to void) requiring lifelong self-catheterization (especially in females).",
             "Metabolic acidosis, mucus plugging of the urethra.",
-            "Rupture of the neobladder requiring emergency surgery."
+            "Rupture of the neobladder requiring emergency surgery.",
+            "Urinary/bowel anastomotic leak leading to fecal or chemical peritonitis, requiring emergency re-laparotomy and stoma creation; small bowel obstruction or ileus; pelvic abscess and wound dehiscence; permanent neobladder incontinence or physical hypercontinence requiring lifelong self-catheterization; high rate of deep vein thrombosis (DVT) and fatal pulmonary embolism; on-table mortality."
         ],
         isMajorSurgery: true,
         hasCatheter: true
@@ -1341,7 +1376,8 @@ const URO_PROCEDURES = {
             "Extremely high rate of wound breakdown, skin flap necrosis, and delayed healing.",
             "Severe lymphedema (permanent chronic swelling) of both legs and scrotum.",
             "Lymph leak or lymphocele.",
-            "Femoral artery rupture (catastrophic) if wound infection exposes the major vessels (sartorius flap transposition performed to protect)."
+            "Femoral artery rupture (catastrophic) if wound infection exposes the major vessels (sartorius flap transposition performed to protect).",
+            "Wound breakdown, skin flap necrosis, and delayed healing (occurs in up to 50% of cases); catastrophic femoral artery blow-out (fatal hemorrhage) due to infection exposing the major vessels; permanent, disabling leg and scrotal lymphedema."
         ],
         isMajorSurgery: true
     },
@@ -1374,8 +1410,6 @@ const URO_PROCEDURES = {
         ],
         isMajorSurgery: true
     },
-
-    // CATEGORY 7: Renal Transplantation
     "LAP_DONOR_NEPHRECTOMY": {
         name: "Laparoscopic Living Donor Nephrectomy",
         category: "cat7",
@@ -1429,11 +1463,12 @@ const URO_PROCEDURES = {
             "Vascular complications: renal artery thrombosis or renal vein thrombosis (resulting in immediate transplant failure/nephrectomy), or arterial stenosis.",
             "Ureteral complications: urine leak or ureteral stricture requiring stenting, nephrostomy, or surgical revision.",
             "Lymphocele around the graft causing pressure on iliac veins or ureter.",
-            "Immunosuppressive side effects: opportunistic infections (CMV, fungal), drug toxicity (tacrolimus nephrotoxicity), and increased risk of cancer."
+            "Immunosuppressive side effects: opportunistic infections (CMV, fungal), drug toxicity (tacrolimus nephrotoxicity), and increased risk of cancer.",
+            "Renal artery or vein thrombosis leading to immediate transplant failure and emergency graft nephrectomy; hyperacute or acute rejection leading to graft loss; anastomotic leak or ureteral necrosis requiring re-operation; lymphocele compressing major vessels; life-threatening opportunistic infections (CMV, fungal) or post-transplant malignancy (PTLD) due to lifelong immunosuppression."
         ],
         isMajorSurgery: true,
-        hasStent: true,
-        hasCatheter: true
+        hasCatheter: true,
+        hasStent: true
     },
     "ROBOTIC_RECIPIENT_TRANSPLANT": {
         name: "Transperitoneal Robotic Recipient Renal Transplantation",
@@ -1445,11 +1480,12 @@ const URO_PROCEDURES = {
             "Intra-abdominal bowel or vessel injury due to transperitoneal approach.",
             "Graft failure or thrombotic loss.",
             "Ureteral leaks or lymphoceles.",
-            "Robotic malfunction."
+            "Robotic malfunction.",
+            "Renal artery or vein thrombosis leading to immediate transplant failure and emergency graft nephrectomy; hyperacute or acute rejection leading to graft loss; anastomotic leak or ureteral necrosis requiring re-operation; lymphocele compressing major vessels; life-threatening opportunistic infections (CMV, fungal) or post-transplant malignancy (PTLD) due to lifelong immunosuppression."
         ],
         isMajorSurgery: true,
-        hasStent: true,
         hasCatheter: true,
+        hasStent: true,
         isLaparoscopicOrRobotic: true
     },
     "GRAFT_NEPHRECTOMY": {
@@ -1462,16 +1498,271 @@ const URO_PROCEDURES = {
             "Severe hemorrhage due to dense adhesions around the iliac vessels (requires subcapsular dissection, high bleeding risk).",
             "Iliac artery/vein tear requiring vascular reconstruction.",
             "Injury to surrounding bowel (cecum/sigmoid colon) or ureter.",
-            "Sepsis or pelvic abscess."
+            "Sepsis or pelvic abscess.",
+            "Catastrophic hemorrhage due to dense adhesions around the iliac vessels (requires subcapsular dissection with high risk of tearing the iliac artery or vein); injury to the bowel (cecum/sigmoid colon) or pelvic nerves; pelvic sepsis."
         ],
         isMajorSurgery: true
+    },
+    "PERINEAL_URETHROSTOMY": {
+        name: "Perineal Urethrostomy",
+        gender: "Male",
+        category: "cat4",
+        diagnosis: "Severe complex urethral stricture / Lichen sclerosus (BXO) / Anterior urethral loss / Failed anterior urethroplasty",
+        benefits: "Creation of a permanent urinary opening in the perineum (between scrotum and anus) to bypass the diseased anterior urethra, relieve voiding obstruction, and protect kidney function.",
+        alternatives: "Long-term/permanent suprapubic catheter, repeated painful urethral dilations, complex multi-stage buccal mucosa graft urethroplasty, or conservative monitoring.",
+        risks: [
+            "Perineal urethrostomy stricture (narrowing of the new opening) requiring regular self-dilation or surgical revision.",
+            "Permanent loss of the ability to void standing up, requiring the patient to sit down to urinate for the rest of their life.",
+            "Post-void dribbling, urinary spraying, and skin irritation or fungal dermatitis in the perineum from urine contact.",
+            "Scrotal/perineal hematoma or wound breakdown due to high moisture and bacterial load in the perineal region.",
+            "Worsening of erectile dysfunction or penile numbness due to surgical dissection near the cavernosal nerves.",
+            "Urinary tract infection (UTI) or chronic bacterial prostatitis."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true
+    },
+    "DJS_PREGNANCY": {
+        name: "Double-J (DJ) Stent Placement during Pregnancy",
+        gender: "Female",
+        category: "cat3",
+        diagnosis: "Ureteric obstruction due to pregnancy / Hydronephrosis of pregnancy / Intractable flank pain or urosepsis in pregnancy",
+        benefits: "Relief of maternal kidney obstruction, drainage of infected urine, and relief of severe flank pain with minimal/no fluoroscopy to protect the fetus.",
+        alternatives: "Percutaneous Nephrostomy (PCN) tube placement under ultrasound guidance, conservative analgesia (with risk of progressive sepsis/preterm labor), or early induction of labor (if near term).",
+        risks: [
+            "Extremely high risk of rapid stent calcification/encrustation due to pregnancy-associated hypercalciuria, requiring frequent exchanges (every 4-6 weeks) until delivery.",
+            "Severe stent-related symptoms including intense bladder spasms, pelvic pain, burning urination, frequency, urgency, and blood in urine (exacerbated by fetal head pressure).",
+            "Preterm labor, uterine contractions, or fetal distress induced by surgical stress, positioning, or anesthesia.",
+            "Systemic infection or maternal urosepsis, which poses a direct, life-threatening risk to both mother and fetus.",
+            "Anesthetic risks to the fetus including miscarriage, premature delivery, or developmental toxicity.",
+            "Spontaneous stent displacement, downward migration, or extrusion due to pregnancy-induced anatomical changes and ureteral dilatation.",
+            "Minimal radiation exposure to the fetus if limited fluoroscopy is absolutely necessary (ultrasound guidance will be prioritized)."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true,
+        hasStent: true
+    },
+    "THERAPEUTIC_CYSTOSCOPY_PROCEED": {
+        name: "Therapeutic Cystoscopy and Proceed",
+        category: "cat2",
+        diagnosis: "Hematuria / Lower Urinary Tract Symptoms (LUTS) / Bladder mass / Urethral stricture under evaluation",
+        benefits: "Direct endoscopic diagnostic mapping of the lower urinary tract with single-session therapeutic clearance or correction of encountered pathologies, avoiding repeated anesthesia.",
+        alternatives: "Diagnostic-only cystoscopy followed by delayed discussion and a separate scheduled therapeutic operation; non-invasive imaging alone (CT, MRI) which lacks biopsy capability.",
+        risks: [
+            "Mild to moderate hematuria (blood in urine) and painful urination (dysuria) for 24-72 hours post-procedure.",
+            "Urinary tract infection (UTI) or severe urosepsis requiring intravenous antibiotics and prolonged hospital stay.",
+            "Injury to the urethra or bladder neck, false passage creation, or bladder wall perforation requiring open surgical conversion and repair.",
+            "Acute urinary retention requiring temporary or prolonged catheterization.",
+            "If prostate or bladder neck tissue is resected/incised (e.g. TURP, BNI): retrograde ejaculation (dry orgasm) in >75% of patients, affecting future fertility.",
+            "If stricture division or urethral dilation is performed: high rate of stricture recurrence requiring regular self-dilations.",
+            "Temporary or permanent urinary incontinence due to sphincter stretching or injury.",
+            "Need to place an indwelling urethral catheter or a Double-J (DJ) stent with associated irritative symptoms.",
+            "Incomplete stone clearance or incomplete tumor resection necessitating secondary staged procedures."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true,
+        hasStent: true
+    },
+    "HOLEP": {
+        name: "Holmium Laser Enucleation of the Prostate (HoLEP)",
+        gender: "Male",
+        category: "cat2",
+        diagnosis: "Benign Prostatic Hyperplasia (BPH) with severe bladder outflow obstruction",
+        benefits: "Complete endoscopic laser enucleation of the obstructing prostatic adenoma, resulting in dramatic relief of lower urinary tract symptoms, high flow rates, low recurrence rates, and compatibility with large gland sizes.",
+        alternatives: "Transurethral Resection of the Prostate (TURP), open/simple prostatectomy, medical therapy, or long-term catheterization.",
+        risks: [
+            "Transient urinary incontinence (stress or urge-based) which is common initially and typically resolves within weeks to months.",
+            "Retrograde ejaculation (dry orgasm) in >75% of cases, impacting future fertility.",
+            "Prostatic capsule perforation with absorption of irrigation fluid, potentially requiring conversion to TURP or open surgery.",
+            "Ureteric orifice injury or postoperative ureteric stricture if resection is close to the orifices.",
+            "Transient or persistent dysuria (burning during urination), urgency, and mild hematuria.",
+            "Delayed hematuria (secondary bleeding) from tissue sloughing, requiring catheter insertion, irrigation, or re-operation.",
+            "Urethral stricture or bladder neck contracture in the long term.",
+            "Sepsis or urinary tract infection."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true
+    },
+    "TORSION_EXPLORATION": {
+        name: "Surgical Exploration of Acute Scrotum for Testicular Torsion",
+        gender: "Male",
+        category: "cat5",
+        diagnosis: "Acute scrotum / Suspected testicular torsion",
+        benefits: "Immediate surgical exploration to assess testicular viability, untwist (detort) the affected testis to restore blood flow, perform orchidopexy (anchoring) to prevent recurrence, and perform prophylactic contralateral orchidopexy.",
+        alternatives: "Manual detorsion (unreliable, temporary), observation (leads to testicular death, infection, and immunological destruction of the other testis).",
+        risks: [
+            "Necessity of unilateral orchiectomy (complete surgical removal of the testis) if the testis is found to be completely necrotic (dead) or non-viable.",
+            "Testicular atrophy (shrinkage and progressive loss of function/fertility) of the salvaged testis due to prolonged ischemia prior to surgery.",
+            "Immunological injury to the contralateral healthy testis due to exposure to testicular antigens from a necrotic testis, potentially impairing long-term fertility.",
+            "Scrotal hematoma, severe postoperative swelling, or wound infection.",
+            "Persistent scrotal pain or paresthesia from nerve irritation.",
+            "Recurrence of torsion if the anchoring sutures fail or pull through."
+        ],
+        isMajorSurgery: true
+    },
+    "ROBOTIC_SACROCOLPOPEXY": {
+        name: "Robotic / Laparoscopic Sacrocolpopexy",
+        gender: "Female",
+        category: "cat4",
+        diagnosis: "Pelvic organ prolapse / Vaginal vault prolapse / Symptomatic cystorectocele",
+        benefits: "Durable suspension and anatomical correction of vaginal vault prolapse using a synthetic mesh anchored to the sacral promontory to restore pelvic support.",
+        alternatives: "Vaginal sacrospinous fixation, colpocleisis (vaginal obliteration), pelvic floor physical therapy, or supportive pessary placement.",
+        risks: [
+            "Mesh erosion or extrusion into the vagina, bladder, or bowel (occurring in 2-5% of cases), which can cause chronic discharge, bleeding, or pain and requires complex surgical removal of mesh.",
+            "Bowel injury (perforation of rectum or small bowel) or postoperative bowel obstruction (ileus/adhesions) requiring conversion or re-operation.",
+            "Bladder or ureteral injury during dissection requiring immediate reconstruction, stenting, or catheterization.",
+            "Sacral osteomyelitis or discitis (infection of the sacral bone/disc) which is a rare but severe complication requiring prolonged IV antibiotics.",
+            "De novo urinary urgency, urge incontinence, or worsening of stress incontinence.",
+            "Dyspareunia (painful intercourse) or persistent pelvic pain.",
+            "Deep vein thrombosis (DVT) or pulmonary embolism."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true,
+        isLaparoscopicOrRobotic: true
+    },
+    "BMG_HARVEST": {
+        name: "Buccal Mucosa Graft (BMG) Harvest (Donor Site)",
+        category: "cat4",
+        diagnosis: "Urethral stricture disease requiring graft substitution / Ureteral stricture requiring graft reconstruction",
+        benefits: "Harvesting high-quality, hairless, wet mucosa from the inner cheek or lower lip to be used for reconstructive urethroplasty or ureteroplasty.",
+        alternatives: "Use of genital skin flaps, split-thickness skin grafts, or synthetic tissue (which have lower success and higher stricture recurrence rates).",
+        risks: [
+            "Persistent mouth pain, swelling, and severe difficulty opening the mouth (trismus) for several weeks.",
+            "Permanent numbness or altered sensation of the inner cheek, lower lip, or chin due to injury to distal branches of the mental/buccal nerves.",
+            "Damage to the parotid duct (Stensen's duct) opening inside the cheek, potentially leading to salivary gland swelling, sialadenitis, or duct stenosis.",
+            "Oral bleeding, hematoma, or infection of the donor site suture line.",
+            "Changes in speech, difficulty swallowing, or alteration in taste initially.",
+            "Graft retraction or scarring of the inner cheek, which may cause a pulling sensation during mouth movement."
+        ],
+        isMajorSurgery: true
+    },
+    "PCN_PLACEMENT": {
+        name: "Percutaneous Nephrostomy (PCN) Placement",
+        category: "cat1",
+        diagnosis: "Ureteric obstruction / Hydronephrosis / Urosepsis / Pyonephrosis / Urinary leak",
+        benefits: "Immediate urinary decompression of an obstructed, infected, or leaking kidney directly through the skin of the back under ultrasound/fluoroscopic guidance, preserving renal function and resolving sepsis.",
+        alternatives: "Retrograde ureteral stenting (DJS placement), open surgical drainage, or conservative management.",
+        risks: [
+            "Severe hemorrhage from renal parenchymal puncture requiring blood transfusion, emergency angioembolization, or nephrectomy.",
+            "Accidental puncture or perforation of adjacent organs, including the pleural cavity (causing pneumothorax or hemothorax requiring a chest tube) or bowel (colon).",
+            "Sepsis, bacteremia, or septic shock due to entry into an infected, pressurized collection of urine.",
+            "Urinoma (urine leak into the retroperitoneum) or retroperitoneal hematoma.",
+            "Catheter displacement, kinking, or blockage requiring urgent re-intervention or tube replacement.",
+            "Severe chronic pain or localized infection around the tube exit site on the back."
+        ],
+        hasNephrostomy: true
+    },
+    "SCROTAL_TRAUMA_EXPLORATION": {
+        name: "Surgical Exploration of Scrotum for Trauma",
+        gender: "Male",
+        category: "cat5",
+        diagnosis: "Scrotal trauma / Testicular rupture / Scrotal hematoma or hematocele",
+        benefits: "Immediate surgical evaluation of the scrotum and its contents, repair of ruptured testicular tunica albuginea, debridement of necrotic tissue, evacuation of tense hematoma to relieve pressure and prevent infection, and preservation of testicular tissue/hormone function.",
+        alternatives: "Conservative management (high risk of testicular necrosis, abscess, chronic pain, and loss of endocrine/exocrine function).",
+        risks: [
+            "Necessity of unilateral or bilateral orchiectomy (complete removal of the testis/testes) if the testicular tissue is found to be completely shattered, devitalized, or non-viable.",
+            "Postoperative testicular atrophy (testicular shrinkage) due to microvascular disruption from the trauma or surgical repair.",
+            "Severe wound infection, scrotal necrosis (Fournier's gangrene risk), or scrotal abscess.",
+            "Development of anti-sperm antibodies due to disruption of the blood-testis barrier, compromising long-term fertility.",
+            "Chronic scrotal pain, sensory loss, or scrotal hematoma re-accumulation.",
+            "Dehiscence (opening) of the scrotal skin incisions due to tissue swelling and high moisture."
+        ],
+        isMajorSurgery: true
+    },
+    "OPEN_URETEROLITHOTOMY": {
+        name: "Open / Laparoscopic Ureterolithotomy",
+        category: "cat3",
+        diagnosis: "Large / Impacted / Obstructing Ureteric Calculus",
+        benefits: "Direct surgical access to the ureter (via open incision or laparoscopy) to extract a large or impacted stone that cannot be managed endoscopically.",
+        alternatives: "Retrograde Intrarenal Surgery (RIRS), Ureteroscopic Lithotripsy (URSL), Extracorporeal Shockwave Lithotripsy (ESWL), or percutaneous antegrade ureterolithotripsy.",
+        risks: [
+            "Ureteral leakage or urinoma (urine collecting in retroperitoneum) requiring prolonged drain or double-J stent retention.",
+            "Delayed ureteral stricture (scarring and narrowing of the ureter) due to surgical incision or stone impaction, requiring reconstruction later.",
+            "Adjacent organ or vascular injury during dissection (renal vessels, iliac vessels, bowel).",
+            "Conversion from laparoscopic to open surgery in the event of dense adhesions or bleeding.",
+            "Hernia or flank muscle weakness at the incision site."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true,
+        hasStent: true,
+        isLaparoscopicOrRobotic: true
+    },
+    "ESWL": {
+        name: "Extracorporeal Shock Wave Lithotripsy (ESWL)",
+        category: "cat3",
+        diagnosis: "Renal calculus / Ureteric calculus",
+        benefits: "Non-invasive fragmentation of kidney or ureteric stone(s) using external shockwaves under ultrasound or X-ray localization, allowing stone fragments to pass naturally in urine.",
+        alternatives: "Retrograde Intrarenal Surgery (RIRS), Ureteroscopic Lithotripsy (URSL), Percutaneous Nephrolithotomy (PCNL), or conservative management.",
+        risks: [
+            "Severe renal hematoma (blood accumulation around or inside the kidney) which may require blood transfusion, hospitalization, or rarely surgical intervention or nephrectomy (loss of kidney).",
+            "Steinstrasse (stone street) - accumulation of fragmented stone dust or pieces blocking the ureter, causing severe obstruction, pain, or infection, and requiring urgent stent insertion or ureteroscopy.",
+            "Severe urosepsis (blood infection) due to release of bacteria from the fragmented stone, which can lead to life-threatening septic shock.",
+            "Cardiac arrhythmia (irregular heartbeat) triggered by shockwave pulses, necessitating session termination or pacemaker synchronization.",
+            "Severe skin bruising, blistering, or muscular pain in the flank or back area at the shockwave entry site.",
+            "Incomplete stone fragmentation necessitating repeated ESWL sessions or alternative endoscopic surgeries.",
+            "Haematuria (blood in urine) which is common and usually resolves within 24-72 hours."
+        ],
+        isMajorSurgery: false,
+        hasStent: false,
+        hasCatheter: false
+    },
+    "SIMPLE_NEPHRECTOMY": {
+        name: "Simple Nephrectomy (Open / Laparoscopic / Robotic)",
+        category: "cat6",
+        diagnosis: "Non-functioning kidney / Chronic pyelonephritis / Xanthogranulomatous pyelonephritis (XGP) / Severe hydronephrosis / Renovascular hypertension",
+        benefits: "Removal of the diseased, non-functioning, or chronically infected kidney to relieve chronic pain, prevent life-threatening recurrent sepsis, control severe hypertension, or prevent spread of infection.",
+        alternatives: "Long-term suppressive antibiotic therapy, permanent nephrostomy drainage, or conservative monitoring.",
+        risks: [
+            "Catastrophic hemorrhage from the renal hilum, major vessels (inferior vena cava, aorta), or lumbar vessels, requiring emergency conversion to open surgery, major blood transfusions, or emergency vascular repair.",
+            "Severe perinephric adhesions (especially in chronic infection or XGP) making dissection extremely difficult, increasing risk of adjacent organ injury (bowel, spleen, liver, pancreas, diaphragm).",
+            "Pleural injury (pneumothorax or hemothorax) due to close proximity to the ribs and diaphragm, requiring emergency chest tube insertion.",
+            "Acute kidney injury (AKI) or renal failure in the remaining kidney, which may necessitate temporary or permanent dialysis.",
+            "Incisional hernia, chronic flank bulge, or permanent numbness or pain along the incision site due to intercostal nerve injury.",
+            "Deep vein thrombosis (DVT) or life-threatening pulmonary embolism."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: true,
+        isLaparoscopicOrRobotic: true
+    },
+    "SIMPLE_ORCHIECTOMY": {
+        name: "Simple Orchiectomy (Unilateral / Bilateral)",
+        gender: "Male",
+        category: "cat5",
+        diagnosis: "Advanced prostate cancer (androgen deprivation therapy) / Testicular infection or abscess / Testicular necrosis / Testicular trauma",
+        benefits: "Removal of one or both testicles to eliminate infected or dead tissue, control advanced prostate cancer by reducing testosterone, or manage severe testicular trauma.",
+        alternatives: "For prostate cancer: medical castration (LHRH agonists/antagonists); for infection/trauma: prolonged high-dose antibiotics, scrotal drainage, or conservative management with high risk of sepsis.",
+        risks: [
+            "Bilateral procedure causes permanent infertility and loss of natural testosterone production, leading to hot flashes, loss of libido, erectile dysfunction, osteoporosis, and fatigue.",
+            "Severe scrotal hematoma (filling the scrotum with blood) requiring surgical evacuation or drainage.",
+            "Scrotal wound infection or wound breakdown, which can lead to Fournier's gangrene (life-threatening scrotal gangrene) requiring extensive debridement.",
+            "Chronic phantom testicular pain or scrotal hypersensitivity.",
+            "Psychological impact due to altered body image (testicular prostheses can be discussed as a future option)."
+        ],
+        isMajorSurgery: true,
+        hasCatheter: false
+    },
+    "FRENULOPLASTY": {
+        name: "Frenuloplasty of Penis",
+        gender: "Male",
+        category: "cat5",
+        diagnosis: "Frenulum breve / Frenular tear or bleeding during intercourse / Dyspareunia",
+        benefits: "Surgical release and plastic reconstruction of a short penile frenulum to relieve pain during erection or intercourse, prevent tearing/bleeding, and improve penile comfort.",
+        alternatives: "Steroid creams and stretching exercises, circumcision, or conservative avoidance of sexual activity.",
+        risks: [
+            "Bleeding or hematoma formation, as the frenular artery is highly vascular; may require secondary suturing.",
+            "Scar tissue contracture or recurrence of tightness, which may necessitate a secondary circumcision.",
+            "Altered or reduced sensitivity of the glans penis or frenular area.",
+            "Severe pain or tearing of sutures during nocturnal erections, requiring careful management.",
+            "Wound infection or delayed healing requiring avoidance of sexual activity for 4-6 weeks."
+        ],
+        isMajorSurgery: false,
+        hasCatheter: false
     }
 };
 
 /**
  * Compiles a detailed, medicolegally watertight consent text.
  */
-function compileConsentText(procKey, customDiag = "", customProc = "", customRisks = "", side = "N/A") {
+function compileConsentText(procKey, customDiag = "", customProc = "", customRisks = "", side = "N/A", isHighRisk = false, hasStentManual = false) {
     const procedure = URO_PROCEDURES[procKey];
     
     let diagnosis = customDiag;
@@ -1480,7 +1771,7 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     let alternatives = "";
     let specificRisks = [];
     let isMajor = false;
-    let hasStent = false;
+    let hasStent = !!hasStentManual; // Set explicitly by the manual toggle!
     let hasCatheter = false;
     let hasNephrostomy = false;
     let isBilateral = false;
@@ -1488,7 +1779,7 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
 
     if (procKey !== "OTHER" && procedure) {
         diagnosis = customDiag || procedure.diagnosis;
-        if (procKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" || procKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED") {
+        if (procKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" || procKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED" || procKey === "THERAPEUTIC_CYSTOSCOPY_PROCEED") {
             procedurePlanned = customProc || "Cystoscopy and Proceed";
         } else {
             procedurePlanned = customProc || procedure.name;
@@ -1497,7 +1788,7 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
         alternatives = procedure.alternatives;
         specificRisks = [...procedure.risks];
         isMajor = !!procedure.isMajorSurgery;
-        hasStent = !!procedure.hasStent;
+        // hasStent is set manually via parameter
         hasCatheter = !!procedure.hasCatheter;
         hasNephrostomy = !!procedure.hasNephrostomy;
         isBilateral = !!procedure.isBilateral || side === "Bilateral";
@@ -1526,15 +1817,15 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     }
 
     let text = `DIAGNOSIS: ${diagnosis}\n`;
-    text += `PROCEDURE PLANNED: ${procedurePlanned}\n\n`;
-    text += `BENEFITS EXPECTED:\n${benefits}\n\n`;
-    text += `ALTERNATIVES DISCUSSED & REFUSED:\n${alternatives}\n\n`;
+    text += `PROCEDURE PLANNED: ${procedurePlanned}\n`;
+    text += `BENEFITS EXPECTED:\n${benefits}\n`;
+    text += `ALTERNATIVES DISCUSSED & REFUSED:\n${alternatives}\n`;
     
     text += `SPECIFIC RISKS & COMPLICATIONS (Read and Explained):\n`;
     text += `I understand that all surgeries carry risks. Specific to this procedure, I have been informed of the following risks (which I accept): `;
     
     const formattedRisks = specificRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ");
-    text += formattedRisks + ".\n\n";
+    text += formattedRisks + ".\n";
 
     if (isMajor) {
         text += `GENERAL MAJOR SURGICAL RISKS: `;
@@ -1545,11 +1836,11 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
             "Anesthesia Risks: Risks associated with general, spinal, or epidural anesthesia including allergic reaction, respiratory failure, cardiac arrest, or death",
             "Adjacent Organ Injury: Risk of accidental damage to surrounding structures (bowel, bladder, ureter, nerves, major blood vessels) requiring immediate repair during the surgery"
         ];
-        text += majorRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ") + ".\n\n";
+        text += majorRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ") + ".\n";
     }
 
     text += `\nEXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:\n`;
-    text += `I authorize the surgical team to alter the procedure ONLY IF a life-threatening emergency arises, or if stopping the surgery to obtain fresh consent would cause me severe medical harm. Specifically, I consent to:\n`;
+    text += `I authorize the surgical team to alter the procedure ONLY IF a life-threatening emergency arises, or if stopping the surgery to obtain fresh consent would cause me medical harm. Specifically, I consent to:\n`;
     if (hasStent) {
         text += `- Abandoning the primary endoscopic procedure and deploying a DJ stent for "passive dilation" if the ureter is too tight to safely admit the instrument, acknowledging a staged procedure will be needed later.\n`;
     }
@@ -1566,9 +1857,11 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
 
     if (hasStent) {
         text += `\nCRITICAL DECLARATION REGARDING DOUBLE-J (DJ) STENT:\n`;
-        text += `I have been explicitly informed that a DJ Stent will likely be placed inside my body. I understand this is a TEMPORARY foreign body. The treating doctor has informed me that it MUST be removed or exchanged within the specific timeframe advised at discharge.\n`;
-        text += `I fully understand that FAILURE TO REPORT for stent removal on time can and will lead to severe, irreversible complications including stent encrustation (stone formation over the tube), permanent kidney failure, life-threatening infection, and the need for multiple complex open surgeries.\n`;
-        text += `By signing, I take absolute personal responsibility for my follow-up for stent removal. I explicitly absolve the operating surgeons and the hospital of any medicolegal liability, loss of organ function, or mortality arising from my failure to follow up for stent removal.\n`;
+        text += `1. I have been explicitly informed that a Double-J (DJ) Ureteral Stent will be placed inside my body. I understand that this stent is a TEMPORARY foreign body and DOES NOT DISSOLVE.\n`;
+        text += `2. I have been informed that the stent MUST be removed or exchanged within the timeframe specified by my surgeon (typically 4 to 12 weeks, and absolutely NOT exceeding 6 months for standard stents).\n`;
+        text += `3. I understand that FAILURE TO RETURN for stent removal will lead to severe, irreversible medical complications, including but not limited to: severe stent encrustation (stone formation over the tube), complete loss of kidney function (renal failure necessitating lifelong dialysis or kidney removal), life-threatening urosepsis (severe blood infection), and the necessity of highly complex open or endoscopic surgeries to extract the calcified stent.\n`;
+        text += `4. I have been warned of the common, expected stent symptoms (such as mild blood in the urine, bladder spasms, pain in the back/flank during urination, and urinary frequency/urgency) and when to seek emergency care (high fever, severe chills, inability to pass urine, or passing large blood clots).\n`;
+        text += `5. By signing, I accept absolute personal responsibility for scheduling and attending my follow-up appointment for stent removal or exchange. I explicitly acknowledge that the hospital and the surgical team are not responsible for tracking my stent, and I release them from any and all clinical and medicolegal liability, including organ loss, permanent disability, or mortality, arising from my failure to report for timely stent removal.\n`;
     }
 
     if (hasCatheter) {
@@ -1579,6 +1872,21 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     if (hasNephrostomy) {
         text += `\nCRITICAL DECLARATION REGARDING NEPHROSTOMY TUBE:\n`;
         text += `I understand that an external nephrostomy tube will be draining my kidney directly. I agree to maintain tube hygiene, avoid pulling or displacement, and report immediately for block, leak, or fever. I accept responsibility for scheduled removal or exchange of the tube.\n`;
+    }
+
+    if (isHighRisk) {
+        text += `\nSPECIAL HIGH-RISK CONSENT ADDENDUM:\n`;
+        text += `I explicitly understand that due to the patient's advanced age, severe pre-existing medical conditions (comorbidities such as heart disease, lung disease, kidney impairment, liver dysfunction, diabetes, or blood clotting disorders), or the complex/emergency nature of this procedure, the surgical and anesthetic risks are SIGNIFICANTLY HEIGHTENED.\n`;
+        text += `Specifically, I have been informed of and accept the high probability of the following outcomes:\n`;
+        text += `- The necessity of post-operative admission to the Intensive Care Unit (ICU) or High Dependency Unit (HDU) for close monitoring.\n`;
+        text += `- The potential need for prolonged mechanical ventilation (respiratory support/breathing machine) and delayed extubation.\n`;
+        text += `- The requirement for intravenous inotropic or vasopressor support (medications to maintain blood pressure and heart function) due to hemodynamic instability.\n`;
+        text += `- A significantly prolonged hospital stay, with a higher risk of hospital-acquired infections, deep vein thrombosis, and physical deconditioning.\n`;
+        text += `- A heightened risk of major cardiovascular and cerebrovascular events, including heart attack (myocardial infarction), cardiac arrest, stroke, and multi-organ failure.\n`;
+        text += `- Acute kidney injury (AKI) which may require emergency temporary or permanent hemodialysis.\n`;
+        text += `- An increased risk of massive intraoperative hemorrhage requiring multiple blood transfusions or emergency surgical re-exploration.\n`;
+        text += `- A recognized, elevated risk of mortality, including on-table death during the procedure or death in the early post-operative period.\n`;
+        text += `Having fully understood these catastrophic risks, I consent to proceed with the proposed surgery under these high-risk conditions, and I accept the clinical decisions made by the surgical and anesthesia teams in managing these contingencies.\n`;
     }
 
     return text;
