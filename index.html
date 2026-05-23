@@ -1786,14 +1786,13 @@
             // DRAW THE COMPLICATIONS BOX TEXT
             const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
             const boxX = Math.round(page1Width * (calib.boxX / 100));
-            // 8% right margin gives a safe buffer so text never crosses the box border
-            const boxWidthPoints = page1Width - boxX - Math.round(page1Width * 0.08);
+            // 5% right margin - just enough to prevent overflow without wasting space
+            const boxWidthPoints = page1Width - boxX - Math.round(page1Width * 0.05);
             
-            // Helvetica average glyph width at small sizes is ~0.58× font size.
-            // Dividing boxWidth by (fontSize × 0.58) gives the correct chars-per-line.
+            // 0.50 is the balanced ratio: 0.42 caused overflow, 0.58 was too conservative
             const contentFontSize = 6.8;
             const contentLineHeight = 8.5;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.2 : (contentFontSize * 0.58)));
+            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.2 : (contentFontSize * 0.50)));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
             let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
