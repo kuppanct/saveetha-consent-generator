@@ -762,17 +762,9 @@
             </div>
 
             <div id="approachGroup" style="display:none; margin-bottom: 16px;">
-                <label>Surgical Approach</label>
-                <div style="display:flex; gap:16px; margin-top:8px; flex-wrap:wrap;">
-                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
-                        <input type="checkbox" id="approachOpen" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Open
-                    </label>
-                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
-                        <input type="checkbox" id="approachLap" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Laparoscopic
-                    </label>
-                    <label style="display:flex; align-items:center; gap:6px; text-transform:none; font-weight:normal; font-size:14px; color:var(--text-main); cursor:pointer;">
-                        <input type="checkbox" id="approachRobotic" checked onchange="triggerConsentCompilation()" style="width:auto; margin:0;"> Robotic
-                    </label>
+                <label id="approachGroupLabel">Procedure Variant</label>
+                <div id="approachCheckboxes" style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
+                    <!-- Dynamically populated by onProcedureDropdownChange() -->
                 </div>
             </div>
 
@@ -897,7 +889,7 @@
 </div>
 
 <!-- Load procedures database script -->
-<script src="procedures.js?v=12"></script>
+<script src="procedures.js?v=13"></script>
 
 <script>
     // Global State
@@ -1231,22 +1223,32 @@
             stentToggle.checked = false;
         }
 
-        // Configure and toggle the approach checkbox group based on the procedure's approach options
+        // Configure and toggle the approach checkbox group based on the procedure's approachOptions
         const approachGroup = document.getElementById("approachGroup");
+        const approachContainer = document.getElementById("approachCheckboxes");
+        approachContainer.innerHTML = ""; // clear old checkboxes
         if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
             const procObj = window.URO_PROCEDURES[selectedProcedureKey];
-            const procName = procObj.name;
-            // Show approach selector only if procedure explicitly offers multiple approaches
-            const hasOpenOption = procName.includes("Open");
-            const hasLapOption = procName.includes("Laparoscopic") || procName.includes("Lap ");
-            const hasRoboticOption = procName.includes("Robotic");
-            const hasApproachOptions = (hasOpenOption || hasLapOption || hasRoboticOption) &&
-                (procName.includes(" / ") || procName.includes(" or "));
-            if (hasApproachOptions) {
+            const opts = procObj.approachOptions; // e.g. ["Open","Laparoscopic","Robotic"]
+            if (opts && opts.length > 0) {
+                // Set label based on type of options
+                const isApproachType = opts.some(o => ["Open","Laparoscopic","Robotic"].includes(o));
+                document.getElementById("approachGroupLabel").textContent = isApproachType ? "Surgical Approach" : "Procedure Variant";
+                opts.forEach((opt, i) => {
+                    const lbl = document.createElement("label");
+                    lbl.style.cssText = "display:flex;align-items:center;gap:6px;text-transform:none;font-weight:normal;font-size:14px;color:var(--text-main);cursor:pointer;";
+                    const cb = document.createElement("input");
+                    cb.type = "checkbox";
+                    cb.id = `approachOpt_${i}`;
+                    cb.value = opt;
+                    cb.checked = true;
+                    cb.style.cssText = "width:auto;margin:0;";
+                    cb.addEventListener("change", triggerConsentCompilation);
+                    lbl.appendChild(cb);
+                    lbl.appendChild(document.createTextNode(" " + opt));
+                    approachContainer.appendChild(lbl);
+                });
                 approachGroup.style.display = "block";
-                document.getElementById("approachOpen").checked = hasOpenOption;
-                document.getElementById("approachLap").checked = hasLapOption;
-                document.getElementById("approachRobotic").checked = hasRoboticOption;
             } else {
                 approachGroup.style.display = "none";
             }
@@ -1310,25 +1312,41 @@
     document.getElementById("customRisks").addEventListener("input", triggerConsentCompilation);
 
     function getSelectedApproachString() {
-        const approaches = [];
-        if (document.getElementById("approachOpen").checked) approaches.push("Open");
-        if (document.getElementById("approachLap").checked) approaches.push("Laparoscopic");
-        if (document.getElementById("approachRobotic").checked) approaches.push("Robotic");
-        
-        if (approaches.length === 0) return "Surgical";
-        return approaches.join(" / ");
+        // Collect all checked approach checkboxes (dynamically generated)
+        const checked = [];
+        document.querySelectorAll("#approachCheckboxes input[type=checkbox]:checked").forEach(cb => {
+            checked.push(cb.value);
+        });
+        if (checked.length === 0) return "Surgical";
+        return checked.join(" / ");
     }
 
-    function formatProcedureName(name, approachStr) {
-        const parenRegex = /\((Open|Laparoscopic|Robotic-Assisted|Robotic|or|Assisted|\s|\/|\-)+\)/i;
+    function formatProcedureName(name, approachStr, originalOptions) {
+        // If the procedure has approachOptions, replace the full options string with the selected ones
+        if (originalOptions && originalOptions.length > 0) {
+            const fullStr = originalOptions.join(" / ");
+            if (name.includes(fullStr)) {
+                return name.replace(fullStr, approachStr);
+            }
+            // Try replacing inside parentheses: (A / B / C) -> (selectedStr)
+            const parenStr = "(" + fullStr + ")";
+            if (name.includes(parenStr)) {
+                return name.replace(parenStr, "(" + approachStr + ")");
+            }
+        }
+        // Fallback: generic paren replacement
+        const parenRegex = /\(([^)]+\/[^)]+)\)/;
         if (parenRegex.test(name)) {
             return name.replace(parenRegex, `(${approachStr})`);
         }
-        if (name.includes("Open / Laparoscopic")) {
-            return name.replace("Open / Laparoscopic", approachStr);
-        }
-        if (name.includes("Robotic-Assisted or Laparoscopic")) {
-            return name.replace("Robotic-Assisted or Laparoscopic", approachStr);
+        // Fallback: replace first " / "-joined sequence found in name
+        const firstSlash = name.indexOf(" / ");
+        if (firstSlash !== -1) {
+            // Find full slash-separated segment
+            let start = firstSlash;
+            while (start > 0 && name[start-1] !== ' ') start--;
+            let end = name.lastIndexOf(" / ") + name.split(" / ").pop().length + 3;
+            return name.substring(0, start).trimEnd() + " " + approachStr + name.substring(end);
         }
         return name;
     }
@@ -1346,15 +1364,9 @@
         } else if (window.URO_PROCEDURES[selectedProcedureKey]) {
             const procObj = window.URO_PROCEDURES[selectedProcedureKey];
             let name = procObj.name;
-            // Show approach selector only if procedure name contains multi-approach separator
-            const hasOpenOption = name.includes("Open");
-            const hasLapOption = name.includes("Laparoscopic") || name.includes("Lap ");
-            const hasRoboticOption = name.includes("Robotic");
-            const hasApproach = (hasOpenOption || hasLapOption || hasRoboticOption) &&
-                (name.includes(" / ") || name.includes(" or "));
-            if (hasApproach) {
+            if (procObj.approachOptions && procObj.approachOptions.length > 0) {
                 const approachStr = getSelectedApproachString();
-                name = formatProcedureName(name, approachStr);
+                name = formatProcedureName(name, approachStr, procObj.approachOptions);
             }
             proc = name;
         }

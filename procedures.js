@@ -226,6 +226,7 @@ const URO_PROCEDURES = {
     },
     "CIRCUMCISION": {
         name: "Conventional / Stapler Circumcision",
+        approachOptions: ["Conventional", "Stapler"],
         gender: "Male",
         category: "cat2",
         diagnosis: "Phimosis / Paraphimosis / Recurrent Balanoposthitis",
@@ -240,6 +241,7 @@ const URO_PROCEDURES = {
     },
     "MEATOTOMY": {
         name: "Meatotomy / Meatoplasty",
+        approachOptions: ["Meatotomy", "Meatoplasty"],
         category: "cat2",
         diagnosis: "Meatal Stenosis (narrowing of the urethral opening)",
         benefits: "Surgical widening of the external urethral meatus to correct a high-velocity stream and voiding difficulty.",
@@ -268,6 +270,7 @@ const URO_PROCEDURES = {
     },
     "TURBT": {
         name: "Transurethral Resection of Bladder Tumor (TURBT / ERBT)",
+        approachOptions: ["TURBT", "ERBT"],
         category: "cat2",
         diagnosis: "Bladder Tumor / Mass",
         benefits: "Complete endoscopic resection of bladder tumor for diagnostic staging and therapeutic clearance.",
@@ -284,6 +287,7 @@ const URO_PROCEDURES = {
     },
     "CYSTOLITHOLAPAXY": {
         name: "Cystolitholapaxy (Laser / Pneumatic)",
+        approachOptions: ["Laser", "Pneumatic"],
         category: "cat2",
         diagnosis: "Urinary Bladder Calculus (Stone)",
         benefits: "Endoscopic fragmentation and removal of bladder stones.",
@@ -315,6 +319,7 @@ const URO_PROCEDURES = {
     },
     "MALE_IMPLANTS": {
         name: "Minimally Invasive Implants (Rezum / UroLift)",
+        approachOptions: ["Rezum", "UroLift"],
         gender: "Male",
         category: "cat2",
         diagnosis: "Benign Prostatic Hyperplasia (BPH)",
@@ -344,7 +349,7 @@ const URO_PROCEDURES = {
         hasCatheter: true
     },
     "MALE_CYSTOSCOPY_PROCEED_COMBINED": {
-        name: "Cystoscopy and Proceed (Combined Consent for BNI/TURP/OIU/TURBT/Cystolitholapaxy/etc.)",
+        name: "Cystoscopy and Proceed",
         gender: "Male",
         category: "cat2",
         diagnosis: "Bladder Outflow Obstruction / Hematuria / Bladder Mass / Urethral Stricture under evaluation",
@@ -409,6 +414,7 @@ const URO_PROCEDURES = {
     },
     "FEMALE_BIOPSY": {
         name: "Cold Cup / Punch Bladder Biopsy",
+        approachOptions: ["Cold Cup", "Punch"],
         gender: "Female",
         category: "cat2",
         diagnosis: "Suspected Bladder Pathology / Mucosal lesion",
@@ -449,7 +455,7 @@ const URO_PROCEDURES = {
         ]
     },
     "FEMALE_CYSTOSCOPY_PROCEED_COMBINED": {
-        name: "Cystoscopy and Proceed (Combined Consent for Dilatation/Hydrodistention/Biopsy/SPC/Caruncle/TURBT)",
+        name: "Cystoscopy and Proceed",
         gender: "Female",
         category: "cat2",
         diagnosis: "Hematuria / Recurrent UTI / Bladder Mass / Voiding Dysfunction under evaluation",
@@ -695,6 +701,7 @@ const URO_PROCEDURES = {
     },
     "DJS_REMOVAL_UNILATERAL": {
         name: "Unilateral Cystoscopic DJS Removal / Exchange",
+        approachOptions: ["Removal", "Exchange"],
         category: "cat3",
         diagnosis: "Indwelling Ureteric DJ Stent (Unilateral)",
         benefits: "Safe cystoscopic extraction or exchange of the temporary internal stent.",
@@ -709,6 +716,7 @@ const URO_PROCEDURES = {
     },
     "DJS_REMOVAL_BILATERAL": {
         name: "Bilateral Cystoscopic DJS Removal / Exchange",
+        approachOptions: ["Removal", "Exchange"],
         category: "cat3",
         diagnosis: "Bilateral Indwelling Ureteric DJ Stents",
         benefits: "Cystoscopic removal or exchange of both stents under a single procedure.",
@@ -739,6 +747,7 @@ const URO_PROCEDURES = {
     },
     "SUBSTITUTION_URETHROPLASTY": {
         name: "Substitution Urethroplasty (Buccal Mucosa / Skin Graft)",
+        approachOptions: ["Buccal Mucosa", "Skin Graft"],
         category: "cat4",
         diagnosis: "Long-segment Urethral Stricture / Panurethral stricture",
         benefits: "Reconstruction of the urethra using buccal mucosa graft or skin graft for long strictures.",
@@ -770,6 +779,7 @@ const URO_PROCEDURES = {
     },
     "PYELOPLASTY": {
         name: "Open / Laparoscopic / Robotic Anderson-Hynes Pyeloplasty",
+        approachOptions: ["Open", "Laparoscopic", "Robotic"],
         category: "cat4",
         diagnosis: "Ureteropelvic Junction Obstruction (UPJO)",
         benefits: "Surgical reconstruction of the UPJ to relieve obstruction, drain the kidney, and preserve renal function.",
@@ -928,6 +938,7 @@ const URO_PROCEDURES = {
     },
     "SLING": {
         name: "Mid-Urethral Sling (TVT / TOT)",
+        approachOptions: ["TVT", "TOT"],
         gender: "Female",
         category: "cat4",
         diagnosis: "Female Stress Urinary Incontinence (SUI)",
@@ -1060,6 +1071,7 @@ const URO_PROCEDURES = {
     },
     "LAP_VARICOCELECTOMY": {
         name: "Laparoscopic / Open Varicocelectomy",
+        approachOptions: ["Laparoscopic", "Open"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Varicocele with subfertility or scrotal pain",
@@ -1077,6 +1089,7 @@ const URO_PROCEDURES = {
     },
     "TESE": {
         name: "Testicular Sperm Extraction (TESE / Micro-TESE)",
+        approachOptions: ["TESE", "Micro-TESE"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Azoospermia (Non-obstructive or Obstructive)",
@@ -1162,6 +1175,7 @@ const URO_PROCEDURES = {
     },
     "PEYRONIES_CORRECTION": {
         name: "Surgical Correction of Peyronie's Disease (Plication / Grafting)",
+        approachOptions: ["Plication", "Grafting"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Peyronie's Disease (penile curvature causing painful or impossible intercourse)",
@@ -1177,6 +1191,7 @@ const URO_PROCEDURES = {
     },
     "HYDROCELE_EXCISION": {
         name: "Excision of Hydrocele (Lord's / Jaboulay's Repair)",
+        approachOptions: ["Lord's", "Jaboulay's"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Hydrocele (fluid accumulation around the testis)",
@@ -1192,6 +1207,7 @@ const URO_PROCEDURES = {
     },
     "SPERMATOCELECTOMY": {
         name: "Spermatocelectomy / Epididymectomy",
+        approachOptions: ["Spermatocelectomy", "Epididymectomy"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Spermatocele / Epididymal cyst / Chronic epididymitis",
@@ -1219,6 +1235,7 @@ const URO_PROCEDURES = {
     },
     "RADICAL_PROSTATECTOMY": {
         name: "Radical Prostatectomy (Open / Laparoscopic / Robotic-Assisted)",
+        approachOptions: ["Open", "Laparoscopic", "Robotic-Assisted"],
         gender: "Male",
         category: "cat6",
         diagnosis: "Localized Prostate Cancer",
@@ -1251,6 +1268,7 @@ const URO_PROCEDURES = {
     },
     "RADICAL_NEPHRECTOMY": {
         name: "Radical Nephrectomy (Open / Laparoscopic / Robotic)",
+        approachOptions: ["Open", "Laparoscopic", "Robotic"],
         category: "cat6",
         diagnosis: "Renal Cell Carcinoma (Renal Mass) / Non-functioning kidney",
         benefits: "Removal of the entire kidney, surrounding fat, and adrenal gland (optional) to cure kidney cancer.",
@@ -1267,6 +1285,7 @@ const URO_PROCEDURES = {
     },
     "PARTIAL_NEPHRECTOMY": {
         name: "Partial Nephrectomy / Nephron-Sparing Surgery",
+        approachOptions: ["Partial Nephrectomy", "Nephron-Sparing Surgery"],
         category: "cat6",
         diagnosis: "Small Renal Mass (kidney cancer)",
         benefits: "Removal of the tumor while preserving the rest of the kidney to maintain long-term renal function.",
@@ -1300,6 +1319,7 @@ const URO_PROCEDURES = {
     },
     "RADICAL_CYSTECTOMY": {
         name: "Radical Cystectomy (Open / Laparoscopic / Robotic)",
+        approachOptions: ["Open", "Laparoscopic", "Robotic"],
         category: "cat6",
         diagnosis: "Muscle-Invasive Bladder Cancer",
         benefits: "Removal of the entire bladder, prostate (in men), uterus/ovaries (in women) to cure aggressive bladder cancer.",
@@ -1380,6 +1400,7 @@ const URO_PROCEDURES = {
     },
     "PENECTOMY": {
         name: "Partial Penectomy / Total Penectomy with Perineal Urethrostomy",
+        approachOptions: ["Partial Penectomy", "Total Penectomy with Perineal Urethrostomy"],
         gender: "Male",
         category: "cat6",
         diagnosis: "Penile Cancer",
@@ -1412,6 +1433,7 @@ const URO_PROCEDURES = {
     },
     "ADRENALECTOMY": {
         name: "Adrenalectomy (Open / Laparoscopic / Robotic)",
+        approachOptions: ["Open", "Laparoscopic", "Robotic"],
         category: "cat6",
         diagnosis: "Adrenal Mass / Pheochromocytoma / Cushing's disease",
         benefits: "Surgical removal of the adrenal gland to treat tumors or hormonal hypersecretion.",
@@ -1630,6 +1652,7 @@ const URO_PROCEDURES = {
     },
     "ROBOTIC_SACROCOLPOPEXY": {
         name: "Robotic / Laparoscopic Sacrocolpopexy",
+        approachOptions: ["Robotic", "Laparoscopic"],
         gender: "Female",
         category: "cat4",
         diagnosis: "Pelvic organ prolapse / Vaginal vault prolapse / Symptomatic cystorectocele",
@@ -1699,6 +1722,7 @@ const URO_PROCEDURES = {
     },
     "OPEN_URETEROLITHOTOMY": {
         name: "Open / Laparoscopic Ureterolithotomy",
+        approachOptions: ["Open", "Laparoscopic"],
         category: "cat3",
         diagnosis: "Large / Impacted / Obstructing Ureteric Calculus",
         benefits: "Direct surgical access to the ureter (via open incision or laparoscopy) to extract a large or impacted stone that cannot be managed endoscopically.",
@@ -1736,6 +1760,7 @@ const URO_PROCEDURES = {
     },
     "SIMPLE_NEPHRECTOMY": {
         name: "Simple Nephrectomy (Open / Laparoscopic / Robotic)",
+        approachOptions: ["Open", "Laparoscopic", "Robotic"],
         category: "cat6",
         diagnosis: "Non-functioning kidney / Chronic pyelonephritis / Xanthogranulomatous pyelonephritis (XGP) / Severe hydronephrosis / Renovascular hypertension",
         benefits: "Removal of the diseased, non-functioning, or chronically infected kidney to relieve chronic pain, prevent life-threatening recurrent sepsis, control severe hypertension, or prevent spread of infection.",
@@ -1754,6 +1779,7 @@ const URO_PROCEDURES = {
     },
     "SIMPLE_ORCHIECTOMY": {
         name: "Simple Orchiectomy (Unilateral / Bilateral)",
+        approachOptions: ["Unilateral", "Bilateral"],
         gender: "Male",
         category: "cat5",
         diagnosis: "Advanced prostate cancer (androgen deprivation therapy) / Testicular infection or abscess / Testicular necrosis / Testicular trauma",
