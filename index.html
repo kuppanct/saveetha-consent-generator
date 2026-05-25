@@ -830,8 +830,10 @@
                     <div class="sig-pad-wrapper">
                         <canvas id="surgeonSignatureCanvas"></canvas>
                     </div>
-                    <div class="sig-pad-actions" style="margin-bottom:12px;">
-                        <button class="btn btn-secondary btn-sm" onclick="clearSurgeonSignature()">Clear Signature</button>
+                    <div class="sig-pad-actions" style="margin-bottom:12px; display:flex; gap:8px; flex-wrap:wrap;">
+                        <button class="btn btn-secondary btn-sm" onclick="clearSurgeonSignature()">Clear</button>
+                        <button class="btn btn-secondary btn-sm" onclick="saveSurgeonSignature()" style="background:var(--accent-bg); color:var(--primary); border:1px solid var(--primary);">💾 Save as Default</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadSurgeonSignature()" style="background:var(--accent-bg); color:var(--accent); border:1px solid var(--accent);">📂 Load Saved</button>
                     </div>
                     
                     <div class="form-group">
@@ -889,7 +891,7 @@
 </div>
 
 <!-- Load procedures database script -->
-<script src="procedures.js?v=13"></script>
+<script src="procedures.js?v=14"></script>
 
 <script>
     // Global State
@@ -971,9 +973,10 @@
             switchCalibPreviewPage(currentPreviewPage);
         });
 
-        // Sync operating consultant and registration number
+        // Sync operating consultant and registration number + auto-load saved signature
         document.getElementById("consultant").addEventListener("change", () => {
             toggleCustomConsultant();
+            autoLoadConsultantSignature();
         });
         document.getElementById("customConsultant").addEventListener("input", () => {
             updateSurgeonNameField();
@@ -1123,6 +1126,65 @@
 
     function clearSignature() {
         signaturePad.clear();
+    }
+
+    function clearSurgeonSignature() {
+        surgeonSignaturePad.clear();
+    }
+
+    // --- Consultant Signature Store ---
+    function getActiveConsultantName() {
+        const val = document.getElementById("consultant").value;
+        if (val === "CUSTOM") {
+            return document.getElementById("customConsultant").value.trim();
+        }
+        return val;
+    }
+
+    function saveSurgeonSignature() {
+        if (surgeonSignaturePad.isEmpty()) {
+            alert("Please draw the surgeon signature first before saving.");
+            return;
+        }
+        const name = getActiveConsultantName();
+        if (!name) { alert("Please select a consultant first."); return; }
+        const dataUrl = surgeonSignaturePad.toDataURL("image/png");
+        localStorage.setItem(`uro-sig-${name}`, dataUrl);
+        // Visual feedback
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = "✅ Saved!";
+        setTimeout(() => btn.textContent = orig, 1500);
+    }
+
+    function loadSurgeonSignature() {
+        const name = getActiveConsultantName();
+        if (!name) { alert("Please select a consultant first."); return; }
+        const dataUrl = localStorage.getItem(`uro-sig-${name}`);
+        if (!dataUrl) {
+            alert(`No saved signature found for ${name}.\nDraw the signature and click 💾 Save as Default.`);
+            return;
+        }
+        surgeonSignaturePad.clear();
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.getElementById('surgeonSignatureCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            // Re-sync signature pad internals by loading from data URL
+            surgeonSignaturePad.fromDataURL(dataUrl);
+        };
+        img.src = dataUrl;
+    }
+
+    function autoLoadConsultantSignature() {
+        const name = getActiveConsultantName();
+        if (!name) return;
+        const dataUrl = localStorage.getItem(`uro-sig-${name}`);
+        if (dataUrl) {
+            surgeonSignaturePad.clear();
+            surgeonSignaturePad.fromDataURL(dataUrl);
+        }
     }
 
     // Populate Grouped Urology Procedures Dropdown

@@ -574,6 +574,7 @@ const URO_PROCEDURES = {
     },
     "PCNL_UNILATERAL": {
         name: "Percutaneous Nephrolithotomy (PCNL) with Unilateral DJS / Nephrostomy",
+        approachOptions: ["DJS", "Nephrostomy"],
         category: "cat3",
         diagnosis: "Large / Staghorn Renal Calculus (Unilateral)",
         benefits: "Direct removal of large stones through a small keyhole incision in the back.",
@@ -591,6 +592,7 @@ const URO_PROCEDURES = {
     },
     "PCNL_BILATERAL": {
         name: "Percutaneous Nephrolithotomy (PCNL) with Bilateral DJS / Nephrostomy",
+        approachOptions: ["DJS", "Nephrostomy"],
         category: "cat3",
         diagnosis: "Bilateral Large Renal Calculi",
         benefits: "Bilateral renal stone clearance under single anesthesia (usually staged but occasionally simultaneous).",
