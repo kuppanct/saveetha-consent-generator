@@ -890,6 +890,81 @@
 
 </div>
 
+<!-- =====================================================
+     ADMIN: Consultant Signature Capture Modal
+     ===================================================== -->
+<button id="adminSigBtn" onclick="openAdminSigModal()"
+    title="Capture Consultant Signatures"
+    style="position:fixed; bottom:24px; right:24px; z-index:9999;
+           background:var(--primary); color:#fff; border:none; border-radius:50px;
+           padding:10px 18px; font-size:13px; font-weight:600; cursor:pointer;
+           box-shadow:0 4px 16px rgba(0,0,0,0.3); display:flex; align-items:center; gap:6px;">
+    ⚙️ Capture Signatures
+</button>
+
+<div id="adminSigModal" style="display:none; position:fixed; inset:0; z-index:10000;
+     background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+    <div style="background:var(--surface); border-radius:16px; padding:28px; width:min(96vw,520px);
+                max-height:90vh; overflow-y:auto; box-shadow:0 8px 40px rgba(0,0,0,0.5);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <h2 style="font-size:17px; color:var(--primary); margin:0;">⚙️ Consultant Signature Capture</h2>
+            <button onclick="closeAdminSigModal()" style="background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-muted);">✕</button>
+        </div>
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+            Select a consultant, draw their signature below, then click <strong>Export Code</strong>.
+            Paste the generated line into <code>signatures.js</code> and push to GitHub — signatures will then load on <em>every</em> device automatically.
+        </p>
+        <div style="margin-bottom:14px;">
+            <label style="font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;">Consultant</label>
+            <select id="adminConsultantSelect" style="width:100%; margin-top:6px; padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:var(--input-bg); color:var(--text-main); font-size:14px;">
+                <option value="Prof. Muthulatha N">Prof. Muthulatha N</option>
+                <option value="Prof. Siva Sankar">Prof. Siva Sankar</option>
+                <option value="Prof. Griffin">Prof. Griffin</option>
+                <option value="Dr. Dev Krishna Barathi">Dr. Dev Krishna Barathi</option>
+                <option value="Dr. Mohammed Farooq">Dr. Mohammed Farooq</option>
+                <option value="Dr. Arvind Ramachandran">Dr. Arvind Ramachandran</option>
+                <option value="Dr. Kuppan C T">Dr. Kuppan C T</option>
+                <option value="Dr. Shubham Choudary">Dr. Shubham Choudary</option>
+                <option value="Dr. Ashirwad">Dr. Ashirwad</option>
+                <option value="Dr. Utkarsh Sharma">Dr. Utkarsh Sharma</option>
+                <option value="Dr. Kiran Kumar B.">Dr. Kiran Kumar B.</option>
+            </select>
+        </div>
+        <div style="margin-bottom:10px;">
+            <label style="font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;">Draw Signature Below</label>
+            <div style="border:2px dashed var(--primary); border-radius:10px; background:#fff; margin-top:6px; height:130px; position:relative; overflow:hidden;">
+                <canvas id="adminSigCanvas" style="width:100%; height:100%; display:block; touch-action:none;"></canvas>
+            </div>
+        </div>
+        <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
+            <button onclick="clearAdminSig()" class="btn btn-secondary btn-sm">Clear</button>
+            <button onclick="exportAdminSig()" class="btn btn-sm"
+                style="background:var(--primary); color:#fff; border:none; padding:7px 16px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer;">
+                📋 Export Code
+            </button>
+        </div>
+        <div id="adminSigOutput" style="display:none;">
+            <label style="font-size:13px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.05em;">Generated Code — Paste into signatures.js</label>
+            <div style="position:relative; margin-top:6px;">
+                <textarea id="adminSigCode" readonly
+                    style="width:100%; height:90px; font-family:monospace; font-size:11px; padding:10px; border-radius:8px;
+                           border:1px solid var(--border); background:var(--code-bg, #1e1e2e); color:#cdd6f4;
+                           resize:none; box-sizing:border-box; word-break:break-all;"></textarea>
+                <button onclick="copyAdminSigCode()"
+                    style="position:absolute; top:8px; right:8px; background:var(--primary); color:#fff; border:none;
+                           border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;" id="adminCopyBtn">
+                    Copy
+                </button>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">
+                ✅ After pasting, save <code>signatures.js</code> and push to GitHub. The signature will auto-load on all devices.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Pre-baked consultant signatures (hardcoded in code, works on all devices) -->
+<script src="signatures.js?v=14"></script>
 <!-- Load procedures database script -->
 <script src="procedures.js?v=14"></script>
 
@@ -1180,10 +1255,17 @@
     function autoLoadConsultantSignature() {
         const name = getActiveConsultantName();
         if (!name) return;
-        const dataUrl = localStorage.getItem(`uro-sig-${name}`);
+        // 1) Prefer hardcoded signature baked into signatures.js
+        const baked = window.CONSULTANT_SIGNATURES && window.CONSULTANT_SIGNATURES[name];
+        // 2) Fallback to per-device localStorage save
+        const local = localStorage.getItem(`uro-sig-${name}`);
+        const dataUrl = baked || local;
         if (dataUrl) {
             surgeonSignaturePad.clear();
             surgeonSignaturePad.fromDataURL(dataUrl);
+        } else {
+            // No saved signature — clear the pad so previous consultant's sig doesn't persist
+            surgeonSignaturePad.clear();
         }
     }
 
@@ -2133,6 +2215,64 @@
             page.drawLine({ start: { x: docTextX + 30, y: detailsY - 3 * detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - 3 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
         }
     }
+
+    // =====================================================
+    // ADMIN: Consultant Signature Capture
+    // =====================================================
+    let adminSigPad = null;
+
+    function openAdminSigModal() {
+        const modal = document.getElementById("adminSigModal");
+        modal.style.display = "flex";
+        // Init the admin signature pad if not done yet
+        const canvas = document.getElementById("adminSigCanvas");
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        if (!adminSigPad) {
+            adminSigPad = new SignaturePad(canvas, { penColor: "rgb(0,0,139)" });
+        } else {
+            adminSigPad.clear();
+        }
+        document.getElementById("adminSigOutput").style.display = "none";
+    }
+
+    function closeAdminSigModal() {
+        document.getElementById("adminSigModal").style.display = "none";
+    }
+
+    function clearAdminSig() {
+        if (adminSigPad) adminSigPad.clear();
+        document.getElementById("adminSigOutput").style.display = "none";
+    }
+
+    function exportAdminSig() {
+        if (!adminSigPad || adminSigPad.isEmpty()) {
+            alert("Please draw the signature first.");
+            return;
+        }
+        const name = document.getElementById("adminConsultantSelect").value;
+        const dataUrl = adminSigPad.toDataURL("image/png");
+        // Generate the exact line to paste into signatures.js
+        const codeLine = `    "${name}": "${dataUrl}",`;
+        document.getElementById("adminSigCode").value = codeLine;
+        document.getElementById("adminSigOutput").style.display = "block";
+    }
+
+    function copyAdminSigCode() {
+        const ta = document.getElementById("adminSigCode");
+        ta.select();
+        document.execCommand("copy");
+        const btn = document.getElementById("adminCopyBtn");
+        btn.textContent = "✅ Copied!";
+        setTimeout(() => btn.textContent = "Copy", 1800);
+    }
+
+    // Close admin modal on backdrop click
+    document.getElementById("adminSigModal").addEventListener("click", function(e) {
+        if (e.target === this) closeAdminSigModal();
+    });
 </script>
 </body>
 </html>
