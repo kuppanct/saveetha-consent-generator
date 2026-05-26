@@ -670,17 +670,7 @@
         </div>
     </header>
 
-    <!-- Tab Navigation -->
-    <div class="tab-nav">
-        <button class="tab-btn active" onclick="switchTab('form')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Generator
-        </button>
-        <button class="tab-btn" onclick="switchTab('calibration')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-            Calibration
-        </button>
-    </div>
+
 
     <!-- MAIN GENERATOR TAB -->
     <div id="formTab" class="tab-content active">
@@ -896,233 +886,7 @@
         </button>
     </div>
 
-    <!-- CALIBRATION TAB -->
-    <div id="calibrationTab" class="tab-content">
-        <div class="app-card">
-            <h2>Template Coordinates Calibration</h2>
-            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">Adjust where text and signatures are printed on your form templates. Coordinates are relative percentages to work across different image resolutions. Saved to your phone's memory automatically.</p>
 
-            <div class="status-banner warning">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                Changes persist locally in browser localStorage.
-            </div>
-
-            <!-- Visual Preview Section -->
-            <div class="calib-preview-card">
-                <h3 style="margin-top: 0; font-size: 14px; margin-bottom: 8px; color: var(--primary);">Live Calibration Overlay Preview</h3>
-                <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Toggle pages below to visually align elements on the templates.</p>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <button class="btn btn-secondary btn-sm active" id="btnPrevPage1" onclick="switchCalibPreviewPage(1)" style="padding: 6px 12px; font-size: 12px;">Page 1</button>
-                    <button class="btn btn-secondary btn-sm" id="btnPrevPage2" onclick="switchCalibPreviewPage(2)" style="padding: 6px 12px; font-size: 12px;">Page 2</button>
-                </div>
-                
-                <div id="calibVisualArea">
-                    <!-- Page 1 Overlays -->
-                    <div id="calib_over_ptName" class="calib-marker" style="color: #ff3b30;">[Pt Name]</div>
-                    <div id="calib_over_ptAge" class="calib-marker" style="color: #ff3b30;">[Age]</div>
-                    <div id="calib_over_ptGender" class="calib-marker" style="color: #ff3b30;">[Gender]</div>
-                    <div id="calib_over_ptPid" class="calib-marker" style="color: #34c759;">[PID]</div>
-                    <div id="calib_over_ptDate" class="calib-marker" style="color: #34c759;">[Date]</div>
-                    <div id="calib_over_ptSurgeon" class="calib-marker" style="color: #007aff;">[Surgeon]</div>
-                    <div id="calib_over_ptWard" class="calib-marker" style="color: #007aff;">[Ward]</div>
-                    <div id="calib_over_diag" class="calib-marker" style="color: #ff9500;">[Diag Blank]</div>
-                    <div id="calib_over_proc" class="calib-marker" style="color: #ff9500;">[Proc Blank]</div>
-                    <div id="calib_over_box" class="calib-marker-box" style="border: 1.5px dashed #af52de; background: rgba(175, 82, 222, 0.08); color: #af52de;">Complications Box (Page 1)</div>
-                    
-                    <!-- Page 2 Overlays -->
-                    <div id="calib_over_box2" class="calib-marker-box" style="border: 1.5px dashed #af52de; background: rgba(175, 82, 222, 0.08); color: #af52de;">Complications Box (Page 2)</div>
-                    <div id="calib_over_sig" class="calib-marker-box" style="border: 1.5px dashed #007aff; background: rgba(0, 122, 255, 0.08); color: #007aff; transform: translate(-50%, -50%);">Pt Sign</div>
-                    <div id="calib_over_docSig" class="calib-marker-box" style="border: 1.5px dashed #34c759; background: rgba(52, 199, 89, 0.08); color: #34c759; transform: translate(-50%, -50%);">Surgeon Sign</div>
-                    <div id="calib_over_ptSigDetails" class="calib-marker-box" style="border: 1.5px dashed #007aff; background: rgba(0, 122, 255, 0.04); color: #007aff; font-size: 7px; transform: translate(0, 0); display: flex; align-items: center; justify-content: center; text-align: center;">Pt Details</div>
-                    <div id="calib_over_docSigDetails" class="calib-marker-box" style="border: 1.5px dashed #34c759; background: rgba(52, 199, 89, 0.04); color: #34c759; font-size: 7px; transform: translate(0, 0); display: flex; align-items: center; justify-content: center; text-align: center;">Surgeon Details</div>
-                </div>
-            </div>
-
-            <h3>Page 1 - Patient Name Alignment</h3>
-            <div class="calibration-row">
-                <label>Name X-axis (% from left) <span class="value" id="val_nameX">23%</span></label>
-                <input type="range" id="cal_nameX" min="5" max="95" value="23" oninput="updateCalibValue('nameX')">
-            </div>
-            <div class="calibration-row">
-                <label>Name Y-axis (% from top) <span class="value" id="val_nameY">18.5%</span></label>
-                <input type="range" id="cal_nameY" min="5" max="95" value="18.5" step="0.1" oninput="updateCalibValue('nameY')">
-            </div>
-
-            <h3>Page 1 - Patient Age Alignment</h3>
-            <div class="calibration-row">
-                <label>Age X-axis (% from left) <span class="value" id="val_ageX">61%</span></label>
-                <input type="range" id="cal_ageX" min="5" max="95" value="61" oninput="updateCalibValue('ageX')">
-            </div>
-            <div class="calibration-row">
-                <label>Age Y-axis (% from top) <span class="value" id="val_ageY">18.5%</span></label>
-                <input type="range" id="cal_ageY" min="5" max="95" value="18.5" step="0.1" oninput="updateCalibValue('ageY')">
-            </div>
-
-            <h3>Page 1 - Patient Gender Alignment</h3>
-            <div class="calibration-row">
-                <label>Gender X-axis (% from left) <span class="value" id="val_genderX">76%</span></label>
-                <input type="range" id="cal_genderX" min="5" max="95" value="76" oninput="updateCalibValue('genderX')">
-            </div>
-            <div class="calibration-row">
-                <label>Gender Y-axis (% from top) <span class="value" id="val_genderY">18.5%</span></label>
-                <input type="range" id="cal_genderY" min="5" max="95" value="18.5" step="0.1" oninput="updateCalibValue('genderY')">
-            </div>
-
-            <h3>Page 1 - Patient ID (PID) Alignment</h3>
-            <div class="calibration-row">
-                <label>PID X-axis (% from left) <span class="value" id="val_pidX">15%</span></label>
-                <input type="range" id="cal_pidX" min="5" max="95" value="15" oninput="updateCalibValue('pidX')">
-            </div>
-            <div class="calibration-row">
-                <label>PID Y-axis (% from top) <span class="value" id="val_pidY">21.2%</span></label>
-                <input type="range" id="cal_pidY" min="5" max="95" value="21.2" step="0.1" oninput="updateCalibValue('pidY')">
-            </div>
-
-            <h3>Page 1 - Date Alignment</h3>
-            <div class="calibration-row">
-                <label>Date X-axis (% from left) <span class="value" id="val_dateX">61%</span></label>
-                <input type="range" id="cal_dateX" min="5" max="95" value="61" oninput="updateCalibValue('dateX')">
-            </div>
-            <div class="calibration-row">
-                <label>Date Y-axis (% from top) <span class="value" id="val_dateY">21.2%</span></label>
-                <input type="range" id="cal_dateY" min="5" max="95" value="21.2" step="0.1" oninput="updateCalibValue('dateY')">
-            </div>
-
-            <h3>Page 1 - Surgeon Name Alignment</h3>
-            <div class="calibration-row">
-                <label>Surgeon X-axis (% from left) <span class="value" id="val_surgeonX">20%</span></label>
-                <input type="range" id="cal_surgeonX" min="5" max="95" value="20" oninput="updateCalibValue('surgeonX')">
-            </div>
-            <div class="calibration-row">
-                <label>Surgeon Y-axis (% from top) <span class="value" id="val_surgeonY">23.9%</span></label>
-                <input type="range" id="cal_surgeonY" min="5" max="95" value="23.9" step="0.1" oninput="updateCalibValue('surgeonY')">
-            </div>
-
-            <h3>Page 1 - Ward Alignment</h3>
-            <div class="calibration-row">
-                <label>Ward X-axis (% from left) <span class="value" id="val_wardX">61%</span></label>
-                <input type="range" id="cal_wardX" min="5" max="95" value="61" oninput="updateCalibValue('wardX')">
-            </div>
-            <div class="calibration-row">
-                <label>Ward Y-axis (% from top) <span class="value" id="val_wardY">23.9%</span></label>
-                <input type="range" id="cal_wardY" min="5" max="95" value="23.9" step="0.1" oninput="updateCalibValue('wardY')">
-            </div>
-
-            <h3>Page 1 - Paragraph Blanks</h3>
-            <div class="calibration-row">
-                <label>Diagnosis X-axis (% from left) <span class="value" id="val_diagX">8.5%</span></label>
-                <input type="range" id="cal_diagX" min="5" max="95" value="8.5" step="0.5" oninput="updateCalibValue('diagX')">
-            </div>
-            <div class="calibration-row">
-                <label>Diagnosis Y-axis (% from top) <span class="value" id="val_diagY">30.1%</span></label>
-                <input type="range" id="cal_diagY" min="5" max="95" value="30.1" step="0.1" oninput="updateCalibValue('diagY')">
-            </div>
-            <div class="calibration-row">
-                <label>Procedure X-axis (% from left) <span class="value" id="val_procX">8.5%</span></label>
-                <input type="range" id="cal_procX" min="5" max="95" value="8.5" step="0.5" oninput="updateCalibValue('procX')">
-            </div>
-            <div class="calibration-row">
-                <label>Procedure Y-axis (% from top) <span class="value" id="val_procY">32.6%</span></label>
-                <input type="range" id="cal_procY" min="5" max="95" value="32.6" step="0.1" oninput="updateCalibValue('procY')">
-            </div>
-
-            <h3>Page 1 - Complications Box Alignment</h3>
-            <div class="calibration-row">
-                <label>Box X-axis (% from left) <span class="value" id="val_boxX">9%</span></label>
-                <input type="range" id="cal_boxX" min="2" max="50" value="9" oninput="updateCalibValue('boxX')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Width (% of page width) <span class="value" id="val_boxWidth">86%</span></label>
-                <input type="range" id="cal_boxWidth" min="20" max="98" value="86" oninput="updateCalibValue('boxWidth')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Top Y-axis (% from top) <span class="value" id="val_boxY">46.5%</span></label>
-                <input type="range" id="cal_boxY" min="5" max="90" value="46.5" step="0.5" oninput="updateCalibValue('boxY')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Bottom Y-axis (% from top) <span class="value" id="val_boxBottom">87%</span></label>
-                <input type="range" id="cal_boxBottom" min="40" max="98" value="87" step="0.5" oninput="updateCalibValue('boxBottom')">
-            </div>
-
-            <h3>Page 2 - Complications Box Overflow</h3>
-            <div class="calibration-row">
-                <label>Box X-axis (% from left) <span class="value" id="val_boxX2">9%</span></label>
-                <input type="range" id="cal_boxX2" min="2" max="50" value="9" oninput="updateCalibValue('boxX2')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Width (% of page width) <span class="value" id="val_boxWidth2">86%</span></label>
-                <input type="range" id="cal_boxWidth2" min="20" max="98" value="86" oninput="updateCalibValue('boxWidth2')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Top Y-axis (% from top) <span class="value" id="val_boxY2">14.5%</span></label>
-                <input type="range" id="cal_boxY2" min="5" max="90" value="14.5" step="0.5" oninput="updateCalibValue('boxY2')">
-            </div>
-            <div class="calibration-row">
-                <label>Box Bottom Y-axis (% from top) <span class="value" id="val_boxBottom2">62.5%</span></label>
-                <input type="range" id="cal_boxBottom2" min="40" max="98" value="62.5" step="0.5" oninput="updateCalibValue('boxBottom2')">
-            </div>
-
-            <h3>Page 2 - Patient Signature Position</h3>
-            <div class="calibration-row">
-                <label>Signature X-axis (% from left) <span class="value" id="val_sigX">21%</span></label>
-                <input type="range" id="cal_sigX" min="5" max="95" value="21" oninput="updateCalibValue('sigX')">
-            </div>
-            <div class="calibration-row">
-                <label>Signature Y-axis (% from top) <span class="value" id="val_sigY">71%</span></label>
-                <input type="range" id="cal_sigY" min="5" max="95" value="71" oninput="updateCalibValue('sigY')">
-            </div>
-            <div class="calibration-row">
-                <label>Signature Scale factor <span class="value" id="val_sigScale">1.2</span></label>
-                <input type="range" id="cal_sigScale" min="5" max="25" value="12" step="1" oninput="updateCalibValue('sigScale')">
-            </div>
-
-            <h3>Page 2 - Surgeon Signature Position</h3>
-            <div class="calibration-row">
-                <label>Signature X-axis (% from left) <span class="value" id="val_docSigX">75%</span></label>
-                <input type="range" id="cal_docSigX" min="5" max="95" value="75" oninput="updateCalibValue('docSigX')">
-            </div>
-            <div class="calibration-row">
-                <label>Signature Y-axis (% from top) <span class="value" id="val_docSigY">71%</span></label>
-                <input type="range" id="cal_docSigY" min="5" max="95" value="71" oninput="updateCalibValue('docSigY')">
-            </div>
-            <div class="calibration-row">
-                <label>Signature Scale factor <span class="value" id="val_docSigScale">1.2</span></label>
-                <input type="range" id="cal_docSigScale" min="5" max="25" value="12" step="1" oninput="updateCalibValue('docSigScale')">
-            </div>
-
-            <h3>Page 2 - Patient Signature Details</h3>
-            <div class="calibration-row">
-                <label>Details X-axis (% from left) <span class="value" id="val_ptSigDetailsX">3%</span></label>
-                <input type="range" id="cal_ptSigDetailsX" min="2" max="95" value="3" oninput="updateCalibValue('ptSigDetailsX')">
-            </div>
-            <div class="calibration-row">
-                <label>Details Y-axis (% from top) <span class="value" id="val_ptSigDetailsY">75.2%</span></label>
-                <input type="range" id="cal_ptSigDetailsY" min="5" max="95" value="75.2" step="0.1" oninput="updateCalibValue('ptSigDetailsY')">
-            </div>
-            <div class="calibration-row">
-                <label>Details Spacing (% of height) <span class="value" id="val_ptSigDetailsSpacing">2.2%</span></label>
-                <input type="range" id="cal_ptSigDetailsSpacing" min="0.5" max="6" value="2.2" step="0.1" oninput="updateCalibValue('ptSigDetailsSpacing')">
-            </div>
-
-            <h3>Page 2 - Surgeon Signature Details</h3>
-            <div class="calibration-row">
-                <label>Details X-axis (% from left) <span class="value" id="val_docSigDetailsX">56%</span></label>
-                <input type="range" id="cal_docSigDetailsX" min="2" max="95" value="56" oninput="updateCalibValue('docSigDetailsX')">
-            </div>
-            <div class="calibration-row">
-                <label>Details Y-axis (% from top) <span class="value" id="val_docSigDetailsY">75.2%</span></label>
-                <input type="range" id="cal_docSigDetailsY" min="5" max="95" value="75.2" step="0.1" oninput="updateCalibValue('docSigDetailsY')">
-            </div>
-            <div class="calibration-row">
-                <label>Details Spacing (% of height) <span class="value" id="val_docSigDetailsSpacing">2.2%</span></label>
-                <input type="range" id="cal_docSigDetailsSpacing" min="0.5" max="6" value="2.2" step="0.1" oninput="updateCalibValue('docSigDetailsSpacing')">
-            </div>
-
-            <div style="display:flex; gap:12px; margin-top:20px;">
-                <button class="btn btn-secondary" onclick="resetCalibration()" style="flex:1;">Reset Defaults</button>
-            </div>
-        </div>
-    </div>
 
 </div>
 
@@ -1222,12 +986,12 @@
         ptSigDetailsX: 2.0,
         ptSigDetailsY: 76.6,
         ptSigDetailsSpacing: 2.2,
-        docSigDetailsX: 51.0,
+        docSigDetailsX: 37.0,
         docSigDetailsY: 77.2,
         docSigDetailsSpacing: 2.2
     };
 
-    // Load Calibration from Local Storage or defaults (v9)
+    // Load Calibration from Local Storage or defaults (v10)
     let calib = { ...defaultCalibrationEN };
 
     // Initialize Page
@@ -1363,7 +1127,8 @@
         const clickedBtn = Array.from(document.querySelectorAll(".tab-btn")).find(btn => btn.getAttribute("onclick").includes(tabId));
         if (clickedBtn) clickedBtn.classList.add("active");
 
-        document.getElementById(`${tabId}Tab`).classList.add("active");
+        const tabEl = document.getElementById(`${tabId}Tab`);
+        if (tabEl) tabEl.classList.add("active");
         
         if (tabId === 'form') {
             // Re-render signature canvas properly upon tab change
@@ -1765,7 +1530,7 @@
 
     function loadCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v9" : "uro-calibration-en-v9";
+        const storageKey = isTamil ? "uro-calibration-ta-v10" : "uro-calibration-en-v10";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
 
         const saved = localStorage.getItem(storageKey);
@@ -1819,7 +1584,7 @@
         calib[key] = val;
         
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v9" : "uro-calibration-en-v9";
+        const storageKey = isTamil ? "uro-calibration-ta-v10" : "uro-calibration-en-v10";
         localStorage.setItem(storageKey, JSON.stringify(calib));
 
         updateVisualCalibPreview();
@@ -1827,7 +1592,7 @@
 
     function resetCalibration() {
         const isTamil = document.getElementById("tamilToggle").checked;
-        const storageKey = isTamil ? "uro-calibration-ta-v9" : "uro-calibration-en-v9";
+        const storageKey = isTamil ? "uro-calibration-ta-v10" : "uro-calibration-en-v10";
         const defaults = isTamil ? defaultCalibrationTA : defaultCalibrationEN;
         
         calib = { ...defaults };
@@ -1838,15 +1603,18 @@
     // Interactive Visual Preview Logic
     function switchCalibPreviewPage(pageNum) {
         currentPreviewPage = pageNum;
-        document.getElementById("btnPrevPage1").classList.toggle("active", pageNum === 1);
-        document.getElementById("btnPrevPage2").classList.toggle("active", pageNum === 2);
+        const btn1 = document.getElementById("btnPrevPage1");
+        const btn2 = document.getElementById("btnPrevPage2");
+        if (btn1) btn1.classList.toggle("active", pageNum === 1);
+        if (btn2) btn2.classList.toggle("active", pageNum === 2);
         
         const isTamil = document.getElementById("tamilToggle").checked;
         const fileSuffix = isTamil ? "_tamil" : "";
         const visualArea = document.getElementById("calibVisualArea");
-        
-        const imgUrl = `page${pageNum}${fileSuffix}.jpg`;
-        visualArea.style.backgroundImage = `url(${imgUrl})`;
+        if (visualArea) {
+            const imgUrl = `page${pageNum}${fileSuffix}.jpg`;
+            visualArea.style.backgroundImage = `url(${imgUrl})`;
+        }
         
         // Toggle markers visibility based on active preview page
         const p1Markers = ["calib_over_ptName", "calib_over_ptAge", "calib_over_ptGender", "calib_over_ptPid", "calib_over_ptDate", "calib_over_ptSurgeon", "calib_over_ptWard", "calib_over_diag", "calib_over_proc", "calib_over_box"];
