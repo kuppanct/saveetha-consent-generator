@@ -993,23 +993,29 @@
             }
         });
 
-        // Auto-fill Signer Name with Patient Name when relationship is "Self"
+        // Auto-fill Signer Name with Patient Name when relationship is "Self" (or empty)
         function syncSignerName() {
-            const relation = document.getElementById("signerRelation").value.trim().toLowerCase();
+            const relationEl = document.getElementById("signerRelation");
+            if (!relationEl) return;
+            const relation = relationEl.value.trim().toLowerCase();
             const signerNameEl = document.getElementById("signerName");
-            if (relation === "self") {
-                signerNameEl.value = document.getElementById("patientName").value;
-                signerNameEl.style.color = "var(--text-muted)";
+            const patientNameVal = document.getElementById("patientName").value;
+            
+            if (relation === "self" || relation === "") {
+                signerNameEl.value = patientNameVal;
+                signerNameEl.dataset.autofilled = "true";
             } else {
                 // Only clear if it was auto-filled (i.e. matches patient name)
-                if (signerNameEl.style.color === "var(--text-muted)") {
+                if (signerNameEl.dataset.autofilled === "true") {
                     signerNameEl.value = "";
-                    signerNameEl.style.color = "";
+                    delete signerNameEl.dataset.autofilled;
                 }
             }
         }
         document.getElementById("signerRelation").addEventListener("input", syncSignerName);
+        document.getElementById("signerRelation").addEventListener("change", syncSignerName);
         document.getElementById("patientName").addEventListener("input", syncSignerName);
+        document.getElementById("patientName").addEventListener("change", syncSignerName);
         // Run once on load (relation defaults to "Self")
         syncSignerName();
 
