@@ -880,9 +880,9 @@
             </label>
         </div>
 
-        <button class="btn btn-primary" id="genBtn" onclick="generatePDF()">
+        <button class="btn btn-primary" id="genBtn" onclick="generateJPEG()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Generate & Download PDF Consent
+            Generate & Download Consent Image (JPEG)
         </button>
     </div>
 
@@ -903,6 +903,8 @@
     let surgeonSignaturePad = null;
     let customConsentOverride = null;
     let currentPreviewPage = 1;
+    let loadedPatientSigDataUrl = null;
+    let loadedSurgeonSigDataUrl = null;
     
     // Default Calibration Configs
     const defaultCalibrationEN = {
@@ -1106,12 +1108,18 @@
     function initSignaturePad() {
         const canvas = document.getElementById('signatureCanvas');
         signaturePad = new SignaturePad(canvas, {
-            penColor: 'rgb(0, 0, 139)' // dark blue pen for clinic authenticity
+            penColor: 'rgb(0, 0, 139)',
+            onBegin: () => {
+                loadedPatientSigDataUrl = null;
+            }
         });
 
         const surgCanvas = document.getElementById('surgeonSignatureCanvas');
         surgeonSignaturePad = new SignaturePad(surgCanvas, {
-            penColor: 'rgb(0, 0, 139)'
+            penColor: 'rgb(0, 0, 139)',
+            onBegin: () => {
+                loadedSurgeonSigDataUrl = null;
+            }
         });
 
         resizeCanvas();
@@ -1123,42 +1131,48 @@
         const ratio = Math.max(window.devicePixelRatio || 1, 1);
         
         if (canvas) {
-            const isEmpty = signaturePad.isEmpty();
-            let data = null;
-            if (!isEmpty) {
-                data = signaturePad.toData();
-            }
-            canvas.width = canvas.offsetWidth * ratio;
-            canvas.height = canvas.offsetHeight * ratio;
-            canvas.getContext("2d").scale(ratio, ratio);
-            signaturePad.clear();
-            if (!isEmpty && data) {
-                signaturePad.fromData(data);
+            const newWidth = Math.floor(canvas.offsetWidth * ratio);
+            const newHeight = Math.floor(canvas.offsetHeight * ratio);
+            if (canvas.width !== newWidth || canvas.height !== newHeight) {
+                const strokes = signaturePad.toData();
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+                canvas.getContext("2d").scale(ratio, ratio);
+                signaturePad.clear();
+                if (strokes && strokes.length > 0) {
+                    signaturePad.fromData(strokes);
+                } else if (loadedPatientSigDataUrl) {
+                    signaturePad.fromDataURL(loadedPatientSigDataUrl, { ratio: ratio, width: canvas.offsetWidth, height: canvas.offsetHeight });
+                }
             }
         }
 
         if (surgCanvas) {
-            const isEmpty = surgeonSignaturePad.isEmpty();
-            let data = null;
-            if (!isEmpty) {
-                data = surgeonSignaturePad.toData();
-            }
-            surgCanvas.width = surgCanvas.offsetWidth * ratio;
-            surgCanvas.height = surgCanvas.offsetHeight * ratio;
-            surgCanvas.getContext("2d").scale(ratio, ratio);
-            surgeonSignaturePad.clear();
-            if (!isEmpty && data) {
-                surgeonSignaturePad.fromData(data);
+            const newWidth = Math.floor(surgCanvas.offsetWidth * ratio);
+            const newHeight = Math.floor(surgCanvas.offsetHeight * ratio);
+            if (surgCanvas.width !== newWidth || surgCanvas.height !== newHeight) {
+                const strokes = surgeonSignaturePad.toData();
+                surgCanvas.width = newWidth;
+                surgCanvas.height = newHeight;
+                surgCanvas.getContext("2d").scale(ratio, ratio);
+                surgeonSignaturePad.clear();
+                if (strokes && strokes.length > 0) {
+                    surgeonSignaturePad.fromData(strokes);
+                } else if (loadedSurgeonSigDataUrl) {
+                    surgeonSignaturePad.fromDataURL(loadedSurgeonSigDataUrl, { ratio: ratio, width: surgCanvas.offsetWidth, height: surgCanvas.offsetHeight });
+                }
             }
         }
     }
 
     function clearSignature() {
         signaturePad.clear();
+        loadedPatientSigDataUrl = null;
     }
 
     function clearSurgeonSignature() {
         surgeonSignaturePad.clear();
+        loadedSurgeonSigDataUrl = null;
     }
 
     // --- Consultant Signature Store ---
@@ -1194,6 +1208,7 @@
             alert(`No saved signature found for ${name}.\nDraw the signature and click 💾 Save as Default.`);
             return;
         }
+        loadedSurgeonSigDataUrl = dataUrl;
         surgeonSignaturePad.clear();
         const img = new Image();
         img.onload = () => {
@@ -1214,6 +1229,7 @@
         // 2) Fallback to per-device localStorage save
         const local = localStorage.getItem(`uro-sig-${name}`);
         const dataUrl = baked || local;
+        loadedSurgeonSigDataUrl = dataUrl || null;
         if (dataUrl) {
             surgeonSignaturePad.clear();
             const img = new Image();
@@ -1726,9 +1742,8 @@
         return lines;
     }
 
-    // 4. Generate the PDF using pdf-lib
-    // 4. Generate the PDF using pdf-lib
-    async function generatePDF() {
+    // 4. Generate the JPEG side-by-side image
+    async function generateJPEG() {
         // Validation
         if (!document.getElementById("patientName").value.trim()) {
             alert("Please enter Patient Name.");
@@ -1746,80 +1761,63 @@
             alert("Please select a Procedure from the dropdown.");
             return;
         }
-        if (signaturePad.isEmpty()) {
+        if (signaturePad.isEmpty() && !loadedPatientSigDataUrl) {
             alert("Please ask the patient to sign the consent pad.");
             return;
         }
-        if (surgeonSignaturePad.isEmpty()) {
+        if (surgeonSignaturePad.isEmpty() && !loadedSurgeonSigDataUrl) {
             alert("Please ask the surgeon to sign the consent pad.");
             return;
         }
 
         const genBtn = document.getElementById("genBtn");
-        genBtn.innerText = "Generating PDF...";
+        genBtn.innerText = "Generating Image...";
         genBtn.disabled = true;
 
         try {
-            const { PDFDocument, StandardFonts, rgb } = PDFLib;
-            const pdfDoc = await PDFDocument.create();
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
             // Fetch background templates
             const isTamil = document.getElementById("tamilToggle").checked;
             const fileSuffix = isTamil ? "_tamil" : "";
             
-            let page1Bytes = null;
-            let page2Bytes = null;
+            // Load both page template images
+            let p1Image = null;
+            let p2Image = null;
             let usingFallback = false;
 
             try {
-                // Try fetching custom image assets page1.jpg & page2.jpg
-                page1Bytes = await fetch(`page1${fileSuffix}.jpg`).then(res => {
-                    if (!res.ok) throw new Error("Image missing");
-                    return res.arrayBuffer();
-                });
-                page2Bytes = await fetch(`page2${fileSuffix}.jpg`).then(res => {
-                    if (!res.ok) throw new Error("Image missing");
-                    return res.arrayBuffer();
-                });
-            } catch (imageErr) {
+                p1Image = await loadImage(`page1${fileSuffix}.jpg`);
+                p2Image = await loadImage(`page2${fileSuffix}.jpg`);
+            } catch (err) {
                 console.warn("Template images missing on server. Invoking professional dynamic vector fallback.");
                 usingFallback = true;
             }
 
-            let page1Width, page1Height, page2Width, page2Height;
-            let p1Image, p2Image;
+            const page1Width = usingFallback ? 1785 : p1Image.width;
+            const page1Height = usingFallback ? 2526 : p1Image.height;
+            const page2Width = usingFallback ? 1785 : p2Image.width;
+            const page2Height = usingFallback ? 2526 : p2Image.height;
 
-            if (!usingFallback) {
-                p1Image = await pdfDoc.embedJpg(page1Bytes);
-                p2Image = await pdfDoc.embedJpg(page2Bytes);
-                page1Width = p1Image.width;
-                page1Height = p1Image.height;
-                page2Width = p2Image.width;
-                page2Height = p2Image.height;
-            } else {
-                // Standard high-resolution A4 size at 72 points per inch (595 x 842 points)
-                page1Width = 595;
-                page1Height = 842;
-                page2Width = 595;
-                page2Height = 842;
-            }
+            // Create side-by-side canvas
+            const canvas = document.createElement("canvas");
+            canvas.width = page1Width + page2Width;
+            canvas.height = Math.max(page1Height, page2Height);
+            const ctx = canvas.getContext("2d");
 
-            // Create Page 1
-            const page1 = pdfDoc.addPage([page1Width, page1Height]);
-            if (!usingFallback) {
-                page1.drawImage(p1Image, { x: 0, y: 0, width: page1Width, height: page1Height });
-            } else {
-                drawFormOutline(page1, page1Width, page1Height, font, fontBold, 1, isTamil);
-            }
+            // Fill background with white
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Create Page 2
-            const page2 = pdfDoc.addPage([page2Width, page2Height]);
+            // Draw templates side-by-side
             if (!usingFallback) {
-                page2.drawImage(p2Image, { x: 0, y: 0, width: page2Width, height: page2Height });
+                ctx.drawImage(p1Image, 0, 0, page1Width, page1Height);
+                ctx.drawImage(p2Image, page1Width, 0, page2Width, page2Height);
             } else {
-                drawFormOutline(page2, page2Width, page2Height, font, fontBold, 2, isTamil);
+                drawFormOutlineCanvas(ctx, page1Width, page1Height, 1, isTamil);
+                // Shift context right to draw page 2 fallback outline
+                ctx.save();
+                ctx.translate(page1Width, 0);
+                drawFormOutlineCanvas(ctx, page2Width, page2Height, 2, isTamil);
+                ctx.restore();
             }
 
             // EXTRACT INPUT DETAILS
@@ -1839,36 +1837,42 @@
             const consultantVal = document.getElementById("consultant").value;
             const ptConsultant = consultantVal === "CUSTOM" ? document.getElementById("customConsultant").value : consultantVal;
 
-            // DRAW PATIENT INFO OVERLAY (Using Percentage Calibration)
-            const vitalFontSize = usingFallback ? 10 : Math.round(page1Width * 0.018); 
-            const textArgs = { font: fontBold, size: vitalFontSize, color: rgb(0, 0, 0) };
-
-            const vitalY = Math.round(page1Height * (1 - (calib.ptY / 100)));
+            // DRAW PATIENT INFO OVERLAY
+            const vitalFontSize = Math.round(page1Width * 0.018);
+            const vitalY = Math.round(page1Height * (calib.ptY / 100));
             const lineSpacing = Math.round(page1Height * (calib.ptSpacing / 100));
+
+            // Helper function to draw text on canvas
+            function drawText(text, x, y, size, isBold) {
+                ctx.font = `${isBold ? 'bold ' : ''}${size}px Helvetica, Arial, sans-serif`;
+                ctx.fillStyle = '#000000';
+                ctx.fillText(text, x, y);
+            }
 
             // Line 1: Name, Age, Gender
             const nameX = Math.round(page1Width * (calib.nameX / 100));
             const ageX = Math.round(page1Width * (calib.ageX / 100));
             const genderX = Math.round(page1Width * (calib.genderX / 100));
             
-            page1.drawText(ptName, { x: nameX, y: vitalY, ...textArgs });
-            page1.drawText(ptAge + " Y", { x: ageX, y: vitalY, ...textArgs });
-            page1.drawText(ptGender, { x: genderX, y: vitalY, ...textArgs });
+            drawText(ptName, nameX, vitalY, vitalFontSize, true);
+            drawText(ptAge + " Y", ageX, vitalY, vitalFontSize, true);
+            drawText(ptGender, genderX, vitalY, vitalFontSize, true);
 
             // Line 2: PID, Date
             const pidX = Math.round(page1Width * (calib.pidX / 100));
             const dateX = ageX;
-            const secondY = vitalY - lineSpacing;
+            const secondY = vitalY + lineSpacing;
             
-            page1.drawText(ptPid, { x: pidX, y: secondY, ...textArgs });
-            page1.drawText(ptDate, { x: dateX, y: secondY, ...textArgs });
+            drawText(ptPid, pidX, secondY, vitalFontSize, true);
+            drawText(ptDate, dateX, secondY, vitalFontSize, true);
 
             // Line 3: Surgeon, Ward
             const surgeonX = pidX;
             const wardX = ageX;
-            const thirdY = vitalY - 2 * lineSpacing;
-            page1.drawText(ptConsultant, { x: surgeonX, y: thirdY, ...textArgs });
-            page1.drawText(ptWard, { x: wardX, y: thirdY, ...textArgs });
+            const thirdY = vitalY + 2 * lineSpacing;
+            
+            drawText(ptConsultant, surgeonX, thirdY, vitalFontSize, true);
+            drawText(ptWard, wardX, thirdY, vitalFontSize, true);
 
             // Draw inline paragraph details
             let diagnosis = document.getElementById("procedureDiagnosis").value;
@@ -1890,40 +1894,34 @@
                 diagnosis = sidePrefix + diagnosis;
             }
 
-            const inlineFontSize = usingFallback ? 10 : Math.round(page1Width * 0.016);
-            const inlineTextArgs = { font: fontBold, size: inlineFontSize, color: rgb(0,0,0) };
-            
-            // Map relative placement for paragraph fields
-            const inlineY1 = Math.round(page1Height * (1 - (calib.diagY / 100)));
-            const inlineY2 = Math.round(page1Height * (1 - (calib.procY / 100)));
+            const inlineFontSize = Math.round(page1Width * 0.016);
+            const inlineY1 = Math.round(page1Height * (calib.diagY / 100));
+            const inlineY2 = Math.round(page1Height * (calib.procY / 100));
             const inlineX1 = Math.round(page1Width * (calib.diagX / 100));
             const inlineX2 = Math.round(page1Width * (calib.procX / 100));
-            page1.drawText(diagnosis, { x: inlineX1, y: inlineY1, ...inlineTextArgs });
-            page1.drawText(procedurePlanned, { x: inlineX2, y: inlineY2, ...inlineTextArgs });
+            
+            drawText(diagnosis, inlineX1, inlineY1, inlineFontSize, true);
+            drawText(procedurePlanned, inlineX2, inlineY2, inlineFontSize, true);
 
             // DRAW THE COMPLICATIONS BOX TEXT
             const consentText = customConsentOverride || document.getElementById("consentTextPreview").value;
             const boxX = Math.round(page1Width * (calib.boxX / 100));
-            // 5% right margin - just enough to prevent overflow without wasting space
             const boxWidthPoints = page1Width - boxX - Math.round(page1Width * 0.05);
             
-            // 0.50 is the balanced ratio: 0.42 caused overflow, 0.58 was too conservative
-            const contentFontSize = 6.8;
-            const contentLineHeight = 8.5;
-            const charsPerLine = Math.round(boxWidthPoints / (usingFallback ? 4.2 : (contentFontSize * 0.47)));
+            const contentFontSize = Math.round(page1Width * 0.0125);
+            const contentLineHeight = Math.round(contentFontSize * 1.25);
+            const charsPerLine = Math.round(boxWidthPoints / (contentFontSize * 0.47));
             const wrappedLines = wrapText(consentText, charsPerLine);
 
-            let currentY = Math.round(page1Height * (1 - (calib.boxY / 100)));
-            const page1BottomLimit = Math.round(page1Height * (1 - (calib.boxBottom / 100))); // bottom limit of page 1 box
-            const page2BottomLimit = Math.round(page2Height * (1 - (calib.boxBottom2 / 100))); // bottom limit of page 2 box
+            let currentY = Math.round(page1Height * (calib.boxY / 100));
+            const page1BottomLimit = Math.round(page1Height * (calib.boxBottom / 100));
             
             let currentPageNum = 1;
 
             wrappedLines.forEach(line => {
-                // Skip blank lines to save space - they come from \n separators in compiled text
                 if (!line.trim()) return;
 
-                let textFont = font;
+                let isBold = false;
                 if (line.startsWith("DIAGNOSIS:") || 
                     line.startsWith("PROCEDURE PLANNED:") || 
                     line.startsWith("BENEFITS EXPECTED:") || 
@@ -1933,79 +1931,64 @@
                     line.startsWith("EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:") ||
                     line.startsWith("SPECIAL HIGH-RISK CONSENT ADDENDUM:") ||
                     line.startsWith("CRITICAL DECLARATION REGARDING")) {
-                    textFont = fontBold;
+                    isBold = true;
                 }
 
-                // If text overflows bottom limit, switch rendering target to page 2 box
-                if (currentPageNum === 1 && currentY < page1BottomLimit) {
+                // If text overflows bottom limit of Page 1, switch rendering to Page 2
+                if (currentPageNum === 1 && currentY > page1BottomLimit) {
                     currentPageNum = 2;
-                    currentY = Math.round(page2Height * (1 - (calib.boxY2 / 100)));
+                    currentY = Math.round(page2Height * (calib.boxY2 / 100));
                 }
 
-                if (currentPageNum === 1) {
-                    page1.drawText(line, {
-                        x: boxX,
-                        y: currentY,
-                        size: contentFontSize,
-                        font: textFont,
-                        color: rgb(0,0,0)
-                    });
-                } else if (currentPageNum === 2) {
-                    page2.drawText(line, {
-                        x: boxX,
-                        y: currentY,
-                        size: contentFontSize,
-                        font: textFont,
-                        color: rgb(0,0,0)
-                    });
-                }
-
-                currentY -= contentLineHeight;
+                // Calculate x position on canvas
+                const targetX = (currentPageNum === 1) ? boxX : (page1Width + boxX);
+                
+                drawText(line, targetX, currentY, contentFontSize, isBold);
+                currentY += contentLineHeight;
             });
 
             // EMBED THE SIGNATURES ON PAGE 2
             // 1. Patient Signature
-            const sigDataUrl = signaturePad.toDataURL("image/png");
-            const sigImageBytes = await fetch(sigDataUrl).then(res => res.arrayBuffer());
-            const sigImage = await pdfDoc.embedPng(sigImageBytes);
+            let sigImg = null;
+            if (!signaturePad.isEmpty()) {
+                const sigDataUrl = signaturePad.toDataURL("image/png");
+                sigImg = await loadImage(sigDataUrl);
+            } else if (loadedPatientSigDataUrl) {
+                sigImg = await loadImage(loadedPatientSigDataUrl);
+            }
 
-            const canvas = document.getElementById('signatureCanvas');
-            const sigX = Math.round(page2Width * (calib.sigX / 100));
-            const sigY = Math.round(page2Height * (1 - (calib.sigY / 100)));
-            const sigW = Math.round(page2Width * 0.25 * calib.sigScale);
-            const sigH = Math.round(sigW * (canvas.height / canvas.width));
-
-            page2.drawImage(sigImage, {
-                x: sigX - Math.round(sigW / 2),
-                y: sigY - Math.round(sigH / 2),
-                width: sigW,
-                height: sigH
-            });
+            if (sigImg) {
+                const sigX = page1Width + Math.round(page2Width * (calib.sigX / 100));
+                const sigY = Math.round(page2Height * (calib.sigY / 100));
+                const sigW = Math.round(page2Width * 0.25 * calib.sigScale);
+                const sigH = Math.round(sigW * (sigImg.height / sigImg.width));
+                ctx.drawImage(sigImg, sigX - Math.round(sigW / 2), sigY - Math.round(sigH / 2), sigW, sigH);
+            }
 
             // 2. Surgeon Signature
-            const docSigDataUrl = surgeonSignaturePad.toDataURL("image/png");
-            const docSigImageBytes = await fetch(docSigDataUrl).then(res => res.arrayBuffer());
-            const docSigImage = await pdfDoc.embedPng(docSigImageBytes);
+            let docSigImg = null;
+            if (!surgeonSignaturePad.isEmpty()) {
+                const docSigDataUrl = surgeonSignaturePad.toDataURL("image/png");
+                docSigImg = await loadImage(docSigDataUrl);
+            } else if (loadedSurgeonSigDataUrl) {
+                docSigImg = await loadImage(loadedSurgeonSigDataUrl);
+            }
 
-            const docSigX = Math.round(page2Width * (calib.docSigX / 100));
-            const docSigW = Math.round(page2Width * 0.25 * calib.docSigScale);
-            const docSigH = Math.round(docSigW * (canvas.height / canvas.width));
-
-            page2.drawImage(docSigImage, {
-                x: docSigX - Math.round(docSigW / 2),
-                y: sigY - Math.round(docSigH / 2), // share sigY
-                width: docSigW,
-                height: docSigH
-            });
+            if (docSigImg) {
+                const docSigX = page1Width + Math.round(page2Width * (calib.docSigX / 100));
+                const sigY = Math.round(page2Height * (calib.sigY / 100));
+                const docSigW = Math.round(page2Width * 0.25 * calib.docSigScale);
+                const docSigH = Math.round(docSigW * (docSigImg.height / docSigImg.width));
+                ctx.drawImage(docSigImg, docSigX - Math.round(docSigW / 2), sigY - Math.round(docSigH / 2), docSigW, docSigH);
+            }
 
             // WRITE THE TEXT VALUES FOR BOTH SIGNATURE BLOCKS ON PAGE 2
-            const sigTextArgs = { font: fontBold, size: Math.max(8, vitalFontSize - 2), color: rgb(0, 0, 0) };
+            const sigTextArgs = { size: Math.max(14, vitalFontSize - 4), isBold: true };
             
-            // Draw text values using the new calibration properties
-            const detailsY = Math.round(page2Height * (1 - (calib.sigDetailsY / 100)));
+            const detailsY = Math.round(page2Height * (calib.sigDetailsY / 100));
             const detailsSpacing = Math.round(page2Height * (calib.sigDetailsSpacing / 100));
-            const ptTextX = Math.round(page2Width * (calib.ptSigDetailsX / 100));
-            const docTextX = Math.round(page2Width * (calib.docSigDetailsX / 100));
+            const ptTextX = page1Width + Math.round(page2Width * (calib.ptSigDetailsX / 100));
+            const docTextX = page1Width + Math.round(page2Width * (calib.docSigDetailsX / 100));
 
             // Patient Column Details
             const valSignerName = document.getElementById("signerName").value || ptName;
@@ -2013,10 +1996,10 @@
             const valSignerDate = document.getElementById("signerDate").value || ptDate;
             const valSignerTime = document.getElementById("signerTime").value || "";
 
-            page2.drawText(valSignerName, { x: ptTextX + 35, y: detailsY, ...sigTextArgs });
-            page2.drawText(valSignerRelation, { x: ptTextX + 60, y: detailsY - detailsSpacing, ...sigTextArgs });
-            page2.drawText(valSignerDate, { x: ptTextX + 35, y: detailsY - 2 * detailsSpacing, ...sigTextArgs });
-            page2.drawText(valSignerTime, { x: ptTextX + 35, y: detailsY - 3 * detailsSpacing, ...sigTextArgs });
+            drawText(valSignerName, ptTextX + 60, detailsY, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valSignerRelation, ptTextX + 110, detailsY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valSignerDate, ptTextX + 60, detailsY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valSignerTime, ptTextX + 60, detailsY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
 
             // Doctor Column Details
             const valDocName = document.getElementById("surgeonName").value || ptConsultant;
@@ -2024,157 +2007,196 @@
             const valDocDate = document.getElementById("docDate").value || ptDate;
             const valDocTime = document.getElementById("docTime").value || "";
 
-            page2.drawText(valDocName, { x: docTextX + 35, y: detailsY, ...sigTextArgs });
-            page2.drawText(valDocReg, { x: docTextX + 45, y: detailsY - detailsSpacing, ...sigTextArgs });
-            page2.drawText(valDocDate, { x: docTextX + 35, y: detailsY - 2 * detailsSpacing, ...sigTextArgs });
-            page2.drawText(valDocTime, { x: docTextX + 35, y: detailsY - 3 * detailsSpacing, ...sigTextArgs });
+            drawText(valDocName, docTextX + 60, detailsY, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valDocReg, docTextX + 80, detailsY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valDocDate, docTextX + 60, detailsY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            drawText(valDocTime, docTextX + 60, detailsY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
 
-            // Save and download PDF
-            const pdfBytes = await pdfDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `${ptName.replace(/\s+/g, '_')}_Urology_Consent.pdf`;
-            link.click();
+            // Export to JPEG Blob and Download
+            canvas.toBlob((blob) => {
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `${ptName.replace(/\s+/g, '_')}_Urology_Consent.jpg`;
+                link.click();
+            }, 'image/jpeg', 0.95);
 
         } catch (error) {
             console.error(error);
-            alert("Error generating PDF: " + error.message);
+            alert("Error generating consent image: " + error.message);
         } finally {
-            genBtn.innerText = "Generate & Download PDF Consent";
+            genBtn.innerText = "Generate & Download Consent Image (JPEG)";
             genBtn.disabled = false;
         }
     }
 
-    // Dynamic Form Outline Fallback Generator
-    function drawFormOutline(page, width, height, font, fontBold, pageNum, isTamil = false) {
-        const { rgb } = PDFLib;
-        const colorPrimary = rgb(0.0, 0.33, 0.7);
-        const colorDark = rgb(0.1, 0.1, 0.1);
-        const colorGray = rgb(0.5, 0.5, 0.5);
+    // Helper function to load image asynchronously
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = (err) => reject(new Error(`Failed to load image from ${src}`));
+            img.src = src;
+        });
+    }
+
+    // Dynamic Form Outline Fallback Generator on Canvas
+    function drawFormOutlineCanvas(ctx, width, height, pageNum, isTamil = false) {
+        const colorPrimary = "#0054b3";
+        const colorDark = "#1a1a1a";
+        const colorGray = "#808080";
 
         // Border Outline
-        page.drawRectangle({
-            x: 20,
-            y: 20,
-            width: width - 40,
-            height: height - 40,
-            borderColor: colorPrimary,
-            borderWidth: 1.5
-        });
+        ctx.strokeStyle = colorPrimary;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(20, 20, width - 40, height - 40);
 
         if (pageNum === 1) {
             // PAGE 1 HEADER
-            page.drawText("SAVEETHA MEDICAL COLLEGE & HOSPITALS", {
-                x: Math.round(width * 0.15), y: height - 60, font: fontBold, size: 16, color: colorPrimary
-            });
-            page.drawText("SIMATS UNIVERSITY, CHENNAI", {
-                x: Math.round(width * 0.3), y: height - 76, font: font, size: 9, color: colorGray
-            });
-            page.drawText("DEPARTMENT OF UROLOGY", {
-                x: Math.round(width * 0.32), y: height - 94, font: fontBold, size: 11, color: colorDark
-            });
-            page.drawText(isTamil ? "INFORMED CONSENT FOR SURGERY (TAMIL FORM OUTLINE)" : "INFORMED CONSENT FOR SURGERY & PROCEDURES", {
-                x: Math.round(width * 0.18), y: height - 115, font: fontBold, size: 12, color: colorPrimary
-            });
+            ctx.font = "bold 32px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorPrimary;
+            ctx.textAlign = "center";
+            ctx.fillText("SAVEETHA MEDICAL COLLEGE & HOSPITALS", width * 0.5, 60);
+
+            ctx.font = "18px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorGray;
+            ctx.fillText("SIMATS UNIVERSITY, CHENNAI", width * 0.5, 90);
+
+            ctx.font = "bold 22px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorDark;
+            ctx.fillText("DEPARTMENT OF UROLOGY", width * 0.5, 120);
+
+            ctx.font = "bold 24px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorPrimary;
+            ctx.fillText(isTamil ? "INFORMED CONSENT FOR SURGERY (TAMIL FORM OUTLINE)" : "INFORMED CONSENT FOR SURGERY & PROCEDURES", width * 0.5, 160);
+
+            // Reset text align for detail labels
+            ctx.textAlign = "left";
 
             // 1. Patient Details
-            const vitalY = Math.round(height * (1 - (calib.ptY / 100)));
+            const vitalY = Math.round(height * (calib.ptY / 100));
             const lineSpacing = Math.round(height * (calib.ptSpacing / 100));
-            const secondY = vitalY - lineSpacing;
-            const thirdY = vitalY - 2 * lineSpacing;
+            const secondY = vitalY + lineSpacing;
+            const thirdY = vitalY + 2 * lineSpacing;
 
-            page.drawText("Patient Name:", { x: 40, y: vitalY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 100, y: vitalY - 2 }, end: { x: 230, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Age:", { x: 240, y: vitalY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 265, y: vitalY - 2 }, end: { x: 390, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Gender:", { x: 400, y: vitalY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 435, y: vitalY - 2 }, end: { x: 540, y: vitalY - 2 }, color: colorGray, thickness: 0.5 });
+            ctx.font = "18px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorGray;
+            ctx.fillText("Patient Name:", 40, vitalY);
+            ctx.fillText("Age:", 550, vitalY);
+            ctx.fillText("Gender:", 900, vitalY);
 
-            page.drawText("Patient ID (PID):", { x: 40, y: secondY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 110, y: secondY - 2 }, end: { x: 230, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Date:", { x: 240, y: secondY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 265, y: secondY - 2 }, end: { x: 390, y: secondY - 2 }, color: colorGray, thickness: 0.5 });
+            ctx.fillText("Patient ID (PID):", 40, secondY);
+            ctx.fillText("Date:", 550, secondY);
 
-            page.drawText("Surgeon:", { x: 40, y: thirdY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 110, y: thirdY - 2 }, end: { x: 230, y: thirdY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Ward:", { x: 240, y: thirdY, font: font, size: 8.5, color: colorGray });
-            page.drawLine({ start: { x: 265, y: thirdY - 2 }, end: { x: 390, y: thirdY - 2 }, color: colorGray, thickness: 0.5 });
+            ctx.fillText("Surgeon:", 40, thirdY);
+            ctx.fillText("Ward:", 550, thirdY);
+
+            // Lines
+            ctx.strokeStyle = colorGray;
+            ctx.lineWidth = 1;
+            // Patient Name line
+            ctx.beginPath(); ctx.moveTo(170, vitalY + 4); ctx.lineTo(520, vitalY + 4); ctx.stroke();
+            // Age line
+            ctx.beginPath(); ctx.moveTo(600, vitalY + 4); ctx.lineTo(870, vitalY + 4); ctx.stroke();
+            // Gender line
+            ctx.beginPath(); ctx.moveTo(980, vitalY + 4); ctx.lineTo(1100, vitalY + 4); ctx.stroke();
+
+            // PID line
+            ctx.beginPath(); ctx.moveTo(190, secondY + 4); ctx.lineTo(520, secondY + 4); ctx.stroke();
+            // Date line
+            ctx.beginPath(); ctx.moveTo(600, secondY + 4); ctx.lineTo(870, secondY + 4); ctx.stroke();
+
+            // Surgeon line
+            ctx.beginPath(); ctx.moveTo(130, thirdY + 4); ctx.lineTo(520, thirdY + 4); ctx.stroke();
+            // Ward line
+            ctx.beginPath(); ctx.moveTo(610, thirdY + 4); ctx.lineTo(870, thirdY + 4); ctx.stroke();
 
             // 2. Text paragraph (Middle)
-            const inlineY1 = Math.round(height * (1 - (calib.diagY / 100)));
-            const inlineY2 = Math.round(height * (1 - (calib.procY / 100)));
-            page.drawText("I, the undersigned, have been diagnosed with", { x: 40, y: inlineY1 + 3, font: font, size: 9.5, color: colorDark });
-            page.drawLine({ start: { x: 235, y: inlineY1 - 2 }, end: { x: width - 40, y: inlineY1 - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("and am planned to undergo the surgical procedure of", { x: 40, y: inlineY2 + 3, font: font, size: 9.5, color: colorDark });
-            page.drawLine({ start: { x: 275, y: inlineY2 - 2 }, end: { x: width - 40, y: inlineY2 - 2 }, color: colorGray, thickness: 0.5 });
+            const inlineY1 = Math.round(height * (calib.diagY / 100));
+            const inlineY2 = Math.round(height * (calib.procY / 100));
+            ctx.font = "20px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorDark;
+            ctx.fillText("I, the undersigned, have been diagnosed with", 40, inlineY1 - 6);
+            ctx.beginPath(); ctx.moveTo(460, inlineY1 + 2); ctx.lineTo(width - 40, inlineY1 + 2); ctx.stroke();
+            
+            ctx.fillText("and am planned to undergo the surgical procedure of", 40, inlineY2 - 6);
+            ctx.beginPath(); ctx.moveTo(520, inlineY2 + 2); ctx.lineTo(width - 40, inlineY2 + 2); ctx.stroke();
 
             // 3. Complications box
-            const boxTopY = Math.round(height * (1 - (calib.boxY / 100)));
-            const boxBottomY = Math.round(height * (1 - (calib.boxBottom / 100)));
-            page.drawRectangle({
-                x: 40,
-                y: boxBottomY,
-                width: width - 80,
-                height: boxTopY - boxBottomY,
-                borderColor: colorPrimary,
-                borderWidth: 1
-            });
+            const boxTopY = Math.round(height * (calib.boxY / 100));
+            const boxBottomY = Math.round(height * (calib.boxBottom / 100));
+            ctx.strokeStyle = colorPrimary;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(40, boxTopY, width - 80, boxBottomY - boxTopY);
         }
 
         if (pageNum === 2) {
             // PAGE 2 HEADER
-            page.drawText("DEPARTMENT OF UROLOGY", {
-                x: Math.round(width * 0.35), y: height - 60, font: fontBold, size: 12, color: colorPrimary
-            });
-            page.drawText("PATIENT DECLARATION & SIGNATURE BLOCK", {
-                x: Math.round(width * 0.25), y: height - 80, font: fontBold, size: 10, color: colorDark
-            });
+            ctx.font = "bold 24px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorPrimary;
+            ctx.textAlign = "center";
+            ctx.fillText("DEPARTMENT OF UROLOGY", width * 0.5, 60);
+
+            ctx.font = "bold 20px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorDark;
+            ctx.fillText("PATIENT DECLARATION & SIGNATURE BLOCK", width * 0.5, 95);
+
+            ctx.textAlign = "left";
 
             // 1. Page 2 complications overflow box
-            const boxTopY2 = Math.round(height * (1 - (calib.boxY2 / 100)));
-            const boxBottomY2 = Math.round(height * (1 - (calib.boxBottom2 / 100)));
-            page.drawRectangle({
-                x: 40,
-                y: boxBottomY2,
-                width: width - 80,
-                height: boxTopY2 - boxBottomY2,
-                borderColor: colorPrimary,
-                borderWidth: 1
-            });
-            page.drawText("COMPLICATIONS (CONTINUED FROM PAGE 1):", {
-                x: 45, y: boxTopY2 - 12, font: fontBold, size: 8, color: colorGray
-            });
+            const boxTopY2 = Math.round(height * (calib.boxY2 / 100));
+            const boxBottomY2 = Math.round(height * (calib.boxBottom2 / 100));
+            ctx.strokeStyle = colorPrimary;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(40, boxTopY2, width - 80, boxBottomY2 - boxTopY2);
+            
+            ctx.font = "bold 16px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorGray;
+            ctx.fillText("COMPLICATIONS (CONTINUED FROM PAGE 1):", 50, boxTopY2 + 25);
 
-            // 2. Symmetrical verification blocks matching page2.jpg lines
-            const sigY = Math.round(height * (1 - (calib.sigY / 100)));
-            const detailsY = Math.round(height * (1 - (calib.sigDetailsY / 100)));
+            // 2. Symmetrical verification blocks
+            const sigY = Math.round(height * (calib.sigY / 100));
+            const detailsY = Math.round(height * (calib.sigDetailsY / 100));
             const detailsSpacing = Math.round(height * (calib.sigDetailsSpacing / 100));
             const ptTextX = Math.round(width * (calib.ptSigDetailsX / 100));
             const docTextX = Math.round(width * (calib.docSigDetailsX / 100));
 
+            ctx.font = "bold 18px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorPrimary;
+            ctx.fillText("Patient / Relative's Signature:", ptTextX, sigY - 80);
+            
+            ctx.fillStyle = colorDark;
+            ctx.fillText("Doctor's Signature:", docTextX, sigY - 80);
+
+            ctx.font = "16px Helvetica, Arial, sans-serif";
+            ctx.fillStyle = colorGray;
+            ctx.strokeStyle = colorGray;
+            ctx.lineWidth = 1;
+
             // Left Column (Patient)
-            page.drawText("Patient / Relative's Signature:", { x: ptTextX, y: sigY + 50, font: fontBold, size: 9, color: colorPrimary });
-            page.drawText("Name:", { x: ptTextX, y: detailsY, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 2 }, end: { x: ptTextX + 180, y: detailsY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Relationship:", { x: ptTextX, y: detailsY - detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: ptTextX + 55, y: detailsY - detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("DATE:", { x: ptTextX, y: detailsY - 2 * detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 2 * detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - 2 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("TIME:", { x: ptTextX, y: detailsY - 3 * detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: ptTextX + 30, y: detailsY - 3 * detailsSpacing - 2 }, end: { x: ptTextX + 180, y: detailsY - 3 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            ctx.fillText("Name:", ptTextX, detailsY);
+            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 2); ctx.lineTo(ptTextX + 360, detailsY + 2); ctx.stroke();
+            
+            ctx.fillText("Relationship:", ptTextX, detailsY + detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(ptTextX + 110, detailsY + detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + detailsSpacing + 2); ctx.stroke();
+            
+            ctx.fillText("DATE:", ptTextX, detailsY + 2 * detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 2 * detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + 2 * detailsSpacing + 2); ctx.stroke();
+            
+            ctx.fillText("TIME:", ptTextX, detailsY + 3 * detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 3 * detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + 3 * detailsSpacing + 2); ctx.stroke();
 
             // Right Column (Doctor)
-            page.drawText("Doctor's Signature:", { x: docTextX, y: sigY + 50, font: fontBold, size: 9, color: colorDark });
-            page.drawText("Name:", { x: docTextX, y: detailsY, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 2 }, end: { x: docTextX + 180, y: detailsY - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("Reg. no:", { x: docTextX, y: detailsY - detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docTextX + 40, y: detailsY - detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("DATE:", { x: docTextX, y: detailsY - 2 * detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 2 * detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - 2 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
-            page.drawText("TIME:", { x: docTextX, y: detailsY - 3 * detailsSpacing, font: font, size: 8, color: colorGray });
-            page.drawLine({ start: { x: docTextX + 30, y: detailsY - 3 * detailsSpacing - 2 }, end: { x: docTextX + 180, y: detailsY - 3 * detailsSpacing - 2 }, color: colorGray, thickness: 0.5 });
+            ctx.fillText("Name:", docTextX, detailsY);
+            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 2); ctx.lineTo(docTextX + 360, detailsY + 2); ctx.stroke();
+            
+            ctx.fillText("Reg. no:", docTextX, detailsY + detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(docTextX + 80, detailsY + detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + detailsSpacing + 2); ctx.stroke();
+            
+            ctx.fillText("DATE:", docTextX, detailsY + 2 * detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 2 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + 2 * detailsSpacing + 2); ctx.stroke();
+            
+            ctx.fillText("TIME:", docTextX, detailsY + 3 * detailsSpacing);
+            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 3 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + 3 * detailsSpacing + 2); ctx.stroke();
         }
     }
 
