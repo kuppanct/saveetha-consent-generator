@@ -1064,7 +1064,27 @@
                 localStorage.setItem(`uro-reg-${activeSurgeonName}`, document.getElementById("docRegNo").value);
             }
         });
-        
+
+        // Auto-fill Signer Name with Patient Name when relationship is "Self"
+        function syncSignerName() {
+            const relation = document.getElementById("signerRelation").value.trim().toLowerCase();
+            const signerNameEl = document.getElementById("signerName");
+            if (relation === "self") {
+                signerNameEl.value = document.getElementById("patientName").value;
+                signerNameEl.style.color = "var(--text-muted)";
+            } else {
+                // Only clear if it was auto-filled (i.e. matches patient name)
+                if (signerNameEl.style.color === "var(--text-muted)") {
+                    signerNameEl.value = "";
+                    signerNameEl.style.color = "";
+                }
+            }
+        }
+        document.getElementById("signerRelation").addEventListener("input", syncSignerName);
+        document.getElementById("patientName").addEventListener("input", syncSignerName);
+        // Run once on load (relation defaults to "Self")
+        syncSignerName();
+
         // Handle window resizing for signature pad
         window.addEventListener("resize", resizeCanvas);
     });
