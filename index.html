@@ -972,6 +972,10 @@
         loadCalibration();
         initDate();
         
+        // Auto-load default consultant signature and details on start
+        toggleCustomConsultant();
+        autoLoadConsultantSignature();
+        
         // Reload coordinates automatically when switching Tamil/English template
         document.getElementById("tamilToggle").addEventListener("change", () => {
             loadCalibration();
@@ -1209,16 +1213,10 @@
             return;
         }
         loadedSurgeonSigDataUrl = dataUrl;
+        const canvas = document.getElementById('surgeonSignatureCanvas');
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
         surgeonSignaturePad.clear();
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.getElementById('surgeonSignatureCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            // Re-sync signature pad internals by loading from data URL
-            surgeonSignaturePad.fromDataURL(dataUrl);
-        };
-        img.src = dataUrl;
+        surgeonSignaturePad.fromDataURL(dataUrl, { ratio: ratio, width: canvas.offsetWidth, height: canvas.offsetHeight });
     }
 
     function autoLoadConsultantSignature() {
@@ -1231,16 +1229,10 @@
         const dataUrl = baked || local;
         loadedSurgeonSigDataUrl = dataUrl || null;
         if (dataUrl) {
+            const canvas = document.getElementById('surgeonSignatureCanvas');
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
             surgeonSignaturePad.clear();
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.getElementById('surgeonSignatureCanvas');
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                // Re-sync signature pad internals
-                surgeonSignaturePad.fromDataURL(dataUrl);
-            };
-            img.src = dataUrl;
+            surgeonSignaturePad.fromDataURL(dataUrl, { ratio: ratio, width: canvas.offsetWidth, height: canvas.offsetHeight });
         } else {
             // No saved signature — clear the pad so previous consultant's sig doesn't persist
             surgeonSignaturePad.clear();
@@ -1990,16 +1982,14 @@
             const ptTextX = page1Width + Math.round(page2Width * (calib.ptSigDetailsX / 100));
             const docTextX = page1Width + Math.round(page2Width * (calib.docSigDetailsX / 100));
 
+            // Shift baseline down to align with printed lines in template (since canvas text Y is baseline-based)
+            const startY = detailsY + Math.round(1.25 * detailsSpacing);
+
             // Patient Column Details
             const valSignerName = document.getElementById("signerName").value || ptName;
             const valSignerRelation = document.getElementById("signerRelation").value || "Self";
             const valSignerDate = document.getElementById("signerDate").value || ptDate;
             const valSignerTime = document.getElementById("signerTime").value || "";
-
-            drawText(valSignerName, ptTextX + 60, detailsY, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valSignerRelation, ptTextX + 110, detailsY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valSignerDate, ptTextX + 60, detailsY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valSignerTime, ptTextX + 60, detailsY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
 
             // Doctor Column Details
             const valDocName = document.getElementById("surgeonName").value || ptConsultant;
@@ -2007,10 +1997,29 @@
             const valDocDate = document.getElementById("docDate").value || ptDate;
             const valDocTime = document.getElementById("docTime").value || "";
 
-            drawText(valDocName, docTextX + 60, detailsY, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valDocReg, docTextX + 80, detailsY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valDocDate, docTextX + 60, detailsY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
-            drawText(valDocTime, docTextX + 60, detailsY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            if (!isTamil) {
+                // English patient details: print all 4 fields aligned with labels
+                drawText(valSignerName, ptTextX + 65, startY, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valSignerRelation, ptTextX + 115, startY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valSignerDate, ptTextX + 65, startY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valSignerTime, ptTextX + 65, startY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+
+                // English doctor details
+                drawText(valDocName, docTextX + 65, startY, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocReg, docTextX + 85, startY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocDate, docTextX + 65, startY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocTime, docTextX + 65, startY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            } else {
+                // Tamil patient details: only print Date and Time next to தேதி: and நேரம்:
+                drawText(valSignerDate, ptTextX + 70, startY, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valSignerTime, ptTextX + 70, startY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+
+                // Tamil doctor details
+                drawText(valDocName, docTextX + 175, startY, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocReg, docTextX + 105, startY + detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocDate, docTextX + 70, startY + 2 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+                drawText(valDocTime, docTextX + 70, startY + 3 * detailsSpacing, sigTextArgs.size, sigTextArgs.isBold);
+            }
 
             // Export to JPEG Blob and Download
             canvas.toBlob((blob) => {
@@ -2172,31 +2181,55 @@
             ctx.strokeStyle = colorGray;
             ctx.lineWidth = 1;
 
-            // Left Column (Patient)
-            ctx.fillText("Name:", ptTextX, detailsY);
-            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 2); ctx.lineTo(ptTextX + 360, detailsY + 2); ctx.stroke();
-            
-            ctx.fillText("Relationship:", ptTextX, detailsY + detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(ptTextX + 110, detailsY + detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + detailsSpacing + 2); ctx.stroke();
-            
-            ctx.fillText("DATE:", ptTextX, detailsY + 2 * detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 2 * detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + 2 * detailsSpacing + 2); ctx.stroke();
-            
-            ctx.fillText("TIME:", ptTextX, detailsY + 3 * detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(ptTextX + 60, detailsY + 3 * detailsSpacing + 2); ctx.lineTo(ptTextX + 360, detailsY + 3 * detailsSpacing + 2); ctx.stroke();
+            const startY = detailsY + Math.round(1.25 * detailsSpacing);
 
-            // Right Column (Doctor)
-            ctx.fillText("Name:", docTextX, detailsY);
-            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 2); ctx.lineTo(docTextX + 360, detailsY + 2); ctx.stroke();
-            
-            ctx.fillText("Reg. no:", docTextX, detailsY + detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(docTextX + 80, detailsY + detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + detailsSpacing + 2); ctx.stroke();
-            
-            ctx.fillText("DATE:", docTextX, detailsY + 2 * detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 2 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + 2 * detailsSpacing + 2); ctx.stroke();
-            
-            ctx.fillText("TIME:", docTextX, detailsY + 3 * detailsSpacing);
-            ctx.beginPath(); ctx.moveTo(docTextX + 60, detailsY + 3 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, detailsY + 3 * detailsSpacing + 2); ctx.stroke();
+            if (!isTamil) {
+                // Left Column (Patient) - English
+                ctx.fillText("Name:", ptTextX, startY);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 65, startY + 2); ctx.lineTo(ptTextX + 365, startY + 2); ctx.stroke();
+                
+                ctx.fillText("Relationship:", ptTextX, startY + detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 115, startY + detailsSpacing + 2); ctx.lineTo(ptTextX + 365, startY + detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("DATE:", ptTextX, startY + 2 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 65, startY + 2 * detailsSpacing + 2); ctx.lineTo(ptTextX + 365, startY + 2 * detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("TIME:", ptTextX, startY + 3 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 65, startY + 3 * detailsSpacing + 2); ctx.lineTo(ptTextX + 365, startY + 3 * detailsSpacing + 2); ctx.stroke();
+
+                // Right Column (Doctor) - English
+                ctx.fillText("Name:", docTextX, startY);
+                ctx.beginPath(); ctx.moveTo(docTextX + 65, startY + 2); ctx.lineTo(docTextX + 365, startY + 2); ctx.stroke();
+                
+                ctx.fillText("Reg. no:", docTextX, startY + detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 85, startY + detailsSpacing + 2); ctx.lineTo(docTextX + 365, startY + detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("DATE:", docTextX, startY + 2 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 65, startY + 2 * detailsSpacing + 2); ctx.lineTo(docTextX + 365, startY + 2 * detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("TIME:", docTextX, startY + 3 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 65, startY + 3 * detailsSpacing + 2); ctx.lineTo(docTextX + 365, startY + 3 * detailsSpacing + 2); ctx.stroke();
+            } else {
+                // Left Column (Patient) - Tamil (Only Date and Time)
+                ctx.fillText("தேதி:", ptTextX, startY);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 70, startY + 2); ctx.lineTo(ptTextX + 360, startY + 2); ctx.stroke();
+                
+                ctx.fillText("நேரம்:", ptTextX, startY + detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(ptTextX + 70, startY + detailsSpacing + 2); ctx.lineTo(ptTextX + 360, startY + detailsSpacing + 2); ctx.stroke();
+
+                // Right Column (Doctor) - Tamil
+                ctx.fillText("மருத்துவரின் பெயர்:", docTextX, startY);
+                ctx.beginPath(); ctx.moveTo(docTextX + 175, startY + 2); ctx.lineTo(docTextX + 360, startY + 2); ctx.stroke();
+                
+                ctx.fillText("பதிவு எண்:", docTextX, startY + detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 105, startY + detailsSpacing + 2); ctx.lineTo(docTextX + 360, startY + detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("தேதி:", docTextX, startY + 2 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 70, startY + 2 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, startY + 2 * detailsSpacing + 2); ctx.stroke();
+                
+                ctx.fillText("நேரம்:", docTextX, startY + 3 * detailsSpacing);
+                ctx.beginPath(); ctx.moveTo(docTextX + 70, startY + 3 * detailsSpacing + 2); ctx.lineTo(docTextX + 360, startY + 3 * detailsSpacing + 2); ctx.stroke();
+            }
         }
     }
 
