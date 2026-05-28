@@ -599,6 +599,75 @@
             }
         }
 
+        /* ── Procedure Blocks ─────────────────────────────────────────── */
+        .proc-block {
+            background: var(--input-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            position: relative;
+            transition: box-shadow 0.2s;
+        }
+
+        .proc-block:hover {
+            box-shadow: 0 2px 10px rgba(0,86,179,0.08);
+        }
+
+        .proc-block-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .proc-block-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.3px;
+        }
+
+        .proc-block-remove {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231,76,60,0.2);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            line-height: 1.4;
+        }
+
+        .proc-block-remove:hover {
+            background: rgba(231,76,60,0.2);
+        }
+
+        .btn-add-proc {
+            width: 100%;
+            padding: 10px;
+            border: 2px dashed var(--primary);
+            background: transparent;
+            color: var(--primary);
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn-add-proc:hover {
+            background: var(--primary);
+            color: #fff;
+        }
+
         /* Interactive Visual Calibration Preview */
         .calib-preview-card {
             border: 1px solid var(--border);
@@ -741,46 +810,18 @@
 
         <div class="app-card">
             <h2>Procedure Selection</h2>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="procedureSelect">Select Procedure</label>
-                    <input type="text" id="procedureSearch" placeholder="🔍 Search procedure..." style="margin-bottom: 8px;" oninput="initProcedureDropdown()">
-                    <select id="procedureSelect" onchange="onProcedureDropdownChange()">
-                        <option value="">-- Choose a Procedure --</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="procedureSide">Surgical Side (Laterality)</label>
-                    <select id="procedureSide" onchange="triggerConsentCompilation()">
-                        <option value="N/A">Not Applicable (N/A)</option>
-                        <option value="Left">Left</option>
-                        <option value="Right">Right</option>
-                        <option value="Bilateral">Bilateral</option>
-                    </select>
-                </div>
-            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">Add one or more procedures. All risks &amp; benefits will be merged into a single combined consent.</p>
 
-            <div id="approachGroup" style="display:none; margin-bottom: 16px;">
-                <label id="approachGroupLabel">Procedure Variant</label>
-                <div id="approachCheckboxes" style="display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
-                    <!-- Dynamically populated by onProcedureDropdownChange() -->
-                </div>
-            </div>
+            <!-- Dynamic procedure blocks -->
+            <div id="proceduresContainer"></div>
 
-            <div id="customProcedureFields" style="display:none;">
-                <div class="form-group">
-                    <label for="customProc">Custom Procedure Planned</label>
-                    <input type="text" id="customProc" placeholder="e.g., Laparoscopic Pyeloplasty">
-                </div>
-                <div class="form-group">
-                    <label for="customRisks">Custom Specific Risks (comma separated)</label>
-                    <textarea id="customRisks" placeholder="Risk 1, Risk 2, Risk 3..." rows="2"></textarea>
-                </div>
-            </div>
+            <button class="btn-add-proc" id="addProcBtn" onclick="addProcedureBlock()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Another Procedure
+            </button>
 
-            <div id="editorPanel" style="display:none;">
-                <label>Real-Time Consent Text Preview & Override (Editable)</label>
+            <div id="editorPanel" style="display:none; margin-top:16px;">
+                <label>Combined Consent Text Preview &amp; Override (Editable)</label>
                 <textarea id="consentTextPreview" class="consent-edit" oninput="overrideConsent()"></textarea>
             </div>
         </div>
@@ -894,13 +935,14 @@
 
 
 <!-- Pre-baked consultant signatures (hardcoded in code, works on all devices) -->
-<script src="signatures.js?v=15"></script>
+<script src="signatures.js?v=16"></script>
 <!-- Load procedures database script -->
-<script src="procedures.js?v=15"></script>
+<script src="procedures.js?v=16"></script>
 
 <script>
     // Global State
-    let selectedProcedureKey = "";
+    let procedureBlocks = [];     // Array of { id, procKey, side, customProc, customRisks, approachStr }
+    let procBlockCounter = 0;     // Auto-incrementing block id counter
     let signaturePad = null;
     let surgeonSignaturePad = null;
     let customConsentOverride = null;
@@ -998,7 +1040,8 @@
     document.addEventListener("DOMContentLoaded", () => {
         initTheme();
         initSignaturePad();
-        initProcedureDropdown();
+        // Create the first procedure block automatically on load
+        addProcedureBlock();
         loadCalibration();
         initDate();
         
@@ -1017,6 +1060,9 @@
             toggleCustomConsultant();
             autoLoadConsultantSignature();
         });
+
+        // Gender change refreshes all procedure dropdowns
+        document.getElementById("gender").addEventListener("change", refreshAllProcedureSelects);
         document.getElementById("customConsultant").addEventListener("input", () => {
             updateSurgeonNameField();
         });
@@ -1057,7 +1103,15 @@
 
         // Handle window resizing for signature pad
         window.addEventListener("resize", resizeCanvas);
+
+        // Mark DJ stent toggle as manually overridden when user clicks it
+        document.getElementById("djStentToggle").addEventListener("click", function() {
+            this.dataset.manualOverride = "1";
+            triggerConsentCompilation();
+        });
+        document.getElementById("highRiskToggle").addEventListener("change", triggerConsentCompilation);
     });
+
 
     // Theme Management
     function initTheme() {
@@ -1270,149 +1324,355 @@
         }
     }
 
-    // Populate Grouped Urology Procedures Dropdown
-    function initProcedureDropdown() {
-        const select = document.getElementById("procedureSelect");
-        const ptGender = document.getElementById("gender") ? document.getElementById("gender").value : "Male";
-        const searchInput = document.getElementById("procedureSearch");
-        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : "";
-        
-        // Remember previous selection
-        const prevSelected = select.value;
-        
-        select.innerHTML = '<option value="">-- Choose a Procedure --</option>';
+    // ═══════════════════════════════════════════════════════════
+    //  MULTI-PROCEDURE BLOCK SYSTEM
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Builds a fresh <select> populated with all procedures filtered by
+     * gender and an optional search term.
+     */
+    function buildProcedureSelect(ptGender, searchTerm, selectedKey) {
+        const select = document.createElement("select");
+        select.className = "";
+        const defaultOpt = document.createElement("option");
+        defaultOpt.value = "";
+        defaultOpt.textContent = "-- Choose a Procedure --";
+        select.appendChild(defaultOpt);
 
         if (window.URO_CATEGORIES && window.URO_PROCEDURES) {
             window.URO_CATEGORIES.forEach(cat => {
                 const group = document.createElement("optgroup");
                 group.label = cat.name;
-
-                // Sort procedures under this category by name
                 const procsInCat = [];
                 for (const [key, proc] of Object.entries(window.URO_PROCEDURES)) {
-                    if (proc.category === cat.id) {
-                        if (proc.gender && ptGender !== "Transgender" && proc.gender !== ptGender) {
-                            continue;
-                        }
-                        if (searchTerm && !proc.name.toLowerCase().includes(searchTerm)) {
-                            continue;
-                        }
-                        procsInCat.push({ key, name: proc.name });
-                    }
+                    if (proc.category !== cat.id) continue;
+                    if (proc.gender && ptGender !== "Transgender" && proc.gender !== ptGender) continue;
+                    if (searchTerm && !proc.name.toLowerCase().includes(searchTerm)) continue;
+                    procsInCat.push({ key, name: proc.name });
                 }
-                
                 procsInCat.forEach(p => {
                     const opt = document.createElement("option");
                     opt.value = p.key;
                     opt.textContent = p.name;
                     group.appendChild(opt);
                 });
-
-                if (group.children.length > 0) {
-                    select.appendChild(group);
-                }
+                if (group.children.length > 0) select.appendChild(group);
             });
-            
-            // Add custom other option
-            if (!searchTerm || "other".includes(searchTerm) || "custom".includes(searchTerm) || "procedure".includes(searchTerm)) {
-                const otherOpt = document.createElement("option");
-                otherOpt.value = "OTHER";
-                otherOpt.textContent = "Other / Custom Procedure";
-                select.appendChild(otherOpt);
+            if (!searchTerm || "other".includes(searchTerm) || "custom".includes(searchTerm)) {
+                const other = document.createElement("option");
+                other.value = "OTHER";
+                other.textContent = "Other / Custom Procedure";
+                select.appendChild(other);
             }
         }
-        
-        // Restore selection if it's still available (or preserve if filtered out so we don't clear the form)
-        if (prevSelected) {
-            const hasOption = Array.from(select.options).some(opt => opt.value === prevSelected);
-            if (!hasOption) {
-                if (prevSelected === "OTHER") {
-                    const otherOpt = document.createElement("option");
-                    otherOpt.value = "OTHER";
-                    otherOpt.textContent = "Other / Custom Procedure";
-                    select.appendChild(otherOpt);
-                } else if (window.URO_PROCEDURES[prevSelected]) {
-                    const opt = document.createElement("option");
-                    opt.value = prevSelected;
-                    opt.textContent = window.URO_PROCEDURES[prevSelected].name;
-                    select.appendChild(opt);
-                }
+        if (selectedKey) {
+            const exists = Array.from(select.options).some(o => o.value === selectedKey);
+            if (!exists && window.URO_PROCEDURES && window.URO_PROCEDURES[selectedKey]) {
+                const opt = document.createElement("option");
+                opt.value = selectedKey;
+                opt.textContent = window.URO_PROCEDURES[selectedKey].name;
+                select.appendChild(opt);
             }
-            select.value = prevSelected;
-            // Re-apply all UI state (approach checkboxes, stent toggle, editor panel)
-            // only if there is actually a selection to restore
-            if (select.value) {
-                onProcedureDropdownChange();
-            }
+            select.value = selectedKey;
         }
+        return select;
     }
 
-    // Handles native select dropdown change
-    function onProcedureDropdownChange() {
-        const select = document.getElementById("procedureSelect");
-        selectedProcedureKey = select.value;
+    /**
+     * Adds a new procedure block to the UI and the procedureBlocks array.
+     * @param {string} [initKey] - Optional procedure key to pre-select.
+     */
+    function addProcedureBlock(initKey) {
+        const id = procBlockCounter++;
+        const ptGender = document.getElementById("gender") ? document.getElementById("gender").value : "Male";
 
-        if (!selectedProcedureKey) {
-            document.getElementById("customProcedureFields").style.display = "none";
-            document.getElementById("editorPanel").style.display = "none";
-            document.getElementById("approachGroup").style.display = "none";
-            customConsentOverride = null;
-            return;
+        // Create block state entry
+        const blockState = { id, procKey: initKey || "", side: "N/A", customProc: "", customRisks: "", approachStr: "" };
+        procedureBlocks.push(blockState);
+
+        // --- Build DOM block ---
+        const block = document.createElement("div");
+        block.className = "proc-block";
+        block.dataset.blockId = id;
+        block.id = `procBlock_${id}`;
+
+        // Header row (title + remove button)
+        const header = document.createElement("div");
+        header.className = "proc-block-header";
+        const title = document.createElement("span");
+        title.className = "proc-block-title";
+        title.id = `procBlockTitle_${id}`;
+        title.textContent = `Procedure ${procedureBlocks.length}`;
+        const removeBtn = document.createElement("button");
+        removeBtn.className = "proc-block-remove";
+        removeBtn.textContent = "✕ Remove";
+        removeBtn.onclick = () => removeProcedureBlock(id);
+        header.appendChild(title);
+        header.appendChild(removeBtn);
+        block.appendChild(header);
+
+        // Search + select row
+        const searchRow = document.createElement("div");
+        searchRow.className = "form-grid";
+
+        const searchGroup = document.createElement("div");
+        searchGroup.className = "form-group";
+        const searchLabel = document.createElement("label");
+        searchLabel.textContent = "Search Procedure";
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.placeholder = "🔍 Type to search...";
+        searchInput.style.marginBottom = "8px";
+        searchInput.id = `procSearch_${id}`;
+        searchGroup.appendChild(searchLabel);
+        searchGroup.appendChild(searchInput);
+
+        const selectGroup = document.createElement("div");
+        selectGroup.className = "form-group";
+        const selectLabel = document.createElement("label");
+        selectLabel.textContent = "Select Procedure";
+        const procSelect = buildProcedureSelect(ptGender, "", initKey || "");
+        procSelect.id = `procSelect_${id}`;
+        selectGroup.appendChild(selectLabel);
+        selectGroup.appendChild(procSelect);
+
+        searchRow.appendChild(searchGroup);
+        searchRow.appendChild(selectGroup);
+        block.appendChild(searchRow);
+
+        // Laterality select
+        const sideGroup = document.createElement("div");
+        sideGroup.className = "form-group";
+        const sideLabel = document.createElement("label");
+        sideLabel.textContent = "Surgical Side (Laterality)";
+        const sideSelect = document.createElement("select");
+        sideSelect.id = `procSide_${id}`;
+        [["N/A","Not Applicable (N/A)"],["Left","Left"],["Right","Right"],["Bilateral","Bilateral"]].forEach(([v, t]) => {
+            const o = document.createElement("option"); o.value = v; o.textContent = t;
+            sideSelect.appendChild(o);
+        });
+        sideGroup.appendChild(sideLabel);
+        sideGroup.appendChild(sideSelect);
+        block.appendChild(sideGroup);
+
+        // Approach / Variant checkboxes (hidden by default)
+        const approachDiv = document.createElement("div");
+        approachDiv.id = `procApproach_${id}`;
+        approachDiv.style.display = "none";
+        approachDiv.style.marginBottom = "14px";
+        const approachLabel = document.createElement("label");
+        approachLabel.id = `procApproachLabel_${id}`;
+        approachLabel.textContent = "Procedure Variant";
+        const approachBoxes = document.createElement("div");
+        approachBoxes.id = `procApproachBoxes_${id}`;
+        approachBoxes.style.cssText = "display:flex; gap:12px; margin-top:8px; flex-wrap:wrap;";
+        approachDiv.appendChild(approachLabel);
+        approachDiv.appendChild(approachBoxes);
+        block.appendChild(approachDiv);
+
+        // Custom fields (hidden by default)
+        const customDiv = document.createElement("div");
+        customDiv.id = `procCustom_${id}`;
+        customDiv.style.display = "none";
+        const customProcGrp = document.createElement("div");
+        customProcGrp.className = "form-group";
+        const customProcLabel = document.createElement("label");
+        customProcLabel.textContent = "Custom Procedure Name";
+        const customProcInput = document.createElement("input");
+        customProcInput.type = "text";
+        customProcInput.id = `procCustomName_${id}`;
+        customProcInput.placeholder = "e.g., Laparoscopic Pyeloplasty";
+        customProcGrp.appendChild(customProcLabel);
+        customProcGrp.appendChild(customProcInput);
+        const customRisksGrp = document.createElement("div");
+        customRisksGrp.className = "form-group";
+        const customRisksLabel = document.createElement("label");
+        customRisksLabel.textContent = "Custom Risks (comma separated)";
+        const customRisksInput = document.createElement("textarea");
+        customRisksInput.id = `procCustomRisks_${id}`;
+        customRisksInput.rows = 2;
+        customRisksInput.placeholder = "Risk 1, Risk 2, Risk 3...";
+        customRisksGrp.appendChild(customRisksLabel);
+        customRisksGrp.appendChild(customRisksInput);
+        customDiv.appendChild(customProcGrp);
+        customDiv.appendChild(customRisksGrp);
+        block.appendChild(customDiv);
+
+        // Append block to container
+        document.getElementById("proceduresContainer").appendChild(block);
+
+        // ── Event listeners ──
+        searchInput.addEventListener("input", () => {
+            const currentSelect = document.getElementById(`procSelect_${id}`);
+            if (!currentSelect) return;
+            const term = searchInput.value.toLowerCase().trim();
+            const gender = document.getElementById("gender").value;
+            const current = currentSelect.value;
+            // Rebuild select in-place
+            const newSelect = buildProcedureSelect(gender, term, current);
+            newSelect.id = currentSelect.id;
+            newSelect.addEventListener("change", () => onBlockSelectChange(id));
+            currentSelect.replaceWith(newSelect);
+        });
+
+        procSelect.addEventListener("change", () => onBlockSelectChange(id));
+        sideSelect.addEventListener("change", () => {
+            blockState.side = sideSelect.value;
+            triggerConsentCompilation();
+        });
+        customProcInput.addEventListener("input", () => {
+            blockState.customProc = customProcInput.value;
+            triggerConsentCompilation();
+        });
+        customRisksInput.addEventListener("input", () => {
+            blockState.customRisks = customRisksInput.value;
+            triggerConsentCompilation();
+        });
+
+        // If pre-initializing with a key, trigger change flow
+        if (initKey) {
+            onBlockSelectChange(id);
         }
 
-        // Auto-configure the DJ stent checkbox based on the selected procedure's default, but let the user manually override
-        const stentToggle = document.getElementById("djStentToggle");
-        if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
-            stentToggle.checked = !!window.URO_PROCEDURES[selectedProcedureKey].hasStent;
-        } else {
-            stentToggle.checked = false;
-        }
-
-        // Configure and toggle the approach checkbox group based on the procedure's approachOptions
-        const approachGroup = document.getElementById("approachGroup");
-        const approachContainer = document.getElementById("approachCheckboxes");
-        approachContainer.innerHTML = ""; // clear old checkboxes
-        if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
-            const procObj = window.URO_PROCEDURES[selectedProcedureKey];
-            const opts = procObj.approachOptions; // e.g. ["Open","Laparoscopic","Robotic"]
-            if (opts && opts.length > 0) {
-                // Set label based on type of options
-                const isApproachType = opts.some(o => ["Open","Laparoscopic","Robotic"].includes(o));
-                document.getElementById("approachGroupLabel").textContent = isApproachType ? "Surgical Approach" : "Procedure Variant";
-                opts.forEach((opt, i) => {
-                    const lbl = document.createElement("label");
-                    lbl.style.cssText = "display:flex;align-items:center;gap:6px;text-transform:none;font-weight:normal;font-size:14px;color:var(--text-main);cursor:pointer;";
-                    const cb = document.createElement("input");
-                    cb.type = "checkbox";
-                    cb.id = `approachOpt_${i}`;
-                    cb.value = opt;
-                    cb.checked = true;
-                    cb.style.cssText = "width:auto;margin:0;";
-                    cb.addEventListener("change", triggerConsentCompilation);
-                    lbl.appendChild(cb);
-                    lbl.appendChild(document.createTextNode(" " + opt));
-                    approachContainer.appendChild(lbl);
-                });
-                approachGroup.style.display = "block";
-            } else {
-                approachGroup.style.display = "none";
-            }
-        } else {
-            approachGroup.style.display = "none";
-        }
-
-        // Toggle custom fields UI
-        const customFields = document.getElementById("customProcedureFields");
-        if (selectedProcedureKey === "OTHER") {
-            customFields.style.display = "block";
-        } else {
-            customFields.style.display = "none";
-        }
-
-        // Show editor panel
-        document.getElementById("editorPanel").style.display = "block";
+        refreshBlockTitles();
         triggerConsentCompilation();
     }
+
+    /**
+     * Removes a procedure block by its id.
+     */
+    function removeProcedureBlock(id) {
+        const idx = procedureBlocks.findIndex(b => b.id === id);
+        if (idx !== -1) procedureBlocks.splice(idx, 1);
+        const el = document.getElementById(`procBlock_${id}`);
+        if (el) el.remove();
+        refreshBlockTitles();
+        triggerConsentCompilation();
+    }
+
+    /**
+     * Renumbers the "Procedure X" headings after add/remove.
+     */
+    function refreshBlockTitles() {
+        procedureBlocks.forEach((b, i) => {
+            const titleEl = document.getElementById(`procBlockTitle_${b.id}`);
+            if (titleEl) titleEl.textContent = `Procedure ${i + 1}`;
+        });
+    }
+
+    /**
+     * Handles dropdown changes inside a block: approach checkboxes, custom fields, stent toggle.
+     */
+    function onBlockSelectChange(id) {
+        const blockState = procedureBlocks.find(b => b.id === id);
+        if (!blockState) return;
+
+        const procSelect = document.getElementById(`procSelect_${id}`);
+        if (!procSelect) return;
+        const procKey = procSelect.value;
+        blockState.procKey = procKey;
+
+        // Approach checkboxes
+        const approachDiv   = document.getElementById(`procApproach_${id}`);
+        const approachBoxes = document.getElementById(`procApproachBoxes_${id}`);
+        const approachLabel = document.getElementById(`procApproachLabel_${id}`);
+        approachBoxes.innerHTML = "";
+
+        const proc = procKey !== "OTHER" && window.URO_PROCEDURES ? window.URO_PROCEDURES[procKey] : null;
+        if (proc && proc.approachOptions && proc.approachOptions.length > 0) {
+            const isApproachType = proc.approachOptions.some(o => ["Open","Laparoscopic","Robotic"].includes(o));
+            if (approachLabel) approachLabel.textContent = isApproachType ? "Surgical Approach" : "Procedure Variant";
+            proc.approachOptions.forEach((opt, i) => {
+                const lbl = document.createElement("label");
+                lbl.style.cssText = "display:flex;align-items:center;gap:6px;font-weight:normal;font-size:14px;color:var(--text-main);cursor:pointer;";
+                const cb = document.createElement("input");
+                cb.type = "checkbox"; cb.value = opt; cb.checked = true;
+                cb.style.cssText = "width:auto;margin:0;";
+                cb.id = `procApproachOpt_${id}_${i}`;
+                cb.addEventListener("change", () => {
+                    blockState.approachStr = getBlockApproachString(id);
+                    triggerConsentCompilation();
+                });
+                lbl.appendChild(cb);
+                lbl.appendChild(document.createTextNode(" " + opt));
+                approachBoxes.appendChild(lbl);
+            });
+            if (approachDiv) approachDiv.style.display = "block";
+            blockState.approachStr = getBlockApproachString(id);
+        } else {
+            if (approachDiv) approachDiv.style.display = "none";
+            blockState.approachStr = "";
+        }
+
+        // Custom fields
+        const customDiv = document.getElementById(`procCustom_${id}`);
+        if (customDiv) customDiv.style.display = (procKey === "OTHER") ? "block" : "none";
+
+        // Auto-set DJ Stent toggle from the first procedure that has hasStent
+        // (only auto-set if no block has manually overridden it)
+        const anyStent = procedureBlocks.some(b => {
+            if (b.procKey === "OTHER" || !b.procKey) return false;
+            const p = window.URO_PROCEDURES && window.URO_PROCEDURES[b.procKey];
+            return p && p.hasStent;
+        });
+        const stentToggle = document.getElementById("djStentToggle");
+        if (stentToggle && !stentToggle.dataset.manualOverride) {
+            stentToggle.checked = anyStent;
+        }
+
+        // Show editor panel if at least one procedure is chosen
+        const anySelected = procedureBlocks.some(b => !!b.procKey);
+        document.getElementById("editorPanel").style.display = anySelected ? "block" : "none";
+
+        triggerConsentCompilation();
+    }
+
+
+    /**
+     * Returns the selected approach/variant checkboxes string for a given block.
+     */
+    function getBlockApproachString(id) {
+        const checked = [];
+        const boxesDiv = document.getElementById(`procApproachBoxes_${id}`);
+        if (!boxesDiv) return "";
+        boxesDiv.querySelectorAll("input[type=checkbox]:checked").forEach(cb => checked.push(cb.value));
+        return checked.length ? checked.join(" / ") : "Surgical";
+    }
+
+    // Gender change refreshes all procedure dropdowns
+    function refreshAllProcedureSelects() {
+        const ptGender = document.getElementById("gender") ? document.getElementById("gender").value : "Male";
+        procedureBlocks.forEach(blockState => {
+            const procSelect = document.getElementById(`procSelect_${blockState.id}`);
+            if (!procSelect) return;
+            const searchInput = document.getElementById(`procSearch_${blockState.id}`);
+            const term = searchInput ? searchInput.value.toLowerCase().trim() : "";
+            const current = procSelect.value;
+            const newSelect = buildProcedureSelect(ptGender, term, current);
+            newSelect.id = procSelect.id;
+            newSelect.addEventListener("change", () => onBlockSelectChange(blockState.id));
+            procSelect.replaceWith(newSelect);
+        });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  LEGACY STUBS (retained for backward compatibility with
+    //  event listeners in DOMContentLoaded that call these)
+    // ═══════════════════════════════════════════════════════════
+
+    // Kept as a no-op stub; gender change now calls refreshAllProcedureSelects
+    function initProcedureDropdown() {
+        refreshAllProcedureSelects();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  CONSENT COMPILATION
+    // ═══════════════════════════════════════════════════════════
+
+
+
+
 
     function toggleCustomConsultant() {
         const val = document.getElementById("consultant").value;
@@ -1453,73 +1713,36 @@
 
     // Listen to changes in fields to trigger consent recompiling
     document.getElementById("procedureDiagnosis").addEventListener("input", triggerConsentCompilation);
-    document.getElementById("customProc").addEventListener("input", triggerConsentCompilation);
-    document.getElementById("customRisks").addEventListener("input", triggerConsentCompilation);
 
-    function getSelectedApproachString() {
-        // Collect all checked approach checkboxes (dynamically generated)
-        const checked = [];
-        document.querySelectorAll("#approachCheckboxes input[type=checkbox]:checked").forEach(cb => {
-            checked.push(cb.value);
-        });
-        if (checked.length === 0) return "Surgical";
-        return checked.join(" / ");
-    }
 
-    function formatProcedureName(name, approachStr, originalOptions) {
-        // If the procedure has approachOptions, replace the full options string with the selected ones
-        if (originalOptions && originalOptions.length > 0) {
-            const fullStr = originalOptions.join(" / ");
-            if (name.includes(fullStr)) {
-                return name.replace(fullStr, approachStr);
-            }
-            // Try replacing inside parentheses: (A / B / C) -> (selectedStr)
-            const parenStr = "(" + fullStr + ")";
-            if (name.includes(parenStr)) {
-                return name.replace(parenStr, "(" + approachStr + ")");
-            }
-        }
-        // Fallback: generic paren replacement
-        const parenRegex = /\(([^)]+\/[^)]+)\)/;
-        if (parenRegex.test(name)) {
-            return name.replace(parenRegex, `(${approachStr})`);
-        }
-        // Fallback: replace first " / "-joined sequence found in name
-        const firstSlash = name.indexOf(" / ");
-        if (firstSlash !== -1) {
-            // Find full slash-separated segment
-            let start = firstSlash;
-            while (start > 0 && name[start-1] !== ' ') start--;
-            let end = name.lastIndexOf(" / ") + name.split(" / ").pop().length + 3;
-            return name.substring(0, start).trimEnd() + " " + approachStr + name.substring(end);
-        }
-        return name;
-    }
 
     function triggerConsentCompilation() {
-        if (!selectedProcedureKey) return;
-        
-        const diag = document.getElementById("procedureDiagnosis").value;
-        let proc = "";
-        let risks = "";
+        // Refresh blockState approachStr from checkboxes before compiling
+        procedureBlocks.forEach(b => {
+            b.approachStr = getBlockApproachString(b.id);
+            const customNameInput = document.getElementById(`procCustomName_${b.id}`);
+            const customRisksInput = document.getElementById(`procCustomRisks_${b.id}`);
+            if (customNameInput) b.customProc = customNameInput.value;
+            if (customRisksInput) b.customRisks = customRisksInput.value;
+            const sideSelect = document.getElementById(`procSide_${b.id}`);
+            if (sideSelect) b.side = sideSelect.value;
+            const procSelect = document.getElementById(`procSelect_${b.id}`);
+            if (procSelect) b.procKey = procSelect.value;
+        });
 
-        if (selectedProcedureKey === "OTHER") {
-            proc = document.getElementById("customProc").value;
-            risks = document.getElementById("customRisks").value;
-        } else if (window.URO_PROCEDURES[selectedProcedureKey]) {
-            const procObj = window.URO_PROCEDURES[selectedProcedureKey];
-            let name = procObj.name;
-            if (procObj.approachOptions && procObj.approachOptions.length > 0) {
-                const approachStr = getSelectedApproachString();
-                name = formatProcedureName(name, approachStr, procObj.approachOptions);
-            }
-            proc = name;
-        }
+        const activeProcedures = procedureBlocks.filter(b => !!b.procKey);
+        if (activeProcedures.length === 0) return;
 
-        const side = document.getElementById("procedureSide").value;
+        const diag       = document.getElementById("procedureDiagnosis").value;
         const isHighRisk = document.getElementById("highRiskToggle") ? document.getElementById("highRiskToggle").checked : false;
-        const hasStent = document.getElementById("djStentToggle") ? document.getElementById("djStentToggle").checked : false;
-        const compiledText = window.compileConsentText(selectedProcedureKey, diag, proc, risks, side, isHighRisk, hasStent);
+        const hasStent   = document.getElementById("djStentToggle") ? document.getElementById("djStentToggle").checked : false;
+
+        const compiledText = window.compileMultipleConsentText(
+            activeProcedures,
+            diag,
+            isHighRisk,
+            hasStent
+        );
         document.getElementById("consentTextPreview").value = compiledText;
         customConsentOverride = compiledText;
     }
@@ -1783,10 +2006,12 @@
             alert("Please enter specific Diagnosis.");
             return;
         }
-        if (!selectedProcedureKey) {
-            alert("Please select a Procedure from the dropdown.");
+        const activeProcedures = procedureBlocks.filter(b => !!b.procKey);
+        if (activeProcedures.length === 0) {
+            alert("Please select at least one Procedure.");
             return;
         }
+
         if (signaturePad.isEmpty() && !loadedPatientSigDataUrl) {
             alert("Please ask the patient to sign the consent pad.");
             return;
@@ -1903,24 +2128,31 @@
             drawText(ptConsultant, surgeonX, surgeonY, vitalFontSize, true);
             drawText(ptWard, wardX, wardY, vitalFontSize, true);
 
-            // Draw inline paragraph details
+            // Build combined procedure name from all active blocks
             let diagnosis = document.getElementById("procedureDiagnosis").value;
             let procedurePlanned = "";
-            const side = document.getElementById("procedureSide").value;
-            const sidePrefix = (side && side !== "N/A") ? (side + " ") : "";
-
-            if (selectedProcedureKey !== "OTHER" && window.URO_PROCEDURES[selectedProcedureKey]) {
-                if (selectedProcedureKey === "THERAPEUTIC_CYSTOSCOPY_PROCEED") {
-                    procedurePlanned = sidePrefix + "Therapeutic Cystoscopy and Proceed";
-                } else {
-                    procedurePlanned = sidePrefix + window.URO_PROCEDURES[selectedProcedureKey].name;
+            const activeProcedures = procedureBlocks.filter(b => !!b.procKey);
+            const procNames = activeProcedures.map(b => {
+                const sidePrefix = (b.side && b.side !== "N/A") ? (b.side + " ") : "";
+                if (b.procKey === "OTHER" || !window.URO_PROCEDURES[b.procKey]) {
+                    return sidePrefix + (b.customProc || "Custom Procedure");
                 }
+                let name = window.URO_PROCEDURES[b.procKey].name;
+                if (b.approachStr && window.URO_PROCEDURES[b.procKey].approachOptions && window.URO_PROCEDURES[b.procKey].approachOptions.length > 0) {
+                    const fullStr = window.URO_PROCEDURES[b.procKey].approachOptions.join(" / ");
+                    const parenStr = "(" + fullStr + ")";
+                    if (name.includes(parenStr)) name = name.replace(parenStr, "(" + b.approachStr + ")");
+                    else if (name.includes(fullStr)) name = name.replace(fullStr, b.approachStr);
+                }
+                return sidePrefix + name;
+            });
+            if (procNames.length === 1) {
+                procedurePlanned = procNames[0];
+            } else if (procNames.length === 2) {
+                procedurePlanned = procNames[0] + " + " + procNames[1];
             } else {
-                procedurePlanned = sidePrefix + document.getElementById("customProc").value;
-            }
-            
-            if (sidePrefix && !diagnosis.startsWith(sidePrefix)) {
-                diagnosis = sidePrefix + diagnosis;
+                const last = procNames[procNames.length - 1];
+                procedurePlanned = procNames.slice(0, -1).join(", ") + ", + " + last;
             }
 
             const inlineFontSize = Math.round(page1Width * 0.016);

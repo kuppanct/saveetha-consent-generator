@@ -1943,7 +1943,199 @@ function compileConsentText(procKey, customDiag = "", customProc = "", customRis
     return text;
 }
 
+/**
+ * Compiles a combined, medicolegally watertight consent text for one OR more concurrent procedures.
+ *
+ * @param {Array} proceduresList  - Array of procedure config objects:
+ *   { procKey, side, customProc, customRisks, approachStr }
+ *   approachStr is the formatted "Open / Laparoscopic" string selected from variant checkboxes.
+ * @param {string} customDiag     - Shared diagnosis text entered by the user.
+ * @param {boolean} isHighRisk    - High-risk patient toggle.
+ * @param {boolean} hasStentManual - Manual override for the DJ stent toggle.
+ */
+function compileMultipleConsentText(proceduresList, customDiag = "", isHighRisk = false, hasStentManual = false) {
+    if (!proceduresList || proceduresList.length === 0) return "";
+
+    // --- Aggregate procedure details across all selected procedures ---
+    let allProcedureNames   = [];
+    let allBenefitParts     = [];
+    let allAltParts         = [];
+    let allSpecificRisks    = [];
+
+    // Merged flags – set to true if ANY procedure requires them
+    let isMajor          = false;
+    let hasStent         = !!hasStentManual;
+    let hasCatheter      = false;
+    let hasNephrostomy   = false;
+    let isLaparoscopic   = false;
+    let hasUroOncOrRecon = false;
+
+    proceduresList.forEach(({ procKey, side, customProc, customRisks, approachStr }) => {
+        const proc = URO_PROCEDURES[procKey];
+        const sidePrefix = (side && side !== "N/A") ? (side + " ") : "";
+
+        if (procKey === "OTHER" || !proc) {
+            // Custom / OTHER entry
+            const cName = customProc || "Custom Urology Surgical Intervention";
+            allProcedureNames.push(sidePrefix + cName);
+            allBenefitParts.push("Treatment of primary pathology, relief of symptoms, and preservation of renal/urinary tract function.");
+            allAltParts.push("Conservative medical management, alternative surgical interventions, or observation as explained by the team.");
+            if (customRisks) {
+                customRisks.split(",").map(r => r.trim()).filter(Boolean).forEach(r => allSpecificRisks.push(r));
+            } else {
+                allSpecificRisks.push("Specific risks explained verbally by the operating team.");
+            }
+            isMajor = true;
+            hasCatheter = true;
+        } else {
+            // Build the display name, injecting selected approach variant
+            let name = proc.name;
+            if (approachStr && proc.approachOptions && proc.approachOptions.length > 0) {
+                const fullStr = proc.approachOptions.join(" / ");
+                const parenStr = "(" + fullStr + ")";
+                if (name.includes(parenStr))      name = name.replace(parenStr, "(" + approachStr + ")");
+                else if (name.includes(fullStr))  name = name.replace(fullStr, approachStr);
+            }
+            // Special display for "cystoscopy and proceed" variants
+            if (procKey === "MALE_CYSTOSCOPY_PROCEED_COMBINED" ||
+                procKey === "FEMALE_CYSTOSCOPY_PROCEED_COMBINED" ||
+                procKey === "THERAPEUTIC_CYSTOSCOPY_PROCEED") {
+                name = "Cystoscopy and Proceed";
+            }
+
+            let procName = sidePrefix + name;
+            if (customProc) procName = sidePrefix + customProc;
+            allProcedureNames.push(procName);
+
+            if (proc.benefits)     allBenefitParts.push(proc.benefits);
+            if (proc.alternatives) allAltParts.push(proc.alternatives);
+            if (proc.risks)        proc.risks.forEach(r => allSpecificRisks.push(r));
+
+            if (proc.isMajorSurgery)         isMajor        = true;
+            if (proc.hasStent)               hasStent       = true;
+            if (proc.hasCatheter)            hasCatheter    = true;
+            if (proc.hasNephrostomy)         hasNephrostomy = true;
+            if (proc.isLaparoscopicOrRobotic) isLaparoscopic = true;
+            if (proc.category === "cat4" || proc.category === "cat6" || proc.category === "cat7") {
+                hasUroOncOrRecon = true;
+            }
+        }
+    });
+
+    // Manual stent toggle always wins
+    if (hasStentManual) hasStent = true;
+
+    // --- Combine diagnosis ---
+    let diagnosis = customDiag || "Urological pathology under evaluation";
+
+    // --- Build combined procedure planned string ---
+    let procedurePlanned = "";
+    if (allProcedureNames.length === 1) {
+        procedurePlanned = allProcedureNames[0];
+    } else if (allProcedureNames.length === 2) {
+        procedurePlanned = allProcedureNames[0] + " AND " + allProcedureNames[1];
+    } else {
+        const last = allProcedureNames.pop();
+        procedurePlanned = allProcedureNames.join(", ") + ", AND " + last;
+    }
+
+    // --- Deduplicate benefits and alternatives ---
+    function deduplicateLines(parts) {
+        const seen = new Set();
+        return parts.filter(p => {
+            const key = p.trim().toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        }).join("\n");
+    }
+
+    const benefits     = deduplicateLines(allBenefitParts);
+    const alternatives = deduplicateLines(allAltParts);
+
+    // --- Deduplicate specific risks (case-insensitive) ---
+    const seenRisks = new Set();
+    const specificRisks = allSpecificRisks.filter(r => {
+        const key = r.trim().toLowerCase();
+        if (!key || seenRisks.has(key)) return false;
+        seenRisks.add(key);
+        return true;
+    });
+
+    // --- Assemble consent text (same structure as single-procedure) ---
+    let text = `DIAGNOSIS: ${diagnosis}\n`;
+    text += `PROCEDURE PLANNED: ${procedurePlanned}\n`;
+    text += `BENEFITS EXPECTED:\n${benefits}\n`;
+    text += `ALTERNATIVES DISCUSSED & REFUSED:\n${alternatives}\n`;
+
+    text += `SPECIFIC RISKS & COMPLICATIONS (Read and Explained):\n`;
+    text += `I understand that all surgeries carry risks. Specific to this procedure, I have been informed of the following risks (which I accept): `;
+    const formattedRisks = specificRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ");
+    text += formattedRisks + ".\n";
+
+    if (isMajor) {
+        text += `GENERAL MAJOR SURGICAL RISKS: `;
+        const majorRisks = [
+            "Bleeding & Hemorrhage: Risk of bleeding during or after surgery, which may require blood transfusion, clot evacuation, or surgical re-exploration",
+            "Severe Infection & Sepsis: Risk of wound infection, deep pelvic infection, urinary tract infection, or systemic urosepsis which can progress to life-threatening septic shock",
+            "Thromboembolism: Risk of deep vein thrombosis (DVT) in the legs or pulmonary embolism (blood clot in the lungs), which can be fatal",
+            "Anesthesia Risks: Risks associated with general, spinal, or epidural anesthesia including allergic reaction, respiratory failure, cardiac arrest, or death",
+            "Adjacent Organ Injury: Risk of accidental damage to surrounding structures (bowel, bladder, ureter, nerves, major blood vessels) requiring immediate repair during the surgery"
+        ];
+        text += majorRisks.map((risk, index) => `(${index + 1}) ${risk}`).join("; ") + ".\n";
+    }
+
+    text += `EXPLICIT CONSENT FOR INTRAOPERATIVE CONTINGENCIES:\n`;
+    text += `I authorize the surgical team to alter the procedure ONLY IF a life-threatening emergency arises, or if stopping the surgery to obtain fresh consent would cause me medical harm. Specifically, I consent to:\n`;
+    if (hasStent) {
+        text += `- Abandoning the primary endoscopic procedure and deploying a DJ stent for "passive dilation" if the ureter is too tight to safely admit the instrument, acknowledging a staged procedure will be needed later.\n`;
+    }
+    if (isLaparoscopic) {
+        text += `- Immediate conversion to an open surgical approach in the event of intractable bleeding, dense adhesions, or severe organ injury.\n`;
+    }
+    if (hasNephrostomy) {
+        text += `- Placement of a Percutaneous Nephrostomy (PCN) tube directly into my kidney if standard retrograde drainage fails.\n`;
+    }
+    if (isMajor && (hasUroOncOrRecon || proceduresList.some(p => p.procKey === "OTHER"))) {
+        text += `- Perform any necessary bowel resection, stoma creation, or vessel grafting if required as an emergency measure.\n`;
+    }
+
+    if (hasStent) {
+        text += `CRITICAL DECLARATION REGARDING DOUBLE-J (DJ) STENT:\n`;
+        text += `1. I have been explicitly informed that a Double-J (DJ) Ureteral Stent will be placed inside my body. I understand that this stent is a TEMPORARY foreign body and DOES NOT DISSOLVE.\n`;
+        text += `2. I have been informed that the stent MUST be removed or exchanged within the timeframe specified by my surgeon (typically 4 to 12 weeks, and absolutely NOT exceeding 6 months for standard stents).\n`;
+        text += `3. I understand that FAILURE TO RETURN for stent removal will lead to severe, irreversible medical complications, including but not limited to: severe stent encrustation (stone formation over the tube), complete loss of kidney function (renal failure necessitating lifelong dialysis or kidney removal), life-threatening urosepsis (severe blood infection), and the necessity of highly complex open or endoscopic surgeries to extract the calcified stent.\n`;
+        text += `4. I have been warned of the common, expected stent symptoms (such as mild blood in the urine, bladder spasms, pain in the back/flank during urination, and urinary frequency/urgency) and when to seek emergency care (high fever, severe chills, inability to pass urine, or passing large blood clots).\n`;
+        text += `5. By signing, I accept absolute personal responsibility for scheduling and attending my follow-up appointment for stent removal or exchange. I explicitly acknowledge that the hospital and the surgical team are not responsible for tracking my stent, and I release them from any and all clinical and medicolegal liability, including organ loss, permanent disability, or mortality, arising from my failure to report for timely stent removal.\n`;
+    }
+    if (hasCatheter) {
+        text += `CRITICAL DECLARATION REGARDING URETHRAL CATHETER / SUPRAPUBIC CYSTOSTOMY:\n`;
+        text += `I understand that a urethral catheter or suprapubic tube will be placed to drain my bladder. I have been informed that it requires strict hygiene, timely monitoring, and removal/exchange per the doctor's instructions. Failure to do so may lead to severe bladder spasm, urethral erosion, strictures, or chronic kidney damage.\n`;
+    }
+    if (hasNephrostomy) {
+        text += `CRITICAL DECLARATION REGARDING NEPHROSTOMY TUBE:\n`;
+        text += `I understand that an external nephrostomy tube will be draining my kidney directly. I agree to maintain tube hygiene, avoid pulling or displacement, and report immediately for block, leak, or fever. I accept responsibility for scheduled removal or exchange of the tube.\n`;
+    }
+    if (isHighRisk) {
+        text += `SPECIAL HIGH-RISK CONSENT ADDENDUM:\n`;
+        text += `I explicitly understand that due to the patient's advanced age, severe pre-existing medical conditions (comorbidities such as heart disease, lung disease, kidney impairment, liver dysfunction, diabetes, or blood clotting disorders), or the complex/emergency nature of this procedure, the surgical and anesthetic risks are SIGNIFICANTLY HEIGHTENED.\n`;
+        text += `Specifically, I have been informed of and accept the high probability of the following outcomes:\n`;
+        text += `- The necessity of post-operative admission to the Intensive Care Unit (ICU) or High Dependency Unit (HDU) for close monitoring.\n`;
+        text += `- The potential need for prolonged mechanical ventilation (respiratory support/breathing machine) and delayed extubation.\n`;
+        text += `- The requirement for intravenous inotropic or vasopressor support (medications to maintain blood pressure and heart function) due to hemodynamic instability.\n`;
+        text += `- A significantly prolonged hospital stay, with a higher risk of hospital-acquired infections, deep vein thrombosis, and physical deconditioning.\n`;
+        text += `- A heightened risk of major cardiovascular and cerebrovascular events, including heart attack (myocardial infarction), cardiac arrest, stroke, and multi-organ failure.\n`;
+        text += `- Acute kidney injury (AKI) which may require emergency temporary or permanent hemodialysis.\n`;
+        text += `- An increased risk of massive intraoperative hemorrhage requiring multiple blood transfusions or emergency surgical re-exploration.\n`;
+        text += `- A recognized, elevated risk of mortality, including on-table death during the procedure or death in the early post-operative period.\n`;
+        text += `Having fully understood these catastrophic risks, I consent to proceed with the proposed surgery under these high-risk conditions, and I accept the clinical decisions made by the surgical and anesthesia teams in managing these contingencies.\n`;
+    }
+
+    return text;
+}
+
 // Export for use in index.html (attaches to window since we run in browser directly)
 window.URO_CATEGORIES = URO_CATEGORIES;
 window.URO_PROCEDURES = URO_PROCEDURES;
 window.compileConsentText = compileConsentText;
+window.compileMultipleConsentText = compileMultipleConsentText;
